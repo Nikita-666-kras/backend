@@ -1,0 +1,133 @@
+:root {
+  --bg: #f3efe6;
+  --bg-elevated: #fffdf8;
+  --ink: #1c2422;
+  --muted: #5d6a66;
+  --line: #d9d1c3;
+  --accent: #0f6b63;
+  --accent-soft: #d9ece9;
+  --danger: #9b2c2c;
+  --draft: #8a6d3b;
+  --published: #0f6b63;
+  --archived: #6b7280;
+  --shadow: 0 12px 40px rgba(28, 36, 34, 0.08);
+  --radius: 14px;
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-serif: "Source Serif 4", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(15, 107, 99, 0.08), transparent 28%),
+    linear-gradient(180deg, #f7f3eb 0%, var(--bg) 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.7rem 1.15rem;
+  background: var(--accent);
+  color: white;
+  font-weight: 500;
+}
+
+.btn:hover {
+  filter: brightness(0.95);
+}
+
+.btn.secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.btn.danger {
+  background: var(--danger);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  background: white;
+  color: var(--ink);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge.DRAFT {
+  background: #f3e6d0;
+  color: var(--draft);
+}
+
+.badge.PUBLISHED {
+  background: var(--accent-soft);
+  color: var(--published);
+}
+
+.badge.ARCHIVED {
+  background: #e8e8e8;
+  color: var(--archived);
+}

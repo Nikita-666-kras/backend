@@ -1,0 +1,25 @@
+server:
+  port: 9005
+
+spring:
+  application:
+    name: admin-service
+
+post-service:
+  base-url: ${POST_SERVICE_URL:http://post-service:9003}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+  internal-api-key: ${INTERNAL_API_KEY}
+
+management:
+  endpoints:
+    web:
+      base-path: /application
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true

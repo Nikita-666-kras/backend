@@ -1,0 +1,11 @@
+**/.gradle
+**/build
+**/.idea
+**/out
+**/*.iml
+**/node_modules
+**/dist
+.git
+.env
+admin-ui/.env
+admin-ui/.env.*
