@@ -44,6 +44,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POST_DB_PASSWORD}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       JWT_SECRET: ${JWT_SECRET}
+      MEDIA_STORAGE_PATH: /data/media
+      MEDIA_MAX_IMAGE_BYTES: ${MEDIA_MAX_IMAGE_BYTES:-10485760}
+      MEDIA_MAX_VIDEO_BYTES: ${MEDIA_MAX_VIDEO_BYTES:-104857600}
+    volumes:
+      - media-data:/data/media
     networks:
       - blog-net
     expose:
@@ -119,3 +124,4 @@ networks:
 volumes:
   post-db-data:
   sso-db-data:
+  media-data:

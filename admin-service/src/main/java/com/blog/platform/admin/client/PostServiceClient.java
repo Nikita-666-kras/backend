@@ -107,6 +107,7 @@ public class PostServiceClient {
         body.put("shortDescription", request.shortDescription());
         body.put("content", request.content());
         body.put("authorId", authorId.toString());
+        body.put("coverMediaId", request.coverMediaId());
         body.put("tags", request.tags() == null ? List.of() : request.tags());
         body.put("categories", request.categories() == null ? List.of() : request.categories());
         body.put("mediaObjectNames", request.mediaObjectNames() == null ? List.of() : request.mediaObjectNames());

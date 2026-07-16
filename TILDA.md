@@ -23,12 +23,15 @@
 |-------|-----|------------|
 | `GET` | `/posts?page=0&size=10` | лента опубликованных |
 | `GET` | `/posts/{slug}` | один пост по slug |
+| `GET` | `/media/{uuid}` | файл обложки / вложения |
 
 Ответ обёрнут в `{ "data": ... }`. У поста важны поля:
 
 - `title`, `slug`, `shortDescription`
 - `htmlContent` — готовый HTML (безопаснее для вставки)
 - `content` — исходный Markdown
+- `coverUrl` — например `/media/{uuid}` (полный URL: `https://api…/media/{uuid}`)
+- `media[]` — `{ id, url, kind, originalName }`
 - `tags`, `categories`, `createdAt`, `readingTime`
 
 Проверка:

@@ -13,7 +13,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/auth': 'http://localhost:8080',
-      '/admin': 'http://localhost:8080'
+      '/admin': 'http://localhost:8080',
+      '/media': 'http://localhost:8080'
     }
   }
 })

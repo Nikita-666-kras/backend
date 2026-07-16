@@ -53,6 +53,9 @@ public class Article extends BaseEntity {
     @Column(nullable = false)
     private UUID authorId;
 
+    @Column(name = "cover_media_id")
+    private UUID coverMediaId;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "article_media", joinColumns = @JoinColumn(name = "article_id"))
     @Column(name = "media_object_name", nullable = false)

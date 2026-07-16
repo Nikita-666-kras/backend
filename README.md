@@ -131,6 +131,10 @@ Header: `Authorization: Bearer <token>`
 
 `GET /posts/{slug}` — без токена (только PUBLISHED)
 
+В ответе поста: `coverUrl` (`/media/{id}`), `media[]` с url картинок/видео.
+
+Публичные файлы: `GET /media/{uuid}` — без токена.
+
 ### 6. Delete (ADMIN only)
 
 `DELETE /admin/posts/{id}`  
@@ -149,7 +153,7 @@ Header: `Authorization: Bearer <token>`
 ```text
 blog-platform/
   common-library/
-  article-service/   # Gradle alias: post-service
+  article-service/   # Gradle alias: post-service (+ media storage)
   sso-service/
   admin-service/
   api-gateway/
@@ -157,3 +161,5 @@ blog-platform/
   docker-compose.yml
   .env.example
 ```
+
+Медиа хранятся в Docker volume `media-data`. Загрузка: `POST /admin/media`. Публичная раздача: `GET /media/{id}`.

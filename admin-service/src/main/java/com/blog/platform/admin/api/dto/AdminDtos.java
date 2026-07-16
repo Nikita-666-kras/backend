@@ -15,9 +15,18 @@ public final class AdminDtos {
             @NotBlank String title,
             @NotBlank String shortDescription,
             @NotBlank String content,
+            UUID coverMediaId,
             Set<String> tags,
             Set<String> categories,
             Set<String> mediaObjectNames
+    ) {
+    }
+
+    public record MediaItem(
+            UUID id,
+            String url,
+            String kind,
+            String originalName
     ) {
     }
 
@@ -33,7 +42,10 @@ public final class AdminDtos {
             Long views,
             Long likes,
             UUID authorId,
+            UUID coverMediaId,
+            String coverUrl,
             Set<String> mediaObjectNames,
+            List<MediaItem> media,
             Set<String> tags,
             Set<String> categories,
             Instant createdAt,
@@ -59,5 +71,39 @@ public final class AdminDtos {
     }
 
     public record StatusBody(@NotNull String status) {
+    }
+
+    public record BulkRequest(
+            @NotNull List<UUID> ids,
+            @NotBlank String action
+    ) {
+    }
+
+    public record BulkResult(
+            int success,
+            int failed,
+            List<String> errors
+    ) {
+    }
+
+    public record MediaResponse(
+            UUID id,
+            String originalName,
+            String contentType,
+            long sizeBytes,
+            String kind,
+            String url,
+            UUID uploadedBy,
+            Instant createdAt
+    ) {
+    }
+
+    public record MediaPageResponse(
+            List<MediaResponse> content,
+            long totalElements,
+            int totalPages,
+            int number,
+            int size
+    ) {
     }
 }

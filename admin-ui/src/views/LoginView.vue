@@ -28,10 +28,10 @@ async function submit() {
 
 <template>
   <div class="login-page">
-    <form class="card login-card" @submit.prevent="submit">
+    <form class="card login-card rise" @submit.prevent="submit">
       <p class="eyebrow">Редакция</p>
       <h1>Вход в админку</h1>
-      <p class="lead">Публикуйте и редактируйте материалы блога через единый вход.</p>
+      <p class="lead muted">Посты, медиатека и публикация в одном месте.</p>
 
       <div class="field">
         <label>Логин</label>
@@ -45,7 +45,7 @@ async function submit() {
       <p v-if="error" class="error">{{ error }}</p>
       <button class="btn" :disabled="loading">{{ loading ? 'Входим…' : 'Войти' }}</button>
 
-      <div class="hint">
+      <div class="hint muted">
         <span>admin / Admin123!</span>
         <span>editor / Editor123!</span>
       </div>
@@ -60,8 +60,9 @@ async function submit() {
   place-items: center;
   padding: 1.5rem;
   background:
-    linear-gradient(135deg, rgba(15, 107, 99, 0.12), transparent 40%),
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230f6b63' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    radial-gradient(circle at 20% 20%, rgba(13, 107, 92, 0.16), transparent 40%),
+    radial-gradient(circle at 80% 0%, rgba(18, 32, 28, 0.12), transparent 35%),
+    linear-gradient(160deg, #eaf3f0, #f7faf8 55%);
 }
 
 .login-card {
@@ -71,28 +72,8 @@ async function submit() {
   gap: 1rem;
 }
 
-.eyebrow {
-  margin: 0;
-  color: var(--accent);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-}
-
-h1 {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: 2.2rem;
-}
-
 .lead,
 .hint {
-  color: var(--muted);
-}
-
-.error {
-  color: var(--danger);
   margin: 0;
 }
 

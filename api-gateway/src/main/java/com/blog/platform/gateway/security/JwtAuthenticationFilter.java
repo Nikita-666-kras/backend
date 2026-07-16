@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        if (HttpMethod.OPTIONS.equals(method) || isAnonymousAuth(path) || isPublicPublishedPosts(path, method)) {
+        if (HttpMethod.OPTIONS.equals(method) || isAnonymousAuth(path) || isPublicPublishedPosts(path, method) || isPublicMedia(path, method)) {
             ServerWebExchange next = exchange.mutate().request(requestBuilder.build()).build();
             if (isPublicPublishedPosts(path, method)) {
                 next = forcePublishedStatus(next);
@@ -123,6 +123,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return false;
         }
         return !path.startsWith("/posts/by-id/");
+    }
+
+    private boolean isPublicMedia(String path, HttpMethod method) {
+        if (!HttpMethod.GET.equals(method)) {
+            return false;
+        }
+        return path.matches("^/media/[0-9a-fA-F-]{36}$");
     }
 
     private boolean requiresEditorRole(String path, HttpMethod method) {

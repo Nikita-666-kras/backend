@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: api-gateway
+  codec:
+    max-in-memory-size: 130MB
   cloud:
     gateway:
       routes:
@@ -19,6 +21,10 @@ spring:
           uri: ${POST_SERVICE_URL:http://post-service:9003}
           predicates:
             - Path=/posts/**
+        - id: media-public
+          uri: ${POST_SERVICE_URL:http://post-service:9003}
+          predicates:
+            - Path=/media/**
 
 security:
   jwt:

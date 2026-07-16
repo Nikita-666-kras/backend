@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class InternalApiKeyFilter extends OncePerRequestFilter {
+
+    private static final Pattern PUBLIC_MEDIA_FILE = Pattern.compile("^/media/[0-9a-fA-F-]{36}$");
 
     @Value("${security.internal-api-key}")
     private String internalApiKey;
@@ -26,7 +29,7 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
         if (HttpMethod.GET.matches(request.getMethod()) && path.startsWith("/posts") && !path.startsWith("/posts/by-id/")) {
             return true;
         }
-        return false;
+        return HttpMethod.GET.matches(request.getMethod()) && PUBLIC_MEDIA_FILE.matcher(path).matches();
     }
 
     @Override

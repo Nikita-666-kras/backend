@@ -40,6 +40,7 @@ async function submit() {
       <div>
         <p class="eyebrow">Доступ</p>
         <h1>Пользователи</h1>
+        <p class="muted">Создание редакторов и администраторов</p>
       </div>
     </header>
 
@@ -71,39 +72,10 @@ async function submit() {
 </template>
 
 <style scoped>
-.page-header {
-  margin-bottom: 1rem;
-}
-
-.eyebrow {
-  margin: 0;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-h1 {
-  margin: 0.25rem 0 0;
-  font-family: var(--font-serif);
-  font-size: 2.4rem;
-}
-
 .form {
   max-width: 520px;
   padding: 1.25rem;
   display: grid;
   gap: 0.9rem;
-}
-
-.ok {
-  color: var(--accent);
-  margin: 0;
-}
-
-.error {
-  color: var(--danger);
-  margin: 0;
 }
 </style>

@@ -1,5 +1,12 @@
 import api from '@/api/http'
 
+export interface MediaItem {
+  id: string
+  url: string
+  kind: string
+  originalName: string
+}
+
 export interface Post {
   id: string
   title: string
@@ -12,7 +19,10 @@ export interface Post {
   views: number
   likes: number
   authorId: string
+  coverMediaId?: string | null
+  coverUrl?: string | null
   mediaObjectNames: string[]
+  media?: MediaItem[]
   tags: string[]
   categories: string[]
   createdAt: string
@@ -38,9 +48,16 @@ export interface PostPayload {
   title: string
   shortDescription: string
   content: string
+  coverMediaId?: string | null
   tags: string[]
   categories: string[]
   mediaObjectNames: string[]
+}
+
+export interface BulkResult {
+  success: number
+  failed: number
+  errors: string[]
 }
 
 export async function fetchDashboard() {
@@ -82,6 +99,11 @@ export async function deletePost(id: string) {
   await api.delete(`/admin/posts/${id}`)
 }
 
+export async function bulkPosts(ids: string[], action: 'PUBLISH' | 'ARCHIVE' | 'DELETE') {
+  const { data } = await api.post('/admin/posts/bulk', { ids, action })
+  return data.data as BulkResult
+}
+
 export async function createUser(payload: {
   username: string
   email: string
@@ -90,4 +112,8 @@ export async function createUser(payload: {
 }) {
   const { data } = await api.post('/auth/admin/users', payload)
   return data.data
+}
+
+export function publicPostPath(slug: string) {
+  return `/posts/${slug}`
 }

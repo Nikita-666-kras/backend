@@ -14,18 +14,19 @@ async function logout() {
 
 <template>
   <div class="shell">
-    <aside class="sidebar card">
+    <aside class="sidebar">
       <div class="brand">
         <span class="mark">Б</span>
         <div>
           <strong>Редакция</strong>
-          <p>Админка блога</p>
+          <p>Контент и медиа</p>
         </div>
       </div>
       <nav>
         <RouterLink to="/">Обзор</RouterLink>
         <RouterLink to="/posts">Посты</RouterLink>
         <RouterLink to="/posts/new">Новый пост</RouterLink>
+        <RouterLink to="/media">Медиатека</RouterLink>
         <RouterLink v-if="auth.isAdmin" to="/users">Пользователи</RouterLink>
       </nav>
       <div class="userbox">
@@ -36,7 +37,7 @@ async function logout() {
         <button class="btn secondary" @click="logout">Выйти</button>
       </div>
     </aside>
-    <main class="content">
+    <main class="content rise">
       <RouterView />
     </main>
   </div>
@@ -45,7 +46,7 @@ async function logout() {
 <style scoped>
 .shell {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 270px 1fr;
   gap: 1.25rem;
   min-height: 100vh;
   padding: 1.25rem;
@@ -58,6 +59,12 @@ async function logout() {
   position: sticky;
   top: 1.25rem;
   height: calc(100vh - 2.5rem);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(165deg, rgba(26, 143, 122, 0.18), transparent 40%),
+    var(--sidebar);
+  color: var(--sidebar-text);
+  box-shadow: var(--shadow);
 }
 
 .brand {
@@ -68,12 +75,12 @@ async function logout() {
 }
 
 .brand .mark {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 12px;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 14px;
   display: grid;
   place-items: center;
-  background: var(--accent);
+  background: var(--accent-2);
   color: white;
   font-family: var(--font-serif);
   font-weight: 700;
@@ -82,13 +89,13 @@ async function logout() {
 .brand strong {
   display: block;
   font-family: var(--font-serif);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
 }
 
 .brand p,
 .userbox p {
   margin: 0.15rem 0 0;
-  color: var(--muted);
+  color: rgba(232, 242, 238, 0.65);
   font-size: 0.85rem;
 }
 
@@ -99,22 +106,28 @@ nav {
 }
 
 nav a {
-  padding: 0.75rem 0.9rem;
-  border-radius: 10px;
-  color: var(--muted);
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  color: rgba(232, 242, 238, 0.72);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 nav a.router-link-active,
 nav a:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
 }
 
 .userbox {
   display: grid;
   gap: 0.75rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.userbox .btn.secondary {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .content {

@@ -18,6 +18,7 @@ const router = createRouter({
         { path: 'posts', name: 'posts', component: () => import('@/views/PostsView.vue') },
         { path: 'posts/new', name: 'post-new', component: () => import('@/views/PostEditorView.vue') },
         { path: 'posts/:id', name: 'post-edit', component: () => import('@/views/PostEditorView.vue') },
+        { path: 'media', name: 'media', component: () => import('@/views/MediaLibraryView.vue') },
         { path: 'users', name: 'users', component: () => import('@/views/UsersView.vue'), meta: { admin: true } }
       ]
     }
