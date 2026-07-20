@@ -82,7 +82,7 @@ Vite proxy ходит на gateway `:8080`.
 
 ## Тильда
 
-Пошаговый гайд: [TILDA.md](TILDA.md) — публичный `GET /posts`, CORS, HTML-блоки ленты и страницы поста.
+Пошаговый гайд: [TILDA.md](TILDA.md) — публичный `GET /posts`, картинки `GET /media/{id}`, CORS, HTML-блоки.
 
 ## Postman через Gateway
 
@@ -131,10 +131,6 @@ Header: `Authorization: Bearer <token>`
 
 `GET /posts/{slug}` — без токена (только PUBLISHED)
 
-В ответе поста: `coverUrl` (`/media/{id}`), `media[]` с url картинок/видео.
-
-Публичные файлы: `GET /media/{uuid}` — без токена.
-
 ### 6. Delete (ADMIN only)
 
 `DELETE /admin/posts/{id}`  
@@ -153,7 +149,7 @@ Header: `Authorization: Bearer <token>`
 ```text
 blog-platform/
   common-library/
-  article-service/   # Gradle alias: post-service (+ media storage)
+  article-service/   # Gradle alias: post-service (+ media files)
   sso-service/
   admin-service/
   api-gateway/
@@ -162,4 +158,8 @@ blog-platform/
   .env.example
 ```
 
-Медиа хранятся в Docker volume `media-data`. Загрузка: `POST /admin/media`. Публичная раздача: `GET /media/{id}`.
+Медиа (локальный volume `media-data`):
+
+- Админ: `POST/GET/DELETE /admin/media`
+- Публично: `GET /media/{id}`
+- В постах: `coverMediaId`, `coverUrl`, `media[]`

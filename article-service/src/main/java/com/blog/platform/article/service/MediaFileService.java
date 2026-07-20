@@ -37,8 +37,10 @@ public class MediaFileService {
     private static final Set<String> IMAGE_TYPES = Set.of(
             "image/jpeg", "image/png", "image/webp", "image/gif"
     );
-    private static final Set<String> VIDEO_TYPES = Set.of("video/mp4", "video/webm");
-    private static final Map<String, String> EXT = Map.of(
+    private static final Set<String> VIDEO_TYPES = Set.of(
+            "video/mp4", "video/webm"
+    );
+    private static final Map<String, String> EXT_BY_TYPE = Map.of(
             "image/jpeg", "jpg",
             "image/png", "png",
             "image/webp", "webp",
@@ -70,7 +72,7 @@ public class MediaFileService {
         if (file.getSize() > max) {
             throw new IllegalArgumentException("Файл слишком большой для типа " + kind);
         }
-        String ext = EXT.get(contentType);
+        String ext = EXT_BY_TYPE.get(contentType);
         String storedName = UUID.randomUUID() + "." + ext;
         Path dir = Path.of(storagePath);
         try {
@@ -155,8 +157,8 @@ public class MediaFileService {
         Path path = Path.of(storagePath).resolve(media.getStoredName());
         try {
             Files.deleteIfExists(path);
-        } catch (IOException ignored) {
-            // metadata removal is still performed
+        } catch (IOException ex) {
+            throw new IllegalStateException("Не удалось удалить файл с диска", ex);
         }
         mediaFileRepository.delete(media);
     }

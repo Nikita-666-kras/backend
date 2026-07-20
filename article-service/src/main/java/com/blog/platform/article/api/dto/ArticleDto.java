@@ -1,6 +1,7 @@
 package com.blog.platform.article.api.dto;
 
 import com.blog.platform.article.domain.ArticleStatus;
+import com.blog.platform.article.domain.MediaKind;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -29,6 +30,14 @@ public record ArticleDto(
         Instant createdAt,
         Instant updatedAt
 ) {
+    public record MediaItem(
+            UUID id,
+            String url,
+            MediaKind kind,
+            String originalName
+    ) {
+    }
+
     public record Create(
             @NotBlank String title,
             @NotBlank String shortDescription,
@@ -41,11 +50,4 @@ public record ArticleDto(
     ) {}
 
     public record StatusUpdate(@NotNull ArticleStatus status) {}
-
-    public record MediaItem(
-            UUID id,
-            String url,
-            String kind,
-            String originalName
-    ) {}
 }

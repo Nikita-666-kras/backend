@@ -58,8 +58,12 @@ async function onFiles(files: FileList | null) {
 
 async function remove(item: MediaAsset) {
   if (!confirm(`Удалить «${item.originalName}»?`)) return
-  await deleteMedia(item.id)
-  await load()
+  try {
+    await deleteMedia(item.id)
+    await load()
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || 'Удаление доступно только администратору'
+  }
 }
 
 function copy(item: MediaAsset) {
@@ -110,11 +114,7 @@ watch([kind], () => {
       </label>
     </header>
 
-    <div
-      class="drop card"
-      @dragover.prevent
-      @drop="onDrop"
-    >
+    <div class="drop card" @dragover.prevent @drop="onDrop">
       Перетащите сюда фото или видео (jpg, png, webp, gif, mp4, webm)
     </div>
 

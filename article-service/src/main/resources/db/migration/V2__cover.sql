@@ -1,7 +1,4 @@
-ALTER TABLE articles DROP COLUMN IF EXISTS cover_object_name;
-ALTER TABLE articles ADD COLUMN IF NOT EXISTS cover_media_id UUID;
-
-CREATE TABLE IF NOT EXISTS media_files (
+CREATE TABLE media_files (
     id UUID PRIMARY KEY,
     original_name VARCHAR(400) NOT NULL,
     stored_name VARCHAR(255) NOT NULL UNIQUE,
@@ -13,5 +10,9 @@ CREATE TABLE IF NOT EXISTS media_files (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_media_files_kind ON media_files(kind);
-CREATE INDEX IF NOT EXISTS idx_media_files_created_at ON media_files(created_at DESC);
+CREATE INDEX idx_media_files_kind ON media_files(kind);
+CREATE INDEX idx_media_files_created_at ON media_files(created_at DESC);
+
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS cover_media_id UUID REFERENCES media_files(id) ON DELETE SET NULL;
+
+ALTER TABLE articles DROP COLUMN IF EXISTS cover_object_name;

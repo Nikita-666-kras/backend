@@ -47,12 +47,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
         stripIdentityHeaders(requestBuilder);
 
-        if (isBlockedPublic(path)) {
+        if (isBlockedPublic(path) || isBlockedDirectMediaApi(path, method)) {
             exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
             return exchange.getResponse().setComplete();
         }
 
-        if (HttpMethod.OPTIONS.equals(method) || isAnonymousAuth(path) || isPublicPublishedPosts(path, method) || isPublicMedia(path, method)) {
+        if (HttpMethod.OPTIONS.equals(method)
+                || isAnonymousAuth(path)
+                || isPublicPublishedPosts(path, method)
+                || isPublicMediaFile(path, method)) {
             ServerWebExchange next = exchange.mutate().request(requestBuilder.build()).build();
             if (isPublicPublishedPosts(path, method)) {
                 next = forcePublishedStatus(next);
@@ -110,6 +113,17 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 || path.startsWith("/v3/api-docs");
     }
 
+    /** List/upload/delete media only via /admin/media; public is GET /media/{uuid}. */
+    private boolean isBlockedDirectMediaApi(String path, HttpMethod method) {
+        if (!path.startsWith("/media")) {
+            return false;
+        }
+        if (!HttpMethod.GET.equals(method)) {
+            return true;
+        }
+        return !isPublicMediaFile(path, method);
+    }
+
     private boolean isAnonymousAuth(String path) {
         return path.startsWith("/auth/login")
                 || path.startsWith("/auth/refresh")
@@ -125,11 +139,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return !path.startsWith("/posts/by-id/");
     }
 
-    private boolean isPublicMedia(String path, HttpMethod method) {
-        if (!HttpMethod.GET.equals(method)) {
-            return false;
-        }
-        return path.matches("^/media/[0-9a-fA-F-]{36}$");
+    private boolean isPublicMediaFile(String path, HttpMethod method) {
+        return HttpMethod.GET.equals(method) && path.matches("^/media/[0-9a-fA-F-]{36}$");
     }
 
     private boolean requiresEditorRole(String path, HttpMethod method) {

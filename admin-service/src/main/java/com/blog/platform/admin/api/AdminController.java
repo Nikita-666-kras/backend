@@ -3,12 +3,9 @@ package com.blog.platform.admin.api;
 import com.blog.platform.admin.api.dto.AdminDtos.BulkRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.BulkResult;
 import com.blog.platform.admin.api.dto.AdminDtos.DashboardStats;
-import com.blog.platform.admin.api.dto.AdminDtos.MediaPageResponse;
-import com.blog.platform.admin.api.dto.AdminDtos.MediaResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.PageResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.PostRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.PostResponse;
-import com.blog.platform.admin.client.MediaServiceClient;
 import com.blog.platform.admin.security.AdminAccessGuard;
 import com.blog.platform.admin.service.AdminPostService;
 import com.blog.platform.common.api.ApiResponse;
@@ -16,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,9 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/admin")
@@ -36,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminController {
 
     private final AdminPostService adminPostService;
-    private final MediaServiceClient mediaServiceClient;
     private final AdminAccessGuard accessGuard;
 
     @GetMapping("/dashboard")
@@ -114,34 +107,6 @@ public class AdminController {
     public ResponseEntity<Void> delete(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireAdmin(request);
         adminPostService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping(value = "/media", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<MediaResponse>> uploadMedia(
-            HttpServletRequest request,
-            @RequestPart("file") MultipartFile file
-    ) {
-        accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(mediaServiceClient.upload(file, accessGuard.userId(request))));
-    }
-
-    @GetMapping("/media")
-    public ResponseEntity<ApiResponse<MediaPageResponse>> listMedia(
-            HttpServletRequest request,
-            @RequestParam(required = false) String kind,
-            @RequestParam(required = false) String q,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "24") int size
-    ) {
-        accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(mediaServiceClient.list(kind, q, page, size)));
-    }
-
-    @DeleteMapping("/media/{id}")
-    public ResponseEntity<Void> deleteMedia(HttpServletRequest request, @PathVariable UUID id) {
-        accessGuard.requireAdmin(request);
-        mediaServiceClient.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

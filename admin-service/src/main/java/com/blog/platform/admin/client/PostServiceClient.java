@@ -1,5 +1,7 @@
 package com.blog.platform.admin.client;
 
+import com.blog.platform.admin.api.dto.AdminDtos.MediaPageResponse;
+import com.blog.platform.admin.api.dto.AdminDtos.MediaResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.PageResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.PostRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.PostResponse;
@@ -13,8 +15,13 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
@@ -97,6 +104,55 @@ public class PostServiceClient {
     public void delete(UUID id) {
         postServiceRestClient.delete()
                 .uri("/posts/{id}", id)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public MediaResponse uploadMedia(MultipartFile file, UUID uploadedBy) {
+        try {
+            ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename();
+                }
+            };
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", resource);
+            body.add("uploadedBy", uploadedBy.toString());
+            ApiResponse<MediaResponse> response = postServiceRestClient.post()
+                    .uri("/media")
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(body)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+            return requireData(response);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Не удалось загрузить файл", ex);
+        }
+    }
+
+    public MediaPageResponse listMedia(String kind, String q, int page, int size) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/media")
+                .queryParam("page", page)
+                .queryParam("size", size);
+        if (kind != null && !kind.isBlank()) {
+            builder.queryParam("kind", kind);
+        }
+        if (q != null && !q.isBlank()) {
+            builder.queryParam("q", q);
+        }
+        ApiResponse<MediaPageResponse> response = postServiceRestClient.get()
+                .uri(builder.build(true).toUriString())
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+        return requireData(response);
+    }
+
+    public void deleteMedia(UUID id) {
+        postServiceRestClient.delete()
+                .uri("/media/{id}", id)
                 .retrieve()
                 .toBodilessEntity();
     }

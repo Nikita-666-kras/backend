@@ -30,6 +30,7 @@ export async function uploadMedia(file: File, onProgress?: (pct: number) => void
   const form = new FormData()
   form.append('file', file)
   const { data } = await api.post('/admin/media', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
       if (!onProgress || !e.total) return
       onProgress(Math.round((e.loaded / e.total) * 100))
