@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-const username = ref('admin')
-const password = ref('Admin123!')
+const username = ref('')
+const password = ref('')
 const error = ref('')
 const loading = ref(false)
 const auth = useAuthStore()
@@ -44,11 +44,6 @@ async function submit() {
 
       <p v-if="error" class="error">{{ error }}</p>
       <button class="btn" :disabled="loading">{{ loading ? 'Входим…' : 'Войти' }}</button>
-
-      <div class="hint muted">
-        <span>admin / Admin123!</span>
-        <span>editor / Editor123!</span>
-      </div>
     </form>
   </div>
 </template>
@@ -72,14 +67,7 @@ async function submit() {
   gap: 1rem;
 }
 
-.lead,
-.hint {
+.lead {
   margin: 0;
-}
-
-.hint {
-  display: grid;
-  gap: 0.25rem;
-  font-size: 0.85rem;
 }
 </style>
