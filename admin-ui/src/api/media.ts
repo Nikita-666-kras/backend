@@ -45,8 +45,12 @@ export async function deleteMedia(id: string) {
 
 export function mediaPublicUrl(idOrUrl: string | null | undefined) {
   if (!idOrUrl) return ''
-  if (idOrUrl.startsWith('/media/') || idOrUrl.startsWith('http')) {
-    return idOrUrl
+  let path = idOrUrl
+  if (path.startsWith('http://')) {
+    path = `https://${path.slice('http://'.length)}`
+  } else if (!path.startsWith('https://')) {
+    path = path.startsWith('/media/') ? path : `/media/${path}`
+    path = `${window.location.origin}${path}`
   }
-  return `/media/${idOrUrl}`
+  return path
 }

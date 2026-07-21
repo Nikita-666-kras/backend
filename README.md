@@ -31,7 +31,7 @@ Admin UI (:8088) ──proxy──┐
 - Публичный `GET /posts` — только `PUBLISHED` (slug тоже)
 - `post-service` write/`by-id` только с `X-Internal-Api-Key`
 - Refresh tokens хранятся как SHA-256 hash
-- Seed users только при `APP_SEED_USERS=true` и заданных `SEED_ADMIN_PASSWORD` / `SEED_EDITOR_PASSWORD` в `.env` (пароли не хранятся в коде)
+- Seed users только при `APP_SEED_USERS=true`
 - Admin UI: DOMPurify, sessionStorage, CSP, same-origin proxy
 
 ## Роли
@@ -39,7 +39,10 @@ Admin UI (:8088) ──proxy──┐
 - `EDITOR` — создавать, редактировать, publish/archive
 - `ADMIN` — всё то же + удаление постов + создание пользователей
 
-При первом запуске с `APP_SEED_USERS=true` создаются пользователи `admin` и `editor` — пароли задаются в `.env`, не в репозитории.
+Demo users (только если `APP_SEED_USERS=true`):
+
+- `admin / Admin123!`
+- `editor / Editor123!`
 
 ## Запуск
 
@@ -64,7 +67,7 @@ curl http://localhost:8080/application/health
 ## Admin UI
 
 1. Открой http://localhost:8088
-2. Войди учётной записью из `.env` (`SEED_*_PASSWORD` при seed) или созданной админом
+2. Войди как `admin` / `Admin123!`
 3. Создай пост → Save draft / Publish
 4. Users (только ADMIN) — создать editor/admin
 
@@ -93,7 +96,7 @@ Base URL: `http://localhost:8080`
 ```json
 {
   "username": "admin",
-  "password": "<your-password>"
+  "password": "Admin123!"
 }
 ```
 

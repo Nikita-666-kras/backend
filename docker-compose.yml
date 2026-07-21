@@ -67,8 +67,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SSO_DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       APP_SEED_USERS: ${APP_SEED_USERS:-false}
-      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
-      SEED_EDITOR_PASSWORD: ${SEED_EDITOR_PASSWORD:-}
     networks:
       - blog-net
     expose:
