@@ -113,9 +113,9 @@ function insertMedia(item: MediaAsset) {
     mediaObjectNames.value = [...mediaObjectNames.value, item.id]
   }
   if (item.kind === 'VIDEO') {
-    insertAtCursor(`\n<video controls src="${item.url}"></video>\n`)
+    insertAtCursor(`\n<video controls src="${mediaPublicUrl(item.url)}"></video>\n`)
   } else {
-    insertAtCursor(`\n![${item.originalName}](${item.url})\n`)
+    insertAtCursor(`\n![${item.originalName}](${mediaPublicUrl(item.url)})\n`)
   }
 }
 

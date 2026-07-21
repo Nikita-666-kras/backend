@@ -13,7 +13,8 @@ public class MarkdownService {
     public MarkdownService() {
         MutableDataSet options = new MutableDataSet();
         this.parser = Parser.builder(options).build();
-        this.renderer = HtmlRenderer.builder(options).escapeHtml(true).build();
+        // Allow trusted editor HTML (<video>, etc.) embedded in markdown content.
+        this.renderer = HtmlRenderer.builder(options).escapeHtml(false).build();
     }
 
     public String toHtml(String markdown) {

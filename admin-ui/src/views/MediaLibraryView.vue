@@ -74,8 +74,8 @@ function copy(item: MediaAsset) {
 function insertMarkdown(item: MediaAsset) {
   const md =
     item.kind === 'VIDEO'
-      ? `<video controls src="${item.url}"></video>`
-      : `![${item.originalName}](${item.url})`
+      ? `<video controls src="${mediaPublicUrl(item.url)}"></video>`
+      : `![${item.originalName}](${mediaPublicUrl(item.url)})`
   navigator.clipboard?.writeText(md)
   message.value = 'Markdown скопирован — вставьте в редактор поста'
 }
