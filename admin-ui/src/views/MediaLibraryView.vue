@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { deleteMedia, fetchMedia, mediaPublicUrl, uploadMedia, type MediaAsset, type MediaPage } from '@/api/media'
 import { useAuthStore } from '@/stores/auth'
 
@@ -14,6 +14,24 @@ const progress = ref(0)
 const error = ref('')
 const message = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
+const previewItem = ref<MediaAsset | null>(null)
+
+function formatSize(bytes: number) {
+  if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} МБ`
+  return `${Math.round(bytes / 1024)} КБ`
+}
+
+function openPreview(item: MediaAsset) {
+  previewItem.value = item
+}
+
+function closePreview() {
+  previewItem.value = null
+}
+
+function onPreviewKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') closePreview()
+}
 
 async function load() {
   loading.value = true
@@ -85,7 +103,11 @@ function onDrop(e: DragEvent) {
   onFiles(e.dataTransfer?.files ?? null)
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  window.addEventListener('keydown', onPreviewKeydown)
+})
+onUnmounted(() => window.removeEventListener('keydown', onPreviewKeydown))
 watch([kind], () => {
   page.value = 0
   load()
@@ -134,16 +156,18 @@ watch([kind], () => {
 
     <div v-if="data" class="grid">
       <article v-for="item in data.content" :key="item.id" class="card item">
-        <div class="preview">
-          <img v-if="item.kind === 'IMAGE'" :src="mediaPublicUrl(item.url)" :alt="item.originalName" />
-          <video v-else :src="mediaPublicUrl(item.url)" muted />
+        <button type="button" class="preview" @click="openPreview(item)">
+          <img v-if="item.kind === 'IMAGE'" :src="mediaPublicUrl(item.url)" :alt="item.originalName" loading="lazy" />
+          <video v-else :src="mediaPublicUrl(item.url)" muted preload="metadata" />
           <span class="kind">{{ item.kind === 'IMAGE' ? 'Фото' : 'Видео' }}</span>
-        </div>
+          <span class="preview-hint">Просмотр</span>
+        </button>
         <div class="meta">
           <strong :title="item.originalName">{{ item.originalName }}</strong>
-          <span>{{ Math.round(item.sizeBytes / 1024) }} КБ</span>
+          <span>{{ formatSize(item.sizeBytes) }}</span>
         </div>
         <div class="actions">
+          <button class="btn secondary" @click="openPreview(item)">Открыть</button>
           <button class="btn secondary" @click="insertMarkdown(item)">MD</button>
           <button class="btn secondary" @click="copy(item)">URL</button>
           <button v-if="auth.isAdmin" class="btn danger" @click="remove(item)">Удалить</button>
@@ -157,6 +181,43 @@ watch([kind], () => {
       <span>{{ page + 1 }} / {{ data.totalPages }}</span>
       <button class="btn secondary" :disabled="page + 1 >= data.totalPages" @click="page++; load()">Далее</button>
     </div>
+
+    <Teleport to="body">
+      <div v-if="previewItem" class="preview-modal" @click.self="closePreview">
+        <div class="preview-dialog card" role="dialog" aria-modal="true" :aria-label="previewItem.originalName">
+          <header class="preview-header">
+            <div>
+              <strong>{{ previewItem.originalName }}</strong>
+              <span class="muted">
+                {{ previewItem.kind === 'IMAGE' ? 'Фото' : 'Видео' }} · {{ formatSize(previewItem.sizeBytes) }}
+              </span>
+            </div>
+            <button type="button" class="btn secondary preview-close" @click="closePreview">Закрыть</button>
+          </header>
+
+          <div class="preview-body">
+            <img
+              v-if="previewItem.kind === 'IMAGE'"
+              :src="mediaPublicUrl(previewItem.url)"
+              :alt="previewItem.originalName"
+            />
+            <video
+              v-else
+              :src="mediaPublicUrl(previewItem.url)"
+              controls
+              autoplay
+              playsinline
+              preload="auto"
+            />
+          </div>
+
+          <footer class="preview-footer">
+            <button class="btn secondary" @click="copy(previewItem)">URL</button>
+            <button class="btn secondary" @click="insertMarkdown(previewItem)">Markdown</button>
+          </footer>
+        </div>
+      </div>
+    </Teleport>
   </section>
 </template>
 
@@ -199,6 +260,27 @@ watch([kind], () => {
   position: relative;
   aspect-ratio: 4 / 3;
   background: #e7eeeb;
+  border: 0;
+  padding: 0;
+  cursor: zoom-in;
+  width: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+.preview:hover .preview-hint {
+  opacity: 1;
+}
+
+.preview-hint {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 0.55rem;
+  background: linear-gradient(transparent, rgba(15, 31, 27, 0.72));
+  color: white;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
 .preview img,
@@ -246,7 +328,72 @@ watch([kind], () => {
 .actions .btn {
   flex: 1;
   padding: 0.45rem 0.4rem;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+}
+
+.preview-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(12, 22, 19, 0.72);
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.preview-dialog {
+  width: min(960px, 100%);
+  max-height: min(90vh, 900px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+}
+
+.preview-header,
+.preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+}
+
+.preview-header div {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.preview-header strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-close {
+  flex-shrink: 0;
+}
+
+.preview-body {
+  background: #0f1f1b;
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+  max-height: calc(90vh - 150px);
+  overflow: auto;
+}
+
+.preview-body img,
+.preview-body video {
+  max-width: 100%;
+  max-height: calc(90vh - 150px);
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.preview-footer {
+  border-top: 1px solid var(--line, #d8e3df);
 }
 
 .pager {
