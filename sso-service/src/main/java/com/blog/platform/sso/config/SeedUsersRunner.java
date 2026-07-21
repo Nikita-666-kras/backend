@@ -3,6 +3,7 @@ package com.blog.platform.sso.config;
 import com.blog.platform.common.security.Role;
 import com.blog.platform.sso.domain.AuthUser;
 import com.blog.platform.sso.repository.AuthUserRepository;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,9 @@ public class SeedUsersRunner implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         if (!StringUtils.hasText(seedAdminPassword) || !StringUtils.hasText(seedEditorPassword)) {
-            throw new IllegalStateException(
-                    "APP_SEED_USERS=true requires SEED_ADMIN_PASSWORD and SEED_EDITOR_PASSWORD in environment");
+            log.warn(
+                    "APP_SEED_USERS=true but SEED_ADMIN_PASSWORD/SEED_EDITOR_PASSWORD are missing — seed skipped");
+            return;
         }
         upsertSeedUser("admin", "admin@blog.local", seedAdminPassword, Set.of(Role.ADMIN));
         upsertSeedUser("editor", "editor@blog.local", seedEditorPassword, Set.of(Role.EDITOR));
@@ -44,12 +46,17 @@ public class SeedUsersRunner implements ApplicationRunner {
 
     private void upsertSeedUser(String username, String email, String password, Set<Role> roles) {
         Optional<AuthUser> existing = authUserRepository.findByUsername(username);
-        AuthUser user = existing.orElseGet(AuthUser::new);
+        AuthUser user = existing.orElseGet(() -> {
+            AuthUser created = new AuthUser();
+            created.setRoles(new HashSet<>());
+            return created;
+        });
         user.setUsername(username);
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setEnabled(true);
-        user.setRoles(roles);
+        user.getRoles().clear();
+        user.getRoles().addAll(roles);
         authUserRepository.save(user);
         log.info(existing.isPresent() ? "Updated seed user {}" : "Seeded user {}", username);
     }
