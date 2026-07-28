@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { finalizeProposal, kits, login, managerPdfUrl, models, myProposals, parts, saveProposal } from './api'
+import { downloadPdf, finalizeProposal, kits, login, models, myProposals, parts, saveProposal } from './api'
 
 type Line = { lineType: 'KIT' | 'PART'; refId: string; sku: string; name: string; qty: number; unitPrice: number; discountPct: number }
 
@@ -52,9 +52,27 @@ async function saveDraft() {
   proposals.value = await myProposals()
 }
 async function finalize() {
+  if (!currentProposalId.value) {
+    await saveDraft()
+  }
   if (!currentProposalId.value) return
-  await finalizeProposal(currentProposalId.value)
+  const p = await finalizeProposal(currentProposalId.value)
   proposals.value = await myProposals()
+  await downloadPdf(p.id, `KP_${p.number}.pdf`)
+}
+
+async function downloadProposalPdf(p: any) {
+  try {
+    let id = p.id
+    if (p.status !== 'FINAL') {
+      const finalized = await finalizeProposal(id)
+      id = finalized.id
+      proposals.value = await myProposals()
+    }
+    await downloadPdf(id, `KP_${p.number}.pdf`)
+  } catch (e: any) {
+    alert(e?.response?.data?.message || 'Не удалось скачать PDF')
+  }
 }
 onMounted(async () => { try { await loadBase(); isAuth.value = true } catch { isAuth.value = false } })
 </script>
@@ -122,7 +140,7 @@ onMounted(async () => { try { await loadBase(); isAuth.value = true } catch { is
           <tbody>
             <tr v-for="p in proposals" :key="p.id">
               <td>{{ p.number }}</td><td>{{ p.recipient }}</td><td>{{ p.droneModelName }}</td><td>{{ p.status }}</td>
-              <td><a :href="managerPdfUrl(p.id)" target="_blank">Скачать</a></td>
+              <td><button class="secondary" type="button" @click="downloadProposalPdf(p)">Скачать</button></td>
             </tr>
           </tbody>
         </table>

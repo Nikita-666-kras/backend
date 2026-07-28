@@ -49,6 +49,15 @@ export async function myProposals() {
   const { data } = await api.get('/manager/kp/proposals')
   return data.data
 }
-export function managerPdfUrl(id: string) {
-  return `/manager/kp/proposals/${id}/pdf`
+
+export async function downloadPdf(id: string, filename = 'kp.pdf') {
+  const { data } = await api.get(`/manager/kp/proposals/${id}/pdf`, { responseType: 'blob' })
+  const url = URL.createObjectURL(data)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
 }

@@ -41,6 +41,14 @@ export async function fetchAllProposals() {
   return data.data as KpProposal[]
 }
 
-export function proposalPdfUrl(id: string) {
-  return `/admin/kp/proposals/${id}/pdf`
+export async function downloadProposalPdf(id: string, filename = 'kp.pdf') {
+  const { data } = await api.get(`/admin/kp/proposals/${id}/pdf`, { responseType: 'blob' })
+  const url = URL.createObjectURL(data)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
 }

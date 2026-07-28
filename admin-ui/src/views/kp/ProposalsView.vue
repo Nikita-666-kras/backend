@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { fetchAllProposals, proposalPdfUrl, type KpProposal } from '@/api/kp'
+import { downloadProposalPdf, fetchAllProposals, type KpProposal } from '@/api/kp'
 import { useToastStore } from '@/stores/toast'
 
 const toast = useToastStore()
@@ -15,6 +15,18 @@ async function load() {
     toast.error(e?.response?.data?.message || 'Не удалось загрузить КП')
   } finally {
     loading.value = false
+  }
+}
+
+async function onDownload(item: KpProposal) {
+  try {
+    if (item.status !== 'FINAL') {
+      toast.error('Сначала сформируйте PDF (статус FINAL)')
+      return
+    }
+    await downloadProposalPdf(item.id, `KP_${item.number}.pdf`)
+  } catch (e: any) {
+    toast.error(e?.response?.data?.message || 'Не удалось скачать PDF')
   }
 }
 
@@ -38,7 +50,7 @@ onMounted(load)
             <td>{{ item.droneModelName }}</td>
             <td>{{ item.status }}</td>
             <td>{{ item.grandTotal }}</td>
-            <td><a class="btn secondary mini" :href="proposalPdfUrl(item.id)" target="_blank">Скачать</a></td>
+            <td><button class="btn secondary mini" type="button" @click="onDownload(item)">Скачать</button></td>
           </tr>
         </tbody>
       </table>

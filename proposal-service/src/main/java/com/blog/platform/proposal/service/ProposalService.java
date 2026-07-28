@@ -6,25 +6,14 @@ import com.blog.platform.proposal.api.dto.KpDtos.DroneModelUpsertRequest;
 import com.blog.platform.proposal.api.dto.KpDtos.ProposalDto;
 import com.blog.platform.proposal.api.dto.KpDtos.ProposalLineDto;
 import com.blog.platform.proposal.api.dto.KpDtos.ProposalUpsertRequest;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ProposalService {
-    private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("dd.MM.yy");
     private final JdbcTemplate jdbc;
-    @Value("${storage.kp-dir:/data/kp}")
-    private String kpDir;
+    private final KpHtmlPdfService kpHtmlPdfService;
 
     public List<DroneModelDto> listModels(boolean onlyActive) {
         String sql = "select id, code, name, default_price, sort_order, active from kp_drone_models "
@@ -95,7 +82,7 @@ public class ProposalService {
     @Transactional
     public ProposalDto finalizeProposal(UUID id, UUID managerId, boolean adminMode) {
         ProposalDto proposal = getById(id, managerId, adminMode);
-        String pdf = generatePdf(proposal);
+        String pdf = kpHtmlPdfService.generate(proposal);
         jdbc.update("update kp_proposals set status='FINAL', pdf_path=?, updated_at=now() where id=?", pdf, id);
         return getById(id, managerId, adminMode);
     }
@@ -179,162 +166,9 @@ public class ProposalService {
         throw new IllegalArgumentException("Discount must be 0/5/10/15/20");
     }
 
-    private String generatePdf(ProposalDto p) {
-        try {
-            Files.createDirectories(Path.of(kpDir));
-            String file = "КП №" + p.number() + " от " + LocalDate.now().format(DF) + " (" + p.droneModelName() + ") - АТРИС.pdf";
-            Path path = Path.of(kpDir, file);
-            try (PDDocument doc = new PDDocument()) {
-                PdfNumbers n = deriveNumbers(p);
-
-                // Page 1 - variant 01 + transition green block
-                PDPage page1 = new PDPage(PDRectangle.A4);
-                doc.addPage(page1);
-                try (PDPageContentStream cs = new PDPageContentStream(doc, page1)) {
-                    drawHeader(cs, "KOMMERCHESKOE PREDLOZHENIE · VARIANT 01");
-                    text(cs, 50, 760, 14, true, "Aviaobrabotka poley");
-                    text(cs, 50, 740, 11, false, "Poluchatel: " + safeAscii(p.recipient()));
-                    text(cs, 50, 722, 11, false, "Raschet dlya ploshadi " + n.areaHa + " ga.");
-                    text(cs, 50, 690, 11, false, "Stavka: 1 000 RUB/ga");
-                    text(cs, 50, 672, 12, true, "Na obyom " + n.areaHa + " ga: " + money(n.variantOneTotal));
-                    drawGreenBlock(cs, 50, 520, 495, 120,
-                            "Est bolee vygodnyy format dlya " + n.areaHa + " ga",
-                            "HD580 + professional pilot: " + money(n.variantTwoTotal)
-                                    + ", ekonomiya okolo " + money(n.saving) + " uzhe v pervyy sezon.");
-                    footer(cs, 1);
-                }
-
-                // Page 2 - variant 02 + guarantee block
-                PDPage page2 = new PDPage(PDRectangle.A4);
-                doc.addPage(page2);
-                try (PDPageContentStream cs = new PDPageContentStream(doc, page2)) {
-                    drawHeader(cs, "VARIANT 02 · REKOMENDUEM");
-                    text(cs, 50, 760, 14, true, p.droneModelName() + " + professional pilot");
-                    text(cs, 50, 740, 11, false, "Komplekt: " + money(p.dronePrice()));
-                    text(cs, 50, 722, 11, false, "Pilot: 100 RUB/ga, na " + n.areaHa + " ga = " + money(n.pilotTotal));
-                    text(cs, 50, 704, 12, true, "Itogo na sezon: " + money(n.variantTwoTotal));
-                    int y = 670;
-                    for (ProposalLineDto line : p.lines()) {
-                        text(cs, 50, y, 10, false,
-                                line.lineType() + " | " + line.name() + " | qty " + line.qty()
-                                        + " | " + money(line.lineTotal()) + " | skidka " + line.discountPct() + "%");
-                        y -= 16;
-                        if (y < 490) {
-                            break;
-                        }
-                    }
-                    drawGreenBlock(cs, 50, 350, 495, 120,
-                            "Garantiya otvetstvennosti pilota",
-                            "Pri polomkah po vine pilota OOO ATRIS kompaniya pokryvaet remont drona zakazchika.");
-                    footer(cs, 2);
-                }
-
-                // Page 3 - comparison
-                PDPage page3 = new PDPage(PDRectangle.A4);
-                doc.addPage(page3);
-                try (PDPageContentStream cs = new PDPageContentStream(doc, page3)) {
-                    drawHeader(cs, "SRAVNENIE NA " + n.areaHa + " GA");
-                    text(cs, 50, 760, 12, true, "Variant 01: " + money(n.variantOneTotal));
-                    text(cs, 50, 740, 12, true, "Variant 02: " + money(n.variantTwoTotal));
-                    text(cs, 50, 720, 12, true, "Ekonomiya: " + money(n.saving));
-                    text(cs, 50, 688, 11, false, "1) Nizhe stoimost pervogo sezona.");
-                    text(cs, 50, 670, 11, false, "2) Tehnika ostaetsya na balanse hozyaystva.");
-                    text(cs, 50, 652, 11, false, "3) Pilot oplachivaetsya tolko po fakticheskim ga.");
-                    text(cs, 50, 634, 11, false, "4) Riski pilotirovaniya po vine pilota pokryvaet ATRIS.");
-                    footer(cs, 3);
-                }
-
-                // Page 4 - terms
-                PDPage page4 = new PDPage(PDRectangle.A4);
-                doc.addPage(page4);
-                try (PDPageContentStream cs = new PDPageContentStream(doc, page4)) {
-                    drawHeader(cs, "USLOVIYA PREDLOZHENIYA");
-                    text(cs, 50, 760, 11, false, "Srok deystviya predlozheniya - 15 rabochih dney.");
-                    text(cs, 50, 742, 11, false, "Variant 01: " + money(n.variantOneTotal) + " pri stavke 1 000 RUB/ga.");
-                    text(cs, 50, 724, 11, false, "Variant 02: " + p.droneModelName() + " + pilot = " + money(n.variantTwoTotal) + ".");
-                    text(cs, 50, 706, 11, false, "Oplata i postavka soglasovyvayutsya dogovorom.");
-                    text(cs, 50, 688, 11, false, "Garantiya: 12 mesyatsev. NDS vklju chen: " + money(p.ndsTotal()) + ".");
-                    drawGreenBlock(cs, 50, 560, 495, 90,
-                            "Rekomenduem dlya " + n.areaHa + " ga",
-                            p.droneModelName() + " + pilot: " + money(n.variantTwoTotal) + ". Ekonomiya: " + money(n.saving));
-                    footer(cs, 4);
-                }
-                doc.save(path.toFile());
-            }
-            return path.toAbsolutePath().toString();
-        } catch (IOException ex) {
-            throw new IllegalStateException("PDF generation failed", ex);
-        }
-    }
-
     private Instant toInstant(Timestamp ts) {
         return ts == null ? null : ts.toInstant();
     }
-
-    private PdfNumbers deriveNumbers(ProposalDto p) {
-        BigDecimal pilotTotal = BigDecimal.ZERO;
-        for (ProposalLineDto line : p.lines()) {
-            String lower = (line.name() == null ? "" : line.name().toLowerCase());
-            if (lower.contains("пилот") || lower.contains("pilot")) {
-                pilotTotal = pilotTotal.add(line.lineTotal());
-            }
-        }
-        int area = 4200;
-        if (pilotTotal.compareTo(BigDecimal.ZERO) > 0) {
-            area = pilotTotal.divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP).intValue();
-        }
-        BigDecimal variantOne = BigDecimal.valueOf(area).multiply(BigDecimal.valueOf(1000));
-        BigDecimal variantTwo = p.grandTotal();
-        BigDecimal saving = variantOne.subtract(variantTwo);
-        return new PdfNumbers(area, pilotTotal, variantOne, variantTwo, saving);
-    }
-
-    private String money(BigDecimal value) {
-        return value.setScale(2, RoundingMode.HALF_UP).toPlainString() + " RUB";
-    }
-
-    private void drawHeader(PDPageContentStream cs, String title) throws IOException {
-        text(cs, 50, 805, 10, false, "+7 (938) 119-29-82 · privet@atris.su · www.atris.su");
-        text(cs, 50, 785, 12, true, title);
-    }
-
-    private void footer(PDPageContentStream cs, int pageNo) throws IOException {
-        text(cs, 50, 26, 10, false, "INZHENERNYE SISTEMY AGROPRIMENENIYA · OOO ATRIS · STR. 0" + pageNo);
-    }
-
-    private void drawGreenBlock(PDPageContentStream cs, float x, float y, float w, float h, String title, String body) throws IOException {
-        cs.setNonStrokingColor(141, 198, 63);
-        cs.addRect(x, y, w, h);
-        cs.fill();
-        cs.setNonStrokingColor(6, 37, 84);
-        text(cs, x + 12, y + h - 26, 12, true, title);
-        text(cs, x + 12, y + h - 46, 10, false, body);
-        cs.setNonStrokingColor(0, 0, 0);
-    }
-
-    private void text(PDPageContentStream cs, float x, float y, int fontSize, boolean bold, String text) throws IOException {
-        cs.beginText();
-        cs.setFont(bold ? PDType1Font.HELVETICA_BOLD : PDType1Font.HELVETICA, fontSize);
-        cs.setRenderingMode(RenderingMode.FILL);
-        cs.newLineAtOffset(x, y);
-        cs.showText(safeAscii(text));
-        cs.endText();
-    }
-
-    private String safeAscii(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value
-                .replace('«', '"')
-                .replace('»', '"')
-                .replace('—', '-')
-                .replace('ё', 'e')
-                .replace('Ё', 'E')
-                .replaceAll("[^\\x20-\\x7E]", "?");
-    }
-
-    private record PdfNumbers(int areaHa, BigDecimal pilotTotal, BigDecimal variantOneTotal, BigDecimal variantTwoTotal, BigDecimal saving) {}
 
     private record Totals(BigDecimal subtotal, BigDecimal discount, BigDecimal grand, BigDecimal nds) {}
 }
