@@ -1,10 +1,14 @@
 package com.blog.platform.admin.client;
 
+import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchProcessRequest;
+import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchProcessResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaPageResponse;
+import com.blog.platform.admin.api.dto.AdminDtos.MediaProcessRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.PageResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.PostRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.PostResponse;
+import com.blog.platform.admin.api.dto.AdminDtos.ProcessingSettingsResponse;
 import com.blog.platform.common.api.ApiResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -108,7 +112,7 @@ public class PostServiceClient {
                 .toBodilessEntity();
     }
 
-    public MediaResponse uploadMedia(MultipartFile file, UUID uploadedBy) {
+    public MediaResponse uploadMedia(MultipartFile file, UUID uploadedBy, String section) {
         try {
             ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
                 @Override
@@ -119,6 +123,9 @@ public class PostServiceClient {
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", resource);
             body.add("uploadedBy", uploadedBy.toString());
+            if (section != null && !section.isBlank()) {
+                body.add("section", section);
+            }
             ApiResponse<MediaResponse> response = postServiceRestClient.post()
                     .uri("/media")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -132,18 +139,68 @@ public class PostServiceClient {
         }
     }
 
-    public MediaPageResponse listMedia(String kind, String q, int page, int size) {
+    public MediaPageResponse listMedia(
+            String kind,
+            String section,
+            String q,
+            Boolean square,
+            Boolean watermark,
+            Boolean incomplete,
+            int page,
+            int size
+    ) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/media")
                 .queryParam("page", page)
                 .queryParam("size", size);
         if (kind != null && !kind.isBlank()) {
             builder.queryParam("kind", kind);
         }
+        if (section != null && !section.isBlank()) {
+            builder.queryParam("section", section);
+        }
         if (q != null && !q.isBlank()) {
             builder.queryParam("q", q);
         }
+        if (square != null) {
+            builder.queryParam("square", square);
+        }
+        if (watermark != null) {
+            builder.queryParam("watermark", watermark);
+        }
+        if (incomplete != null) {
+            builder.queryParam("incomplete", incomplete);
+        }
         ApiResponse<MediaPageResponse> response = postServiceRestClient.get()
                 .uri(builder.build(true).toUriString())
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+        return requireData(response);
+    }
+
+    public MediaResponse processMedia(UUID id, MediaProcessRequest request) {
+        ApiResponse<MediaResponse> response = postServiceRestClient.post()
+                .uri("/media/{id}/process", id)
+                .body(request)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+        return requireData(response);
+    }
+
+    public MediaBatchProcessResponse processMediaBatch(MediaBatchProcessRequest request) {
+        ApiResponse<MediaBatchProcessResponse> response = postServiceRestClient.post()
+                .uri("/media/process-batch")
+                .body(request)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+        return requireData(response);
+    }
+
+    public ProcessingSettingsResponse processingSettings() {
+        ApiResponse<ProcessingSettingsResponse> response = postServiceRestClient.get()
+                .uri("/media/processing-settings")
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
                 });

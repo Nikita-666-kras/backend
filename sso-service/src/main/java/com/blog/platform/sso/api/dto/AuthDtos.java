@@ -4,6 +4,7 @@ import com.blog.platform.common.security.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Set;
@@ -34,6 +35,12 @@ public final class AuthDtos {
             String password,
             @NotEmpty Set<Role> roles
     ) {
+    }
+
+    public record UpdateRolesRequest(@NotEmpty Set<Role> roles) {
+    }
+
+    public record UpdateEnabledRequest(@NotNull Boolean enabled) {
     }
 
     public record AuthResponse(String accessToken, String refreshToken, String tokenType) {

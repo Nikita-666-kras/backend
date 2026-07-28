@@ -32,6 +32,16 @@ public class MediaFile extends BaseEntity {
     @Column(nullable = false, length = 20)
     private MediaKind kind;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private MediaSection section;
+
     @Column(nullable = false)
     private UUID uploadedBy;
+
+    @Column(name = "is_square", nullable = false)
+    private boolean square;
+
+    @Column(name = "has_watermark", nullable = false)
+    private boolean watermark;
 }

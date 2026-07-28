@@ -6,15 +6,17 @@ import {
   bulkPosts,
   deletePost,
   fetchPosts,
-  publicPostPath,
   publishPost,
   type PageResponse
 } from '@/api/posts'
 import { mediaPublicUrl } from '@/api/media'
 import { useAuthStore } from '@/stores/auth'
+import { useToastStore } from '@/stores/toast'
+import { publicPostUrl } from '@/utils/publicUrl'
 import { statusLabel } from '@/utils/labels'
 
 const auth = useAuthStore()
+const toast = useToastStore()
 const route = useRoute()
 const q = ref('')
 const status = ref(typeof route.query.status === 'string' ? route.query.status : '')
@@ -65,19 +67,34 @@ function toggleOne(id: string) {
 }
 
 async function publish(id: string) {
-  await publishPost(id)
-  await load()
+  try {
+    await publishPost(id)
+    toast.ok('Опубликовано')
+    await load()
+  } catch (e: any) {
+    toast.error(e?.response?.data?.message || 'Ошибка публикации')
+  }
 }
 
 async function archive(id: string) {
-  await archivePost(id)
-  await load()
+  try {
+    await archivePost(id)
+    toast.ok('В архиве')
+    await load()
+  } catch (e: any) {
+    toast.error(e?.response?.data?.message || 'Ошибка архивации')
+  }
 }
 
 async function remove(id: string) {
   if (!confirm('Удалить пост?')) return
-  await deletePost(id)
-  await load()
+  try {
+    await deletePost(id)
+    toast.ok('Удалено')
+    await load()
+  } catch (e: any) {
+    toast.error(e?.response?.data?.message || 'Ошибка удаления')
+  }
 }
 
 async function runBulk(action: 'PUBLISH' | 'ARCHIVE' | 'DELETE') {
@@ -89,16 +106,19 @@ async function runBulk(action: 'PUBLISH' | 'ARCHIVE' | 'DELETE') {
   try {
     const result = await bulkPosts(ids, action)
     message.value = `Готово: успешно ${result.success}, ошибок ${result.failed}`
+    toast.ok(message.value)
     await load()
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Ошибка массового действия'
+    toast.error(error.value)
   }
 }
 
 function copyUrl(slug: string) {
-  const url = `${window.location.origin.replace(':8088', ':8080')}${publicPostPath(slug)}`
+  const url = publicPostUrl(slug)
   navigator.clipboard?.writeText(url)
   message.value = 'Публичный URL скопирован'
+  toast.ok(message.value)
 }
 
 onMounted(load)
@@ -237,7 +257,7 @@ watch([status], () => {
   height: 64px;
   border-radius: 10px;
   overflow: hidden;
-  background: #e7eeeb;
+  background: rgba(255, 255, 255, 0.04);
   display: grid;
   place-items: center;
   font-size: 0.7rem;
@@ -274,7 +294,7 @@ watch([status], () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: #eef4f1;
+  background: rgba(255, 255, 255, 0.06);
   padding: 0.15rem 0.45rem;
   border-radius: 6px;
 }

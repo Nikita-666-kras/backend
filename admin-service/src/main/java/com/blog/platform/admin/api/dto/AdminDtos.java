@@ -62,11 +62,29 @@ public final class AdminDtos {
     ) {
     }
 
-    public record DashboardStats(
+    public record StatusCounts(
             long drafts,
             long published,
             long archived,
             long total
+    ) {
+    }
+
+    public record MediaCounts(
+            long total,
+            long incomplete
+    ) {
+    }
+
+    public record DashboardStats(
+            long drafts,
+            long published,
+            long archived,
+            long total,
+            StatusCounts posts,
+            StatusCounts parts,
+            StatusCounts kits,
+            MediaCounts media
     ) {
     }
 
@@ -92,9 +110,58 @@ public final class AdminDtos {
             String contentType,
             long sizeBytes,
             String kind,
+            String section,
             String url,
             UUID uploadedBy,
-            Instant createdAt
+            Instant createdAt,
+            Instant updatedAt,
+            boolean square,
+            boolean watermark
+    ) {
+    }
+
+    public record MediaProcessRequest(
+            boolean square,
+            boolean watermark,
+            boolean convertToWebp,
+            String backgroundColor,
+            Float opacity,
+            Integer bgThreshold
+    ) {
+    }
+
+    public record MediaBatchProcessRequest(
+            List<UUID> ids,
+            boolean square,
+            boolean watermark,
+            boolean convertToWebp,
+            String backgroundColor,
+            Float opacity,
+            Integer bgThreshold
+    ) {
+    }
+
+    public record MediaBatchProcessResponse(
+            int processed,
+            int failed,
+            List<String> errors
+    ) {
+    }
+
+    public record ProcessingSettingsResponse(
+            String squareBackground,
+            String logoPath,
+            float opacity,
+            int bgThreshold,
+            boolean logoAvailable
+    ) {
+    }
+
+    /** @deprecated kept for compatibility with older clients */
+    public record WatermarkSettingsResponse(
+            String text,
+            float opacity,
+            int marginPx
     ) {
     }
 

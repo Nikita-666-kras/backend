@@ -38,4 +38,26 @@ public class AdminConfig {
                 .defaultHeader(InternalHeaders.API_KEY, internalApiKey)
                 .build();
     }
+
+    @Bean
+    RestClient partsServiceRestClient(
+            @Value("${parts-service.base-url}") String baseUrl,
+            @Value("${security.internal-api-key}") String internalApiKey
+    ) {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader(InternalHeaders.API_KEY, internalApiKey)
+                .build();
+    }
+
+    @Bean
+    RestClient proposalServiceRestClient(
+            @Value("${proposal-service.base-url}") String baseUrl,
+            @Value("${security.internal-api-key}") String internalApiKey
+    ) {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader(InternalHeaders.API_KEY, internalApiKey)
+                .build();
+    }
 }

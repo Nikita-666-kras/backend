@@ -3,14 +3,18 @@ package com.blog.platform.admin.service;
 import com.blog.platform.admin.api.dto.AdminDtos.BulkRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.BulkResult;
 import com.blog.platform.admin.api.dto.AdminDtos.DashboardStats;
+import com.blog.platform.admin.api.dto.AdminDtos.MediaCounts;
 import com.blog.platform.admin.api.dto.AdminDtos.PageResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.PostRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.PostResponse;
+import com.blog.platform.admin.api.dto.AdminDtos.StatusCounts;
+import com.blog.platform.admin.client.PartsServiceClient;
 import com.blog.platform.admin.client.PostServiceClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class AdminPostService {
 
     private final PostServiceClient postServiceClient;
+    private final PartsServiceClient partsServiceClient;
 
     public PageResponse list(String q, String status, int page, int size) {
         return postServiceClient.search(q, status, page, size);
@@ -69,9 +74,29 @@ public class AdminPostService {
     }
 
     public DashboardStats dashboard() {
-        long drafts = postServiceClient.search(null, "DRAFT", 0, 1).totalElements();
-        long published = postServiceClient.search(null, "PUBLISHED", 0, 1).totalElements();
-        long archived = postServiceClient.search(null, "ARCHIVED", 0, 1).totalElements();
-        return new DashboardStats(drafts, published, archived, drafts + published + archived);
+        StatusCounts posts = statusCounts((status, size) -> postServiceClient.search(null, status, 0, size).totalElements());
+        StatusCounts parts = statusCounts((status, size) ->
+                partsServiceClient.searchParts(null, status, null, null, 0, size).totalElements());
+        StatusCounts kits = statusCounts((status, size) ->
+                partsServiceClient.searchKits(null, status, null, 0, size).totalElements());
+        long mediaTotal = postServiceClient.listMedia(null, null, null, null, null, null, 0, 1).totalElements();
+        long mediaIncomplete = postServiceClient.listMedia(null, null, null, null, null, true, 0, 1).totalElements();
+        return new DashboardStats(
+                posts.drafts(),
+                posts.published(),
+                posts.archived(),
+                posts.total(),
+                posts,
+                parts,
+                kits,
+                new MediaCounts(mediaTotal, mediaIncomplete)
+        );
+    }
+
+    private StatusCounts statusCounts(BiFunction<String, Integer, Long> counter) {
+        long drafts = counter.apply("DRAFT", 1);
+        long published = counter.apply("PUBLISHED", 1);
+        long archived = counter.apply("ARCHIVED", 1);
+        return new StatusCounts(drafts, published, archived, drafts + published + archived);
     }
 }

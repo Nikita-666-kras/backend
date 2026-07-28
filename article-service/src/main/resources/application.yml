@@ -30,6 +30,11 @@ media:
   storage-path: ${MEDIA_STORAGE_PATH:/data/media}
   max-image-bytes: ${MEDIA_MAX_IMAGE_BYTES:10485760}
   max-video-bytes: ${MEDIA_MAX_VIDEO_BYTES:104857600}
+  square-background: ${MEDIA_SQUARE_BACKGROUND:#ffffff}
+  watermark:
+    logo-path: ${MEDIA_WATERMARK_LOGO_PATH:watermark.png}
+    opacity: ${MEDIA_WATERMARK_OPACITY:0.15}
+    bg-threshold: ${MEDIA_WATERMARK_BG_THRESHOLD:40}
 
 management:
   endpoints:

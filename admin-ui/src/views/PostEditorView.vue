@@ -1,21 +1,26 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import {
   createPost,
   fetchPost,
-  publicPostPath,
   publishPost,
   updatePost,
   type PostPayload
 } from '@/api/posts'
 import { fetchMedia, mediaPublicUrl, uploadMedia, type MediaAsset } from '@/api/media'
+import { usePostEditorStore } from '@/stores/postEditor'
+import { useToastStore } from '@/stores/toast'
+import { useUnsavedGuard } from '@/composables/useUnsavedGuard'
+import { publicPostUrl } from '@/utils/publicUrl'
 import { statusLabel } from '@/utils/labels'
 
 const route = useRoute()
 const router = useRouter()
+const postEditorStore = usePostEditorStore()
+const toast = useToastStore()
 const id = computed(() => (typeof route.params.id === 'string' ? route.params.id : ''))
 const isNew = computed(() => route.name === 'post-new')
 
@@ -29,11 +34,61 @@ const slug = ref('')
 const coverMediaId = ref<string | null>(null)
 const mediaObjectNames = ref<string[]>([])
 const library = ref<MediaAsset[]>([])
+const mediaQ = ref('')
 const saving = ref(false)
 const uploading = ref(false)
 const error = ref('')
 const message = ref('')
 const contentEl = ref<HTMLTextAreaElement | null>(null)
+const dirty = ref(false)
+const baseline = ref('')
+let draftSaveTimer: ReturnType<typeof setTimeout> | null = null
+let mediaSearchTimer: ReturnType<typeof setTimeout> | null = null
+
+useUnsavedGuard(dirty)
+
+function persistEditorDraft() {
+  if (draftSaveTimer) {
+    clearTimeout(draftSaveTimer)
+  }
+  draftSaveTimer = setTimeout(() => {
+    postEditorStore.saveDraft(id.value, {
+      title: title.value,
+      shortDescription: shortDescription.value,
+      content: content.value,
+      tags: tags.value,
+      categories: categories.value,
+      coverMediaId: coverMediaId.value,
+      mediaObjectNames: mediaObjectNames.value,
+      savedAt: new Date().toISOString()
+    })
+  }, 350)
+}
+
+function restoreEditorDraft(force = false) {
+  if (!postEditorStore.hasDraft(id.value)) return
+  if (!force) {
+    const ok = confirm('Найден черновик формы в этой сессии. Восстановить его?')
+    if (!ok) return
+  }
+  const draft = postEditorStore.loadDraft(id.value)
+  if (!draft) return
+  title.value = draft.title
+  shortDescription.value = draft.shortDescription
+  content.value = draft.content
+  tags.value = draft.tags
+  categories.value = draft.categories
+  coverMediaId.value = draft.coverMediaId
+  mediaObjectNames.value = [...draft.mediaObjectNames]
+  message.value = `Черновик формы восстановлен (${new Date(draft.savedAt).toLocaleString()})`
+  toast.info('Черновик формы восстановлен')
+}
+
+function clearEditorDraft() {
+  postEditorStore.clearDraft(id.value)
+  message.value = 'Черновик формы очищен'
+  toast.info('Черновик формы очищен')
+}
 
 const previewHtml = computed(() =>
   DOMPurify.sanitize(marked.parse(content.value || '') as string, {
@@ -45,15 +100,33 @@ const previewHtml = computed(() =>
 
 const publicUrl = computed(() => {
   if (!slug.value) return 'Появится после сохранения'
-  const apiOrigin = window.location.origin.includes(':8088')
-    ? window.location.origin.replace(':8088', ':8080')
-    : window.location.origin
-  return `${apiOrigin}${publicPostPath(slug.value)}`
+  return publicPostUrl(slug.value)
 })
 
 const attached = computed(() =>
   library.value.filter((m) => mediaObjectNames.value.includes(m.id))
 )
+
+function snapshot() {
+  return JSON.stringify({
+    title: title.value,
+    shortDescription: shortDescription.value,
+    content: content.value,
+    tags: tags.value,
+    categories: categories.value,
+    coverMediaId: coverMediaId.value,
+    mediaObjectNames: mediaObjectNames.value
+  })
+}
+
+function markClean() {
+  baseline.value = snapshot()
+  dirty.value = false
+}
+
+function touchDirty() {
+  dirty.value = baseline.value !== '' && snapshot() !== baseline.value
+}
 
 function payload(): PostPayload {
   return {
@@ -67,14 +140,16 @@ function payload(): PostPayload {
   }
 }
 
-async function loadLibrary() {
-  const page = await fetchMedia({ size: 48 })
+async function loadLibrary(q?: string) {
+  const page = await fetchMedia({ size: 60, section: 'ARTICLES', q: q || undefined })
   library.value = page.content
 }
 
 async function load() {
   if (isNew.value) {
+    restoreEditorDraft()
     await loadLibrary()
+    markClean()
     return
   }
   const post = await fetchPost(id.value)
@@ -87,7 +162,9 @@ async function load() {
   slug.value = post.slug
   coverMediaId.value = post.coverMediaId || null
   mediaObjectNames.value = [...(post.mediaObjectNames || [])]
+  restoreEditorDraft()
   await loadLibrary()
+  markClean()
 }
 
 function insertAtCursor(snippet: string) {
@@ -145,7 +222,7 @@ async function uploadAndAttach(files: FileList | null) {
   error.value = ''
   try {
     for (const file of Array.from(files)) {
-      const asset = await uploadMedia(file)
+      const asset = await uploadMedia(file, 'ARTICLES')
       library.value = [asset, ...library.value]
       insertMedia(asset)
       if (!coverMediaId.value && asset.kind === 'IMAGE') {
@@ -168,17 +245,24 @@ async function saveDraft() {
     if (isNew.value) {
       const created = await createPost(payload())
       message.value = 'Черновик создан'
+      toast.ok('Черновик создан')
+      postEditorStore.clearDraft(id.value)
+      dirty.value = false
       await router.replace(`/posts/${created.id}`)
       slug.value = created.slug
       status.value = created.status
     } else {
       const updated = await updatePost(id.value, payload())
       message.value = 'Сохранено'
+      toast.ok('Сохранено')
+      postEditorStore.clearDraft(id.value)
       slug.value = updated.slug
       status.value = updated.status
+      markClean()
     }
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Ошибка сохранения'
+    toast.error(error.value)
   } finally {
     saving.value = false
   }
@@ -194,6 +278,7 @@ async function saveAndPublish() {
       const created = await createPost(payload())
       currentId = created.id
       slug.value = created.slug
+      dirty.value = false
       await router.replace(`/posts/${created.id}`)
     } else {
       await updatePost(id.value, payload())
@@ -202,8 +287,12 @@ async function saveAndPublish() {
     status.value = published.status
     slug.value = published.slug
     message.value = 'Опубликовано'
+    toast.ok('Опубликовано')
+    postEditorStore.clearDraft(id.value)
+    markClean()
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Ошибка публикации'
+    toast.error(error.value)
   } finally {
     saving.value = false
   }
@@ -213,6 +302,7 @@ function copyPublicUrl() {
   if (!slug.value) return
   navigator.clipboard?.writeText(publicUrl.value)
   message.value = 'Публичный URL скопирован'
+  toast.ok('URL скопирован')
 }
 
 onMounted(async () => {
@@ -220,7 +310,18 @@ onMounted(async () => {
     await load()
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Не удалось загрузить пост'
+    toast.error(error.value)
   }
+})
+watch([title, shortDescription, content, tags, categories, coverMediaId, mediaObjectNames], () => {
+  persistEditorDraft()
+  touchDirty()
+})
+watch(mediaQ, (q) => {
+  if (mediaSearchTimer) clearTimeout(mediaSearchTimer)
+  mediaSearchTimer = setTimeout(() => {
+    loadLibrary(q.trim() || undefined).catch(() => undefined)
+  }, 280)
 })
 </script>
 
@@ -233,6 +334,22 @@ onMounted(async () => {
       </div>
       <div class="actions">
         <span class="badge" :class="status">{{ statusLabel(status) }}</span>
+        <button
+          class="btn secondary"
+          type="button"
+          :disabled="!postEditorStore.hasDraft(id)"
+          @click="restoreEditorDraft(true)"
+        >
+          Восстановить черновик
+        </button>
+        <button
+          class="btn secondary"
+          type="button"
+          :disabled="!postEditorStore.hasDraft(id)"
+          @click="clearEditorDraft"
+        >
+          Очистить черновик
+        </button>
         <button class="btn secondary" :disabled="saving" @click="saveDraft">Сохранить черновик</button>
         <button class="btn" :disabled="saving" @click="saveAndPublish">Опубликовать</button>
       </div>
@@ -305,6 +422,7 @@ onMounted(async () => {
               />
             </label>
           </div>
+          <input v-model="mediaQ" class="media-search" placeholder="Поиск в медиатеке статей…" />
           <div class="media-list">
             <div v-for="item in library" :key="item.id" class="media-row">
               <div class="thumb">
@@ -368,8 +486,18 @@ onMounted(async () => {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 1rem;
-  background: white;
+  background: var(--on-light-bg, #f4f6f8);
+  color: var(--on-light-ink, #111);
+  color-scheme: light;
   overflow: auto;
+}
+
+.preview :deep(*) {
+  color: inherit;
+}
+
+.preview :deep(a) {
+  color: #0b57d0;
 }
 
 .preview :deep(img),
@@ -405,6 +533,15 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+}
+
+.media-search {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  background: var(--input-bg);
+  color: var(--ink);
 }
 
 .mini {
@@ -453,7 +590,7 @@ onMounted(async () => {
   height: 42px;
   border-radius: 8px;
   overflow: hidden;
-  background: #e7eeeb;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .thumb img,

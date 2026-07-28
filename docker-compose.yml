@@ -31,6 +31,38 @@ services:
     networks:
       - blog-net
 
+  parts-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: parts_db
+      POSTGRES_USER: parts
+      POSTGRES_PASSWORD: ${PARTS_DB_PASSWORD}
+    volumes:
+      - parts-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parts -d parts_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - blog-net
+
+  proposal-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: proposal_db
+      POSTGRES_USER: proposal
+      POSTGRES_PASSWORD: ${PROPOSAL_DB_PASSWORD}
+    volumes:
+      - proposal-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U proposal -d proposal_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - blog-net
+
   post-service:
     build:
       context: .
@@ -47,6 +79,10 @@ services:
       MEDIA_STORAGE_PATH: /data/media
       MEDIA_MAX_IMAGE_BYTES: ${MEDIA_MAX_IMAGE_BYTES:-10485760}
       MEDIA_MAX_VIDEO_BYTES: ${MEDIA_MAX_VIDEO_BYTES:-104857600}
+      MEDIA_SQUARE_BACKGROUND: ${MEDIA_SQUARE_BACKGROUND:-#ffffff}
+      MEDIA_WATERMARK_LOGO_PATH: ${MEDIA_WATERMARK_LOGO_PATH:-watermark.png}
+      MEDIA_WATERMARK_OPACITY: ${MEDIA_WATERMARK_OPACITY:-0.15}
+      MEDIA_WATERMARK_BG_THRESHOLD: ${MEDIA_WATERMARK_BG_THRESHOLD:-40}
     volumes:
       - media-data:/data/media
     networks:
@@ -67,10 +103,53 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SSO_DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       APP_SEED_USERS: ${APP_SEED_USERS:-false}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_EDITOR_PASSWORD: ${SEED_EDITOR_PASSWORD:-}
+      SEED_MANAGER_PASSWORD: ${SEED_MANAGER_PASSWORD:-}
     networks:
       - blog-net
     expose:
       - "9001"
+
+  parts-service:
+    build:
+      context: .
+      dockerfile: parts-service/Dockerfile
+    depends_on:
+      parts-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://parts-db:5432/parts_db
+      SPRING_DATASOURCE_USERNAME: parts
+      SPRING_DATASOURCE_PASSWORD: ${PARTS_DB_PASSWORD}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+    networks:
+      - blog-net
+    expose:
+      - "9006"
+
+  proposal-service:
+    build:
+      context: .
+      dockerfile: proposal-service/Dockerfile
+    depends_on:
+      proposal-db:
+        condition: service_healthy
+      parts-service:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://proposal-db:5432/proposal_db
+      SPRING_DATASOURCE_USERNAME: proposal
+      SPRING_DATASOURCE_PASSWORD: ${PROPOSAL_DB_PASSWORD}
+      PARTS_SERVICE_URL: http://parts-service:9006
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      KP_STORAGE_PATH: /data/kp
+    volumes:
+      - kp-data:/data/kp
+    networks:
+      - blog-net
+    expose:
+      - "9007"
 
   admin-service:
     build:
@@ -78,8 +157,11 @@ services:
       dockerfile: admin-service/Dockerfile
     depends_on:
       - post-service
+      - parts-service
     environment:
       POST_SERVICE_URL: http://post-service:9003
+      PARTS_SERVICE_URL: http://parts-service:9006
+      PROPOSAL_SERVICE_URL: http://proposal-service:9007
       INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       JWT_SECRET: ${JWT_SECRET}
     networks:
@@ -95,6 +177,7 @@ services:
       - sso-service
       - admin-service
       - post-service
+      - parts-service
     ports:
       - "8080:8080"
     environment:
@@ -103,6 +186,8 @@ services:
       SSO_SERVICE_URL: http://sso-service:9001
       ADMIN_SERVICE_URL: http://admin-service:9005
       POST_SERVICE_URL: http://post-service:9003
+      PARTS_SERVICE_URL: http://parts-service:9006
+      PROPOSAL_SERVICE_URL: http://proposal-service:9007
     networks:
       - blog-net
 
@@ -130,6 +215,17 @@ services:
     networks:
       - blog-net
 
+  manager-ui:
+    build:
+      context: ./manager-ui
+      dockerfile: Dockerfile
+    depends_on:
+      - api-gateway
+    ports:
+      - "8090:80"
+    networks:
+      - blog-net
+
 networks:
   blog-net:
     driver: bridge
@@ -137,4 +233,7 @@ networks:
 volumes:
   post-db-data:
   sso-db-data:
+  parts-db-data:
+  proposal-db-data:
   media-data:
+  kp-data:

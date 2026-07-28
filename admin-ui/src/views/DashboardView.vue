@@ -2,15 +2,16 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { fetchDashboard, type DashboardStats } from '@/api/posts'
+import { useToastStore } from '@/stores/toast'
 
 const stats = ref<DashboardStats | null>(null)
-const error = ref('')
+const toast = useToastStore()
 
 onMounted(async () => {
   try {
     stats.value = await fetchDashboard()
   } catch (e: any) {
-    error.value = e?.response?.data?.message || 'Не удалось загрузить обзор'
+    toast.error(e?.response?.data?.message || 'Не удалось загрузить обзор')
   }
 })
 </script>
@@ -20,47 +21,60 @@ onMounted(async () => {
     <header class="page-header">
       <div>
         <p class="eyebrow">Сводка</p>
-        <h1>Обзор редакции</h1>
-        <p class="muted lead">Статусы материалов и быстрый старт</p>
-      </div>
-      <div class="actions">
-        <RouterLink class="btn secondary" to="/media">Медиатека</RouterLink>
-        <RouterLink class="btn" to="/posts/new">Новый пост</RouterLink>
+        <h1>Обзор</h1>
+        <p class="muted lead">Контент, каталог и медиатека — цифры и быстрые действия</p>
       </div>
     </header>
 
-    <p v-if="error" class="error">{{ error }}</p>
+    <div class="hubs">
+      <article class="card hub">
+        <p class="hub-kicker">Контент</p>
+        <h2>Посты</h2>
+        <p>Черновики, публикация и редактура статей</p>
+        <div v-if="stats" class="hub-stats">
+          <span>{{ stats.posts?.drafts ?? stats.drafts }} черн.</span>
+          <span>{{ stats.posts?.published ?? stats.published }} опубл.</span>
+          <span>{{ stats.posts?.total ?? stats.total }} всего</span>
+        </div>
+        <div class="hub-actions">
+          <RouterLink class="btn" to="/posts">К постам</RouterLink>
+          <RouterLink class="btn secondary" to="/posts/new">Новый</RouterLink>
+          <RouterLink class="btn secondary" to="/media?section=ARTICLES">Медиа</RouterLink>
+        </div>
+      </article>
 
-    <div v-if="stats" class="grid">
-      <article class="card stat">
-        <span>Черновики</span>
-        <strong>{{ stats.drafts }}</strong>
-        <RouterLink to="/posts?status=DRAFT">Открыть</RouterLink>
+      <article class="card hub accent">
+        <p class="hub-kicker">Каталог</p>
+        <h2>Запчасти</h2>
+        <p>Номенклатура, комплекты, дроны и импорт</p>
+        <div v-if="stats" class="hub-stats">
+          <span>{{ stats.parts?.drafts ?? 0 }} черн.</span>
+          <span>{{ stats.parts?.published ?? 0 }} опубл.</span>
+          <span>{{ stats.parts?.total ?? 0 }} запч.</span>
+          <span>{{ stats.kits?.total ?? 0 }} компл.</span>
+        </div>
+        <div class="hub-actions">
+          <RouterLink class="btn" to="/parts">К каталогу</RouterLink>
+          <RouterLink class="btn secondary" to="/parts/new">Добавить</RouterLink>
+          <RouterLink class="btn secondary" to="/categories">Категории</RouterLink>
+          <RouterLink class="btn secondary" to="/media?section=PARTS">Медиа</RouterLink>
+        </div>
       </article>
-      <article class="card stat">
-        <span>Опубликовано</span>
-        <strong>{{ stats.published }}</strong>
-        <RouterLink to="/posts?status=PUBLISHED">Открыть</RouterLink>
-      </article>
-      <article class="card stat">
-        <span>В архиве</span>
-        <strong>{{ stats.archived }}</strong>
-        <RouterLink to="/posts?status=ARCHIVED">Открыть</RouterLink>
-      </article>
-      <article class="card stat accent">
-        <span>Всего</span>
-        <strong>{{ stats.total }}</strong>
-        <RouterLink to="/posts">Все посты</RouterLink>
-      </article>
-    </div>
 
-    <div class="tips card">
-      <h2>Рабочий процесс</h2>
-      <ol>
-        <li>Загрузите обложку и медиа в <RouterLink to="/media">медиатеку</RouterLink></li>
-        <li>Создайте пост и вставьте картинки/видео в Markdown</li>
-        <li>Опубликуйте — материал сразу появится в публичном API</li>
-      </ol>
+      <article class="card hub soft">
+        <p class="hub-kicker">Файлы</p>
+        <h2>Медиатека</h2>
+        <p>Загрузка, квадрат, watermark и WebP</p>
+        <div v-if="stats" class="hub-stats">
+          <span>{{ stats.media?.total ?? 0 }} файлов</span>
+          <span>{{ stats.media?.incomplete ?? 0 }} без обработки</span>
+        </div>
+        <div class="hub-actions">
+          <RouterLink class="btn" to="/media">Открыть</RouterLink>
+          <RouterLink class="btn secondary" to="/media?section=PARTS">Запчасти</RouterLink>
+          <RouterLink class="btn secondary" to="/media?section=ARTICLES">Статьи</RouterLink>
+        </div>
+      </article>
     </div>
   </section>
 </template>
@@ -70,80 +84,89 @@ onMounted(async () => {
   margin: 0.4rem 0 0;
 }
 
-.actions {
-  display: flex;
-  gap: 0.6rem;
-}
-
-.grid {
+.hubs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.stat {
-  padding: 1.25rem;
+.hub {
+  padding: 1.35rem 1.3rem;
   display: grid;
-  gap: 0.45rem;
+  gap: 0.55rem;
+  align-content: start;
+  min-height: 240px;
+  background:
+    linear-gradient(160deg, rgba(141, 198, 63, 0.08), transparent 50%),
+    var(--glass);
 }
 
-.stat span {
-  color: var(--muted);
-}
-
-.stat strong {
-  font-family: var(--font-serif);
-  font-size: 2.5rem;
-}
-
-.stat a {
-  color: var(--accent);
-  font-size: 0.9rem;
-}
-
-.stat.accent {
-  background: linear-gradient(145deg, #0f1f1b, #13473d);
-  color: white;
-  border: none;
-}
-
-.stat.accent span,
-.stat.accent a {
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.tips {
-  margin-top: 1.25rem;
-  padding: 1.25rem 1.4rem;
-}
-
-.tips h2 {
-  margin: 0 0 0.75rem;
-  font-family: var(--font-serif);
-  font-size: 1.35rem;
-}
-
-.tips ol {
+.hub h2 {
   margin: 0;
-  padding-left: 1.2rem;
+  font-family: var(--font-serif);
+  font-size: 1.85rem;
+}
+
+.hub p {
+  margin: 0;
   color: var(--muted);
-  display: grid;
+}
+
+.hub-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--accent) !important;
+}
+
+.hub-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.hub-actions {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.45rem;
+  margin-top: auto;
+  padding-top: 0.6rem;
 }
 
-.tips a {
-  color: var(--accent);
-  text-decoration: underline;
+.hub.accent {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(141, 198, 63, 0.22), transparent 45%),
+    linear-gradient(155deg, rgba(2, 18, 40, 0.95), rgba(4, 29, 72, 0.92));
+  color: #fff;
+  border: 1px solid rgba(141, 198, 63, 0.28);
 }
 
-@media (max-width: 960px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-  }
+.hub.accent p,
+.hub.accent .hub-stats {
+  color: #e4ecf6;
+}
 
-  .page-header {
-    align-items: start;
-    flex-direction: column;
+.hub.accent .hub-kicker {
+  color: var(--accent) !important;
+}
+
+.hub.accent .btn.secondary {
+  color: #fff;
+  border-color: rgba(141, 198, 63, 0.35);
+}
+
+.hub.soft {
+  background:
+    linear-gradient(160deg, rgba(141, 198, 63, 0.08), transparent 45%),
+    var(--glass);
+}
+
+@media (max-width: 1100px) {
+  .hubs {
+    grid-template-columns: 1fr;
   }
 }
 </style>

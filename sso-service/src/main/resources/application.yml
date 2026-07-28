@@ -24,6 +24,7 @@ app:
   seed:
     admin-password: ${SEED_ADMIN_PASSWORD:}
     editor-password: ${SEED_EDITOR_PASSWORD:}
+    manager-password: ${SEED_MANAGER_PASSWORD:}
 
 management:
   endpoints:

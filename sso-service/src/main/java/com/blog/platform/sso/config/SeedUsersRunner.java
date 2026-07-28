@@ -32,16 +32,22 @@ public class SeedUsersRunner implements ApplicationRunner {
     @Value("${app.seed.editor-password:}")
     private String seedEditorPassword;
 
+    @Value("${app.seed.manager-password:}")
+    private String seedManagerPassword;
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        if (!StringUtils.hasText(seedAdminPassword) || !StringUtils.hasText(seedEditorPassword)) {
+        if (!StringUtils.hasText(seedAdminPassword)
+                || !StringUtils.hasText(seedEditorPassword)
+                || !StringUtils.hasText(seedManagerPassword)) {
             log.warn(
-                    "APP_SEED_USERS=true but SEED_ADMIN_PASSWORD/SEED_EDITOR_PASSWORD are missing — seed skipped");
+                    "APP_SEED_USERS=true but SEED_ADMIN_PASSWORD/SEED_EDITOR_PASSWORD/SEED_MANAGER_PASSWORD are missing — seed skipped");
             return;
         }
         upsertSeedUser("admin", "admin@blog.local", seedAdminPassword, Set.of(Role.ADMIN));
         upsertSeedUser("editor", "editor@blog.local", seedEditorPassword, Set.of(Role.EDITOR));
+        upsertSeedUser("manager", "manager@blog.local", seedManagerPassword, Set.of(Role.MANAGER));
     }
 
     private void upsertSeedUser(String username, String email, String password, Set<Role> roles) {

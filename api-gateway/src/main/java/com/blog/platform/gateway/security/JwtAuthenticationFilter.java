@@ -35,6 +35,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     public static final String CLAIM_ROLES = "roles";
 
     private static final Set<String> EDITOR_ROLES = Set.of("ADMIN", "EDITOR");
+    private static final Set<String> MANAGER_ROLES = Set.of("ADMIN", "MANAGER");
 
     @Value("${security.jwt.secret}")
     private String jwtSecret;
@@ -55,10 +56,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         if (HttpMethod.OPTIONS.equals(method)
                 || isAnonymousAuth(path)
                 || isPublicPublishedPosts(path, method)
+                || isPublicCatalog(path, method)
                 || isPublicMediaFile(path, method)) {
             ServerWebExchange next = exchange.mutate().request(requestBuilder.build()).build();
             if (isPublicPublishedPosts(path, method)) {
-                next = forcePublishedStatus(next);
+                next = forcePublishedStatus(next, "/posts");
+            } else if (isPublicCatalog(path, method)) {
+                next = forcePublishedCatalog(next, path);
             }
             return chain.filter(next);
         }
@@ -79,6 +83,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             Set<String> roleSet = splitRoles(roles);
 
             if (requiresEditorRole(path, method) && roleSet.stream().noneMatch(EDITOR_ROLES::contains)) {
+                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                return exchange.getResponse().setComplete();
+            }
+            if (requiresManagerRole(path) && roleSet.stream().noneMatch(MANAGER_ROLES::contains)) {
                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                 return exchange.getResponse().setComplete();
             }
@@ -139,25 +147,62 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return !path.startsWith("/posts/by-id/");
     }
 
+    private boolean isPublicCatalog(String path, HttpMethod method) {
+        if (!HttpMethod.GET.equals(method)) {
+            return false;
+        }
+        if (path.startsWith("/parts/by-id/") || path.startsWith("/kits/by-id/") || path.startsWith("/drones/by-id/")) {
+            return false;
+        }
+        return path.startsWith("/parts")
+                || path.startsWith("/kits")
+                || path.startsWith("/drones")
+                || path.startsWith("/part-categories");
+    }
+
     private boolean isPublicMediaFile(String path, HttpMethod method) {
         return HttpMethod.GET.equals(method) && path.matches("^/media/[0-9a-fA-F-]{36}$");
     }
 
     private boolean requiresEditorRole(String path, HttpMethod method) {
+        if (path.startsWith("/manager/")) {
+            return false;
+        }
         if (path.startsWith("/admin/")) {
             return true;
         }
         if (path.startsWith("/posts") && !HttpMethod.GET.equals(method)) {
             return true;
         }
+        if ((path.startsWith("/parts") || path.startsWith("/kits") || path.startsWith("/drones") || path.startsWith("/part-categories"))
+                && !HttpMethod.GET.equals(method)) {
+            return true;
+        }
         return path.startsWith("/auth/admin/");
     }
 
-    private ServerWebExchange forcePublishedStatus(ServerWebExchange exchange) {
+    private boolean requiresManagerRole(String path) {
+        return path.startsWith("/manager/");
+    }
+
+    private ServerWebExchange forcePublishedStatus(ServerWebExchange exchange, String listPath) {
         String path = exchange.getRequest().getPath().value();
-        if (!"/posts".equals(path) && !path.equals("/posts/")) {
+        if (!listPath.equals(path) && !path.equals(listPath + "/")) {
             return exchange;
         }
+        return withForcedStatus(exchange);
+    }
+
+    private ServerWebExchange forcePublishedCatalog(ServerWebExchange exchange, String path) {
+        if ("/parts".equals(path) || "/parts/".equals(path)
+                || "/kits".equals(path) || "/kits/".equals(path)
+                || "/drones".equals(path) || "/drones/".equals(path)) {
+            return withForcedStatus(exchange);
+        }
+        return exchange;
+    }
+
+    private ServerWebExchange withForcedStatus(ServerWebExchange exchange) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>(exchange.getRequest().getQueryParams());
         params.put("status", List.of("PUBLISHED"));
         var uri = UriComponentsBuilder.fromUri(exchange.getRequest().getURI())

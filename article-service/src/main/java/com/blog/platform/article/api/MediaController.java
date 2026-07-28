@@ -1,7 +1,11 @@
 package com.blog.platform.article.api;
 
+import com.blog.platform.article.api.dto.MediaDtos.BatchProcessRequest;
+import com.blog.platform.article.api.dto.MediaDtos.BatchProcessResponse;
 import com.blog.platform.article.api.dto.MediaDtos.MediaResponse;
 import com.blog.platform.article.api.dto.MediaDtos.PageResponse;
+import com.blog.platform.article.api.dto.MediaDtos.ProcessRequest;
+import com.blog.platform.article.api.dto.MediaDtos.ProcessingSettingsResponse;
 import com.blog.platform.article.service.MediaFileService;
 import com.blog.platform.common.api.ApiResponse;
 import java.util.UUID;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,19 +32,37 @@ public class MediaController {
     @PostMapping
     public ResponseEntity<ApiResponse<MediaResponse>> upload(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("uploadedBy") UUID uploadedBy
+            @RequestParam("uploadedBy") UUID uploadedBy,
+            @RequestParam(required = false) String section
     ) {
-        return ResponseEntity.ok(ApiResponse.of(mediaFileService.upload(file, uploadedBy)));
+        return ResponseEntity.ok(ApiResponse.of(mediaFileService.upload(file, uploadedBy, section)));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse>> list(
             @RequestParam(required = false) String kind,
+            @RequestParam(required = false) String section,
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) Boolean square,
+            @RequestParam(required = false) Boolean watermark,
+            @RequestParam(required = false) Boolean incomplete,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size
     ) {
-        return ResponseEntity.ok(ApiResponse.of(mediaFileService.list(kind, q, page, size)));
+        return ResponseEntity.ok(ApiResponse.of(
+                mediaFileService.list(kind, section, q, square, watermark, incomplete, page, size)
+        ));
+    }
+
+    @GetMapping("/processing-settings")
+    public ResponseEntity<ApiResponse<ProcessingSettingsResponse>> processingSettings() {
+        return ResponseEntity.ok(ApiResponse.of(mediaFileService.processingSettings()));
+    }
+
+    /** @deprecated use /processing-settings */
+    @GetMapping("/watermark-settings")
+    public ResponseEntity<ApiResponse<ProcessingSettingsResponse>> watermarkSettings() {
+        return ResponseEntity.ok(ApiResponse.of(mediaFileService.processingSettings()));
     }
 
     @GetMapping("/{id}/meta")
@@ -50,6 +73,39 @@ public class MediaController {
     @GetMapping("/{id}")
     public ResponseEntity<Resource> file(@PathVariable UUID id) {
         return mediaFileService.stream(id);
+    }
+
+    @PostMapping("/{id}/process")
+    public ResponseEntity<ApiResponse<MediaResponse>> process(
+            @PathVariable UUID id,
+            @RequestBody ProcessRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.of(
+                mediaFileService.process(
+                        id,
+                        request.square(),
+                        request.watermark(),
+                        request.convertToWebp(),
+                        request.backgroundColor(),
+                        request.opacity(),
+                        request.bgThreshold()
+                )
+        ));
+    }
+
+    @PostMapping("/process-batch")
+    public ResponseEntity<ApiResponse<BatchProcessResponse>> processBatch(@RequestBody BatchProcessRequest request) {
+        return ResponseEntity.ok(ApiResponse.of(
+                mediaFileService.processBatch(
+                        request.ids(),
+                        request.square(),
+                        request.watermark(),
+                        request.convertToWebp(),
+                        request.backgroundColor(),
+                        request.opacity(),
+                        request.bgThreshold()
+                )
+        ));
     }
 
     @DeleteMapping("/{id}")

@@ -1,7 +1,9 @@
 package com.blog.platform.sso.service;
 
+import com.blog.platform.common.exception.ForbiddenException;
 import com.blog.platform.common.exception.UnauthorizedException;
 import com.blog.platform.common.security.JwtClaims;
+import com.blog.platform.common.security.Role;
 import com.blog.platform.sso.api.dto.AuthDtos.AuthResponse;
 import com.blog.platform.sso.api.dto.AuthDtos.CreateUserRequest;
 import com.blog.platform.sso.api.dto.AuthDtos.LoginRequest;
@@ -15,6 +17,8 @@ import com.blog.platform.sso.security.JwtProvider;
 import com.blog.platform.sso.security.TokenHasher;
 import io.jsonwebtoken.Claims;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -97,6 +101,43 @@ public class AuthService {
         user.setEnabled(true);
         user.setRoles(new HashSet<>(request.roles()));
         return toResponse(authUserRepository.save(user));
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> listUsers(String q) {
+        String query = q == null ? "" : q.trim();
+        return authUserRepository.search(query).stream().map(this::toResponse).toList();
+    }
+
+    @Transactional
+    public UserResponse updateRoles(UUID id, Set<Role> roles, UUID actorId) {
+        AuthUser user = requireUser(id);
+        if (user.getId().equals(actorId) && !roles.contains(Role.ADMIN)) {
+            throw new ForbiddenException("Нельзя снять у себя роль ADMIN");
+        }
+        user.setRoles(new HashSet<>(roles));
+        return toResponse(authUserRepository.save(user));
+    }
+
+    @Transactional
+    public UserResponse updateEnabled(UUID id, boolean enabled, UUID actorId) {
+        AuthUser user = requireUser(id);
+        if (user.getId().equals(actorId) && !enabled) {
+            throw new ForbiddenException("Нельзя отключить собственный аккаунт");
+        }
+        user.setEnabled(enabled);
+        if (!enabled) {
+            for (RefreshToken token : refreshTokenRepository.findByUserIdAndRevokedFalse(user.getId())) {
+                token.setRevoked(true);
+                refreshTokenRepository.save(token);
+            }
+        }
+        return toResponse(authUserRepository.save(user));
+    }
+
+    private AuthUser requireUser(UUID id) {
+        return authUserRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     private AuthResponse issueTokens(AuthUser user) {

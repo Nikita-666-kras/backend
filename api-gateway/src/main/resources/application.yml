@@ -25,6 +25,26 @@ spring:
           uri: ${POST_SERVICE_URL:http://post-service:9003}
           predicates:
             - Path=/media/**
+        - id: parts-public
+          uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
+          predicates:
+            - Path=/parts/**
+        - id: kits-public
+          uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
+          predicates:
+            - Path=/kits/**
+        - id: drones-public
+          uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
+          predicates:
+            - Path=/drones/**
+        - id: part-categories-public
+          uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
+          predicates:
+            - Path=/part-categories/**
+        - id: proposal-manager
+          uri: ${PROPOSAL_SERVICE_URL:http://proposal-service:9007}
+          predicates:
+            - Path=/manager/kp/**
 
 security:
   jwt:

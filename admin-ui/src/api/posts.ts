@@ -37,11 +37,27 @@ export interface PageResponse {
   size: number
 }
 
+export interface StatusCounts {
+  drafts: number
+  published: number
+  archived: number
+  total: number
+}
+
+export interface MediaCounts {
+  total: number
+  incomplete: number
+}
+
 export interface DashboardStats {
   drafts: number
   published: number
   archived: number
   total: number
+  posts: StatusCounts
+  parts: StatusCounts
+  kits: StatusCounts
+  media: MediaCounts
 }
 
 export interface PostPayload {
@@ -58,6 +74,14 @@ export interface BulkResult {
   success: number
   failed: number
   errors: string[]
+}
+
+export interface AdminUser {
+  id: string
+  username: string
+  email: string
+  roles: string[]
+  enabled: boolean
 }
 
 export async function fetchDashboard() {
@@ -111,7 +135,22 @@ export async function createUser(payload: {
   roles: string[]
 }) {
   const { data } = await api.post('/auth/admin/users', payload)
-  return data.data
+  return data.data as AdminUser
+}
+
+export async function fetchUsers(q?: string) {
+  const { data } = await api.get('/auth/admin/users', { params: { q: q || undefined } })
+  return data.data as AdminUser[]
+}
+
+export async function updateUserRoles(id: string, roles: string[]) {
+  const { data } = await api.patch(`/auth/admin/users/${id}/roles`, { roles })
+  return data.data as AdminUser
+}
+
+export async function updateUserEnabled(id: string, enabled: boolean) {
+  const { data } = await api.patch(`/auth/admin/users/${id}/enabled`, { enabled })
+  return data.data as AdminUser
 }
 
 export function publicPostPath(slug: string) {

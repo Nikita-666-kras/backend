@@ -14,6 +14,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
+    implementation("org.sejda.imageio:webp-imageio:0.1.6")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
