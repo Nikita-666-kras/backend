@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import KpCatalogSearch from '@/components/kp/KpCatalogSearch.vue'
 import KpLinesTable from '@/components/kp/KpLinesTable.vue'
@@ -19,35 +19,49 @@ const catalogRef = ref<InstanceType<typeof KpCatalogSearch> | null>(null)
 
 useUnsavedGuard(editor.dirty)
 
-onMounted(async () => {
+async function initializeEditor(id?: string) {
+  editor.reset()
   await editor.loadModels()
-  const id = route.params.id as string | undefined
 
   if (id) {
     await editor.loadDraft(id)
   } else {
     const clone = sessionStorage.getItem('manager_kp_clone')
     if (clone) {
-      const snapshot = JSON.parse(clone) as {
-        recipient: string
-        droneModelId: string
-        dronePrice: number
-        lines: ProposalLine[]
+      try {
+        const snapshot = JSON.parse(clone) as {
+          recipient: string
+          droneModelId: string
+          dronePrice: number
+          lines: ProposalLine[]
+        }
+        editor.recipient = snapshot.recipient
+        editor.modelId = snapshot.droneModelId
+        editor.dronePrice = Number(snapshot.dronePrice)
+        editor.lines = snapshot.lines
+        editor.markDirty()
+        toast.ok('Копия КП загружена в редактор')
+      } catch {
+        toast.error('Черновик копии КП поврежден и был сброшен')
+      } finally {
+        sessionStorage.removeItem('manager_kp_clone')
       }
-      editor.recipient = snapshot.recipient
-      editor.modelId = snapshot.droneModelId
-      editor.dronePrice = Number(snapshot.dronePrice)
-      editor.lines = snapshot.lines
-      editor.markDirty()
-      sessionStorage.removeItem('manager_kp_clone')
-      toast.ok('Копия КП загружена в редактор')
     } else if (editor.models.length && !editor.modelId) {
       await editor.applyModelPreset(editor.models[0].id)
     }
   }
 
   await catalogRef.value?.lookup()
-})
+}
+
+watch(
+  () => route.params.id,
+  async (nextId) => {
+    const id = typeof nextId === 'string' ? nextId : undefined
+    await initializeEditor(id)
+  },
+  { immediate: true }
+)
 
 function addLines(lines: ProposalLine[]) {
   for (const line of lines) editor.addLine(line)

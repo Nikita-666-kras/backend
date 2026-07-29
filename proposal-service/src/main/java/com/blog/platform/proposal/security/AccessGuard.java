@@ -16,7 +16,11 @@ public class AccessGuard {
     public UUID userId(HttpServletRequest request) {
         String value = request.getHeader(SecurityHeaders.USER_ID);
         if (value == null || value.isBlank()) throw new UnauthorizedException("Missing user identity");
-        return UUID.fromString(value);
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException ex) {
+            throw new UnauthorizedException("Invalid user identity");
+        }
     }
 
     public String username(HttpServletRequest request) {
@@ -30,8 +34,16 @@ public class AccessGuard {
         return Arrays.stream(header.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .map(Role::valueOf)
+                .map(this::toRole)
                 .collect(Collectors.toSet());
+    }
+
+    private Role toRole(String value) {
+        try {
+            return Role.valueOf(value);
+        } catch (IllegalArgumentException ex) {
+            throw new ForbiddenException("Invalid role in request");
+        }
     }
 
     public void requireManagerOrAdmin(HttpServletRequest request) {

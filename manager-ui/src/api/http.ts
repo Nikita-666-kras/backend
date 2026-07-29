@@ -14,13 +14,29 @@ api.interceptors.request.use((config) => {
 })
 
 let refreshing: Promise<void> | null = null
+let redirectingToLogin = false
+
+function forceLoginRedirect() {
+  if (redirectingToLogin) return
+  redirectingToLogin = true
+  window.location.replace('/login')
+}
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const auth = useAuthStore()
     const original = error.config
+    const url = original?.url || ''
+    const isRefreshRequest = url.includes('/auth/refresh')
+    const isLogoutRequest = url.includes('/auth/logout')
     if (error.response?.status === 401 && original && !original._retry && auth.refreshToken) {
+      if (isRefreshRequest || isLogoutRequest) {
+        auth.clearSession()
+        forceLoginRedirect()
+        return Promise.reject(error)
+      }
+
       original._retry = true
       refreshing ??= auth.refresh().finally(() => {
         refreshing = null
@@ -30,7 +46,8 @@ api.interceptors.response.use(
         original.headers.Authorization = `Bearer ${auth.accessToken}`
         return api(original)
       } catch {
-        auth.logout()
+        auth.clearSession()
+        forceLoginRedirect()
       }
     }
     return Promise.reject(error)

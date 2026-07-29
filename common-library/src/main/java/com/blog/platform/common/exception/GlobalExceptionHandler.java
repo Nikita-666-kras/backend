@@ -52,17 +52,25 @@ public class GlobalExceptionHandler {
                 .body(new ApiError("FORBIDDEN", ex.getMessage(), List.of(), Instant.now()));
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiError("NOT_FOUND", ex.getMessage(), List.of(), Instant.now()));
+    }
+
     @ExceptionHandler(HttpStatusCodeException.class)
     public ResponseEntity<ApiError> handleDownstreamHttpStatus(HttpStatusCodeException ex) {
         int statusCode = ex.getStatusCode().value();
         HttpStatus status = HttpStatus.resolve(statusCode);
         if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;
-
-        var responseBody = ex.getResponseBodyAsString();
-        if (responseBody != null && responseBody.length() > 350) {
-            responseBody = responseBody.substring(0, 350) + "...";
-        }
-        String message = (responseBody == null || responseBody.isBlank()) ? status.getReasonPhrase() : responseBody;
+        String message = switch (status) {
+            case BAD_REQUEST -> "Downstream request validation failed";
+            case UNAUTHORIZED -> "Downstream service rejected authentication";
+            case FORBIDDEN -> "Downstream service denied access";
+            case NOT_FOUND -> "Downstream resource not found";
+            case TOO_MANY_REQUESTS -> "Downstream rate limit exceeded";
+            default -> status.is5xxServerError() ? "Downstream service error" : status.getReasonPhrase();
+        };
         return ResponseEntity.status(statusCode)
                 .body(new ApiError(status.name(), message, List.of(), Instant.now()));
     }

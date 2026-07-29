@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -300,19 +300,32 @@ async function saveAndPublish() {
 
 function copyPublicUrl() {
   if (!slug.value) return
-  navigator.clipboard?.writeText(publicUrl.value)
-  message.value = 'Публичный URL скопирован'
-  toast.ok('URL скопирован')
+  navigator.clipboard
+    ?.writeText(publicUrl.value)
+    .then(() => {
+      message.value = 'Публичный URL скопирован'
+      toast.ok('URL скопирован')
+    })
+    .catch(() => {
+      error.value = 'Не удалось скопировать URL'
+      toast.error(error.value)
+    })
 }
 
-onMounted(async () => {
+onBeforeUnmount(() => {
+  if (draftSaveTimer) clearTimeout(draftSaveTimer)
+  if (mediaSearchTimer) clearTimeout(mediaSearchTimer)
+})
+
+watch([id, isNew], async () => {
+  if (draftSaveTimer) clearTimeout(draftSaveTimer)
   try {
     await load()
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Не удалось загрузить пост'
     toast.error(error.value)
   }
-})
+}, { immediate: true })
 watch([title, shortDescription, content, tags, categories, coverMediaId, mediaObjectNames], () => {
   persistEditorDraft()
   touchDirty()

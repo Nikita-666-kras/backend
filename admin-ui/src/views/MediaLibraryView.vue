@@ -53,6 +53,7 @@ const processingFilter = ref<'all' | 'no_square' | 'no_watermark' | 'incomplete'
 const selectedIds = ref<string[]>([])
 const settingsOpen = ref(false)
 const logoOk = ref(false)
+let loadRequestVersion = 0
 
 const sectionOptions: Array<{ value: MediaSection; label: string }> = [
   { value: 'PARTS', label: 'Запчасти' },
@@ -150,21 +151,28 @@ function listParams() {
 }
 
 async function load() {
+  const requestVersion = ++loadRequestVersion
   loading.value = true
   error.value = ''
   try {
-    data.value = await fetchMedia(listParams() as any)
-    if (processingFilter.value === 'not_webp' && data.value) {
+    const pageData = await fetchMedia(listParams() as any)
+    if (requestVersion !== loadRequestVersion) return
+
+    if (processingFilter.value === 'not_webp') {
       data.value = {
-        ...data.value,
-        content: data.value.content.filter((item) => item.kind === 'IMAGE' && !isWebp(item))
+        ...pageData,
+        content: pageData.content.filter((item) => item.kind === 'IMAGE' && !isWebp(item))
       }
+    } else {
+      data.value = pageData
     }
-    const visible = new Set(data.value.content.map((item) => item.id))
+    const visible = new Set((data.value?.content || []).map((item) => item.id))
     selectedIds.value = selectedIds.value.filter((id) => visible.has(id))
   } catch (e: any) {
+    if (requestVersion !== loadRequestVersion) return
     error.value = e?.response?.data?.message || 'Не удалось загрузить медиатеку'
   } finally {
+    if (requestVersion !== loadRequestVersion) return
     loading.value = false
   }
 }
@@ -346,8 +354,14 @@ async function remove(item: MediaAsset) {
 }
 
 function copy(item: MediaAsset) {
-  navigator.clipboard?.writeText(mediaPublicUrl(item.url))
-  message.value = 'URL скопирован'
+  navigator.clipboard
+    ?.writeText(mediaPublicUrl(item.url))
+    .then(() => {
+      message.value = 'URL скопирован'
+    })
+    .catch(() => {
+      error.value = 'Не удалось скопировать URL'
+    })
 }
 
 function onDrop(e: DragEvent) {

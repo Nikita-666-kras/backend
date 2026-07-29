@@ -31,6 +31,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     public static final String HEADER_USER_ID = "X-User-Id";
     public static final String HEADER_USER_ROLES = "X-User-Roles";
     public static final String HEADER_USERNAME = "X-Username";
+    public static final String HEADER_INTERNAL_API_KEY = "X-Internal-Api-Key";
     public static final String CLAIM_USER_ID = "uid";
     public static final String CLAIM_ROLES = "roles";
 
@@ -39,6 +40,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Value("${security.jwt.secret}")
     private String jwtSecret;
+    @Value("${security.internal-api-key}")
+    private String internalApiKey;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -47,6 +50,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
         stripIdentityHeaders(requestBuilder);
+        requestBuilder.header(HEADER_INTERNAL_API_KEY, internalApiKey);
 
         if (isBlockedPublic(path) || isBlockedDirectMediaApi(path, method)) {
             exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
@@ -108,6 +112,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             headers.remove(HEADER_USER_ID);
             headers.remove(HEADER_USER_ROLES);
             headers.remove(HEADER_USERNAME);
+            headers.remove(HEADER_INTERNAL_API_KEY);
         });
     }
 

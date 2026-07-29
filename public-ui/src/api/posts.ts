@@ -59,9 +59,16 @@ export async function fetchPosts(page = 0, size = 9): Promise<PageResponse> {
 }
 
 export async function fetchPostBySlug(slug: string): Promise<Post> {
-  const response = await fetch(`/posts/${encodeURIComponent(slug)}`)
+  let response: Response
+  try {
+    response = await fetch(`/posts/${encodeURIComponent(slug)}`)
+  } catch {
+    throw new Error('NETWORK_ERROR')
+  }
   if (!response.ok) {
-    throw new Error('Post not found')
+    if (response.status === 404) throw new Error('POST_NOT_FOUND')
+    if (response.status >= 500) throw new Error('SERVER_ERROR')
+    throw new Error('POST_LOAD_ERROR')
   }
   const body = (await response.json()) as ApiResponse<Post>
   return body.data

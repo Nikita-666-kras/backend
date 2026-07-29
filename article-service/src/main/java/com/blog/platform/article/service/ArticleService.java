@@ -6,6 +6,7 @@ import com.blog.platform.article.domain.ArticleStatus;
 import com.blog.platform.article.domain.MediaFile;
 import com.blog.platform.article.repository.ArticleRepository;
 import com.blog.platform.article.repository.MediaFileRepository;
+import com.blog.platform.common.exception.NotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,9 +40,9 @@ public class ArticleService {
     @Transactional(readOnly = true)
     public ArticleDto getBySlug(String slug) {
         Article article = articleRepository.findBySlug(slug)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found"));
+                .orElseThrow(() -> new NotFoundException("Article not found"));
         if (article.getStatus() != ArticleStatus.PUBLISHED) {
-            throw new IllegalArgumentException("Article not found");
+            throw new NotFoundException("Article not found");
         }
         return toDto(article);
     }
@@ -49,13 +50,13 @@ public class ArticleService {
     @Transactional(readOnly = true)
     public ArticleDto getById(UUID id) {
         return toDto(articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found")));
+                .orElseThrow(() -> new NotFoundException("Article not found")));
     }
 
     @Transactional
     public ArticleDto updateStatus(UUID id, ArticleStatus status) {
         Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found"));
+                .orElseThrow(() -> new NotFoundException("Article not found"));
         if (status == ArticleStatus.PUBLISHED) {
             article.setHtmlContent(markdownService.toHtml(article.getContent()));
         }
@@ -76,7 +77,7 @@ public class ArticleService {
     @Transactional
     public ArticleDto update(UUID id, ArticleDto.Create request) {
         Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article not found"));
+                .orElseThrow(() -> new NotFoundException("Article not found"));
         apply(article, request);
         return toDto(articleRepository.save(article));
     }
@@ -84,7 +85,7 @@ public class ArticleService {
     @Transactional
     public void delete(UUID id) {
         if (!articleRepository.existsById(id)) {
-            throw new IllegalArgumentException("Article not found");
+            throw new NotFoundException("Article not found");
         }
         articleRepository.deleteById(id);
     }
