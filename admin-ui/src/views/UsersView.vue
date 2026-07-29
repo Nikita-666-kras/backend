@@ -18,8 +18,15 @@ const q = ref('')
 const username = ref('')
 const email = ref('')
 const password = ref('')
+const showPassword = ref(false)
 const role = ref('EDITOR')
 const loading = ref(false)
+
+/** Prevent password-manager autofill from locking/styling create-user fields. */
+function unlockAutofill(event: Event) {
+  const el = event.target as HTMLInputElement
+  el.removeAttribute('readonly')
+}
 
 async function load() {
   loading.value = true
@@ -44,6 +51,7 @@ async function submit() {
     username.value = ''
     email.value = ''
     password.value = ''
+    showPassword.value = false
     role.value = 'EDITOR'
     await load()
   } catch (e: any) {
@@ -88,29 +96,74 @@ onMounted(load)
     </header>
 
     <div class="layout">
-      <form class="card form" @submit.prevent="submit">
+      <form class="card form" autocomplete="off" @submit.prevent="submit">
         <h3>Новый пользователь</h3>
         <div class="field">
-          <label>Логин</label>
-          <input v-model="username" required minlength="3" />
+          <label for="new-user-username">Логин</label>
+          <input
+            id="new-user-username"
+            v-model="username"
+            name="new-username"
+            type="text"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+            minlength="3"
+            readonly
+            @focus="unlockAutofill"
+          />
         </div>
         <div class="field">
-          <label>Email</label>
-          <input v-model="email" type="email" required />
+          <label for="new-user-email">Email</label>
+          <input
+            id="new-user-email"
+            v-model="email"
+            name="new-email"
+            type="email"
+            autocomplete="off"
+            spellcheck="false"
+            required
+            readonly
+            @focus="unlockAutofill"
+          />
         </div>
         <div class="field">
-          <label>Пароль</label>
-          <input v-model="password" type="password" minlength="10" required />
+          <label for="new-user-password">Пароль</label>
+          <div class="password-field">
+            <input
+              id="new-user-password"
+              v-model="password"
+              class="password-input"
+              name="new-password"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="new-password"
+              minlength="10"
+              required
+              spellcheck="false"
+              readonly
+              @focus="unlockAutofill"
+            />
+            <button
+              class="toggle"
+              type="button"
+              :aria-pressed="showPassword"
+              :aria-label="showPassword ? 'Скрыть пароль' : 'Показать пароль'"
+              @click="showPassword = !showPassword"
+            >
+              {{ showPassword ? 'Скрыть' : 'Показать' }}
+            </button>
+          </div>
         </div>
         <div class="field">
-          <label>Роль</label>
-          <select v-model="role">
+          <label for="new-user-role">Роль</label>
+          <select id="new-user-role" v-model="role" autocomplete="off">
             <option value="EDITOR">Редактор</option>
             <option value="MANAGER">Менеджер</option>
             <option value="ADMIN">Администратор</option>
           </select>
         </div>
-        <button class="btn">Создать</button>
+        <button class="btn" type="submit">Создать</button>
       </form>
 
       <div class="list-wrap">
@@ -169,6 +222,30 @@ onMounted(load)
 .form h3 {
   margin: 0;
   font-size: 0.95rem;
+}
+.password-field {
+  position: relative;
+}
+.password-input {
+  width: 100%;
+  padding-right: 5.8rem;
+}
+.toggle {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid rgba(141, 198, 63, 0.35);
+  background: rgba(141, 198, 63, 0.08);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.toggle:hover {
+  background: rgba(141, 198, 63, 0.16);
 }
 .toolbar {
   display: flex;

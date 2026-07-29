@@ -175,6 +175,18 @@ select:focus {
   border-color: rgba(141, 198, 63, 0.65);
 }
 
+/* Keep autofilled fields editable-looking on dark theme (Chrome paints them darker). */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--accent);
+  box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  transition: background-color 99999s ease-out;
+}
+
 /* Light surfaces: always dark text */
 .on-light,
 .surface-light {
