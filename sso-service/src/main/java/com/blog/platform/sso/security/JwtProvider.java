@@ -29,12 +29,13 @@ public class JwtProvider {
     @Value("${security.jwt.refresh-expiration-seconds:2592000}")
     private long refreshExpiration;
 
-    public String createAccessToken(UUID userId, String username, Collection<Role> roles) {
+    public String createAccessToken(UUID userId, String username, Collection<Role> roles, long tokenVersion) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(username)
                 .claim(JwtClaims.USER_ID, userId.toString())
                 .claim(JwtClaims.ROLES, roles.stream().map(Enum::name).toList())
+                .claim(JwtClaims.TOKEN_VERSION, tokenVersion)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(accessExpiration)))
                 .signWith(secretKey())

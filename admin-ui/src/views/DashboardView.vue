@@ -2,10 +2,12 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { fetchDashboard, type DashboardStats } from '@/api/posts'
+import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
 
 const stats = ref<DashboardStats | null>(null)
 const toast = useToastStore()
+const auth = useAuthStore()
 
 onMounted(async () => {
   try {
@@ -22,12 +24,20 @@ onMounted(async () => {
       <div>
         <p class="eyebrow">Сводка</p>
         <h1>Обзор</h1>
-        <p class="muted lead">Контент, каталог и медиатека — цифры и быстрые действия</p>
+        <p class="muted lead">
+          {{
+            auth.isPurchaserOnly
+              ? 'Каталог запчастей, комплектов и медиа'
+              : auth.isEditorOnly
+                ? 'Посты и медиа для статей'
+                : 'Контент, каталог и медиатека — цифры и быстрые действия'
+          }}
+        </p>
       </div>
     </header>
 
-    <div class="hubs">
-      <article class="card hub">
+    <div class="hubs" :class="{ editor: auth.isEditorOnly, purchaser: auth.isPurchaserOnly }">
+      <article v-if="auth.canAccessEditorContent" class="card hub">
         <p class="hub-kicker">Контент</p>
         <h2>Посты</h2>
         <p>Черновики, публикация и редактура статей</p>
@@ -43,35 +53,62 @@ onMounted(async () => {
         </div>
       </article>
 
-      <article class="card hub accent">
-        <p class="hub-kicker">Каталог</p>
-        <h2>Запчасти</h2>
-        <p>Номенклатура, комплекты, дроны и импорт</p>
-        <div v-if="stats" class="hub-stats">
-          <span>{{ stats.parts?.drafts ?? 0 }} черн.</span>
-          <span>{{ stats.parts?.published ?? 0 }} опубл.</span>
-          <span>{{ stats.parts?.total ?? 0 }} запч.</span>
-          <span>{{ stats.kits?.total ?? 0 }} компл.</span>
-        </div>
-        <div class="hub-actions">
-          <RouterLink class="btn" to="/parts">К каталогу</RouterLink>
-          <RouterLink class="btn secondary" to="/parts/new">Добавить</RouterLink>
-          <RouterLink class="btn secondary" to="/categories">Категории</RouterLink>
-          <RouterLink class="btn secondary" to="/media?section=PARTS">Медиа</RouterLink>
-        </div>
-      </article>
+      <template v-if="auth.canAccessCatalog">
+        <article class="card hub accent">
+          <p class="hub-kicker">Каталог</p>
+          <h2>Запчасти</h2>
+          <p>Номенклатура, комплекты, дроны и импорт</p>
+          <div v-if="stats" class="hub-stats">
+            <span>{{ stats.parts?.drafts ?? 0 }} черн.</span>
+            <span>{{ stats.parts?.published ?? 0 }} опубл.</span>
+            <span>{{ stats.parts?.total ?? 0 }} запч.</span>
+            <span>{{ stats.kits?.total ?? 0 }} компл.</span>
+          </div>
+          <div class="hub-actions">
+            <RouterLink class="btn" to="/parts">К каталогу</RouterLink>
+            <RouterLink class="btn secondary" to="/parts/new">Добавить</RouterLink>
+            <RouterLink class="btn secondary" to="/categories">Категории</RouterLink>
+            <RouterLink class="btn secondary" to="/media?section=PARTS">Медиа</RouterLink>
+          </div>
+        </article>
 
-      <article class="card hub soft">
+        <article v-if="auth.isAdmin" class="card hub soft">
+          <p class="hub-kicker">Файлы</p>
+          <h2>Медиатека</h2>
+          <p>Загрузка, квадрат, watermark и WebP</p>
+          <div v-if="stats" class="hub-stats">
+            <span>{{ stats.media?.total ?? 0 }} файлов</span>
+            <span>{{ stats.media?.incomplete ?? 0 }} без обработки</span>
+          </div>
+          <div class="hub-actions">
+            <RouterLink class="btn" to="/media">Открыть</RouterLink>
+            <RouterLink class="btn secondary" to="/media?section=PARTS">Запчасти</RouterLink>
+            <RouterLink class="btn secondary" to="/media?section=ARTICLES">Статьи</RouterLink>
+          </div>
+        </article>
+
+        <article v-else-if="auth.isPurchaserOnly" class="card hub soft">
+          <p class="hub-kicker">Файлы</p>
+          <h2>Медиа каталога</h2>
+          <p>Запчасти, дроны, сервис и общие файлы</p>
+          <div class="hub-actions">
+            <RouterLink class="btn" to="/media?section=PARTS">Запчасти</RouterLink>
+            <RouterLink class="btn secondary" to="/media?section=DRONES">Дроны</RouterLink>
+            <RouterLink class="btn secondary" to="/media?section=SERVICE">Сервис</RouterLink>
+            <RouterLink class="btn secondary" to="/media?section=OTHER">Другое</RouterLink>
+          </div>
+        </article>
+      </template>
+
+      <article v-else-if="auth.canAccessEditorContent" class="card hub soft">
         <p class="hub-kicker">Файлы</p>
         <h2>Медиатека</h2>
-        <p>Загрузка, квадрат, watermark и WebP</p>
+        <p>Изображения и файлы для статей</p>
         <div v-if="stats" class="hub-stats">
           <span>{{ stats.media?.total ?? 0 }} файлов</span>
-          <span>{{ stats.media?.incomplete ?? 0 }} без обработки</span>
         </div>
         <div class="hub-actions">
           <RouterLink class="btn" to="/media">Открыть</RouterLink>
-          <RouterLink class="btn secondary" to="/media?section=PARTS">Запчасти</RouterLink>
           <RouterLink class="btn secondary" to="/media?section=ARTICLES">Статьи</RouterLink>
         </div>
       </article>
@@ -88,6 +125,11 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
+}
+
+.hubs.editor,
+.hubs.purchaser {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .hub {

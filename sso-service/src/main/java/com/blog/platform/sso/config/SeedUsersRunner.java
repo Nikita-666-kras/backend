@@ -35,35 +35,40 @@ public class SeedUsersRunner implements ApplicationRunner {
     @Value("${app.seed.manager-password:}")
     private String seedManagerPassword;
 
+    @Value("${app.seed.purchaser-password:}")
+    private String seedPurchaserPassword;
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         if (!StringUtils.hasText(seedAdminPassword)
                 || !StringUtils.hasText(seedEditorPassword)
-                || !StringUtils.hasText(seedManagerPassword)) {
+                || !StringUtils.hasText(seedManagerPassword)
+                || !StringUtils.hasText(seedPurchaserPassword)) {
             log.warn(
-                    "APP_SEED_USERS=true but SEED_ADMIN_PASSWORD/SEED_EDITOR_PASSWORD/SEED_MANAGER_PASSWORD are missing — seed skipped");
+                    "APP_SEED_USERS=true but SEED_ADMIN_PASSWORD/SEED_EDITOR_PASSWORD/SEED_MANAGER_PASSWORD/SEED_PURCHASER_PASSWORD are missing — seed skipped");
             return;
         }
         upsertSeedUser("admin", "admin@blog.local", seedAdminPassword, Set.of(Role.ADMIN));
         upsertSeedUser("editor", "editor@blog.local", seedEditorPassword, Set.of(Role.EDITOR));
         upsertSeedUser("manager", "manager@blog.local", seedManagerPassword, Set.of(Role.MANAGER));
+        upsertSeedUser("purchaser", "purchaser@blog.local", seedPurchaserPassword, Set.of(Role.PURCHASER));
     }
 
     private void upsertSeedUser(String username, String email, String password, Set<Role> roles) {
         Optional<AuthUser> existing = authUserRepository.findByUsername(username);
-        AuthUser user = existing.orElseGet(() -> {
-            AuthUser created = new AuthUser();
-            created.setRoles(new HashSet<>());
-            return created;
-        });
+        if (existing.isPresent()) {
+            log.info("Seed user {} already exists — skipped", username);
+            return;
+        }
+        AuthUser user = new AuthUser();
+        user.setRoles(new HashSet<>());
         user.setUsername(username);
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setEnabled(true);
-        user.getRoles().clear();
         user.getRoles().addAll(roles);
         authUserRepository.save(user);
-        log.info(existing.isPresent() ? "Updated seed user {}" : "Seeded user {}", username);
+        log.info("Seeded user {}", username);
     }
 }

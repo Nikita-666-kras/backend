@@ -71,4 +71,9 @@ public final class MediaDtos {
             int size
     ) {
     }
+
+    public record SectionUpdateRequest(
+            MediaSection section
+    ) {
+    }
 }

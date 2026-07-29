@@ -18,6 +18,12 @@ spring:
 security:
   jwt:
     secret: ${JWT_SECRET}
+  internal-api-key: ${SSO_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
+  login:
+    max-failures: ${LOGIN_MAX_FAILURES:5}
+    lockout-minutes: ${LOGIN_LOCKOUT_MINUTES:15}
+    ip-limit-per-minute: ${LOGIN_IP_LIMIT_PER_MINUTE:20}
+    refresh-limit-per-minute: ${LOGIN_REFRESH_LIMIT_PER_MINUTE:30}
 
 app:
   seed-users: ${APP_SEED_USERS:false}
@@ -25,6 +31,7 @@ app:
     admin-password: ${SEED_ADMIN_PASSWORD:}
     editor-password: ${SEED_EDITOR_PASSWORD:}
     manager-password: ${SEED_MANAGER_PASSWORD:}
+    purchaser-password: ${SEED_PURCHASER_PASSWORD:}
 
 management:
   endpoints:

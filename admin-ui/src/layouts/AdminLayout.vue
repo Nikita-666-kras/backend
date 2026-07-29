@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
+import AppIcon from '@/components/AppIcon.vue'
 import { useAuthStore } from '@/stores/auth'
 import { rolesLabel } from '@/utils/labels'
+import { managerUiUrl } from '@/utils/roles'
 
 const auth = useAuthStore()
 const router = useRouter()
 const navOpen = ref(false)
+const managerHubUrl = managerUiUrl()
 
 function closeNav() {
   navOpen.value = false
@@ -33,29 +36,97 @@ async function logout() {
       </div>
 
       <nav @click="closeNav">
-        <RouterLink class="nav-link" active-class="" exact-active-class="active" to="/">Обзор</RouterLink>
+        <template v-if="auth.isManagerOnly">
+          <p class="nav-group">Файлы</p>
+          <RouterLink class="nav-link icon-link" active-class="" exact-active-class="active" to="/media?section=OTHER">
+            <AppIcon name="folder" :size="16" />
+            <span>Другое</span>
+          </RouterLink>
+          <a class="nav-link external icon-link" :href="managerHubUrl" target="_blank" rel="noopener">
+            <AppIcon name="drone" :size="16" />
+            <span>Менеджерский хаб</span>
+          </a>
+        </template>
 
-        <p class="nav-group">Контент</p>
-        <RouterLink class="nav-link" active-class="" exact-active-class="active" to="/posts">Посты</RouterLink>
-        <RouterLink class="nav-link" active-class="" exact-active-class="active" to="/posts/new">Новый пост</RouterLink>
-        <RouterLink class="nav-link media-quick" to="/media?section=ARTICLES">Медиа статей</RouterLink>
+        <template v-else>
+          <RouterLink v-if="!auth.isPurchaserOnly" class="nav-link icon-link" active-class="" exact-active-class="active" to="/">
+            <AppIcon name="folder" :size="16" />
+            <span>Обзор</span>
+          </RouterLink>
 
-        <p class="nav-group">Каталог</p>
-        <RouterLink class="nav-link" active-class="" exact-active-class="active" to="/parts">Запчасти</RouterLink>
-        <RouterLink class="nav-link" to="/kits">Комплекты</RouterLink>
-        <RouterLink class="nav-link" to="/drones">Дроны</RouterLink>
-        <RouterLink class="nav-link" to="/categories">Категории</RouterLink>
-        <RouterLink class="nav-link" to="/parts-import">Импорт</RouterLink>
-        <RouterLink class="nav-link" to="/kp/drone-models">КП · Модели</RouterLink>
-        <RouterLink class="nav-link" to="/kp/proposals">КП · Архив</RouterLink>
-        <RouterLink class="nav-link media-quick" to="/media?section=PARTS">Медиа запчастей</RouterLink>
+          <template v-if="auth.canAccessEditorContent">
+            <p class="nav-group">Контент</p>
+            <RouterLink class="nav-link icon-link" active-class="" exact-active-class="active" to="/posts">
+              <AppIcon name="file-text" :size="16" />
+              <span>Посты</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/media?section=ARTICLES">
+              <AppIcon name="image" :size="16" />
+              <span>Медиа статей</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/media?section=EDUCATION">
+              <AppIcon name="book-open" :size="16" />
+              <span>Обучение</span>
+            </RouterLink>
+          </template>
 
-        <p class="nav-group">Медиатека</p>
-        <RouterLink class="nav-link" active-class="" exact-active-class="active" to="/media">Вся медиатека</RouterLink>
+          <template v-if="auth.canAccessCatalog">
+            <p class="nav-group">Каталог</p>
+            <RouterLink class="nav-link icon-link" active-class="" exact-active-class="active" to="/parts">
+              <AppIcon name="package" :size="16" />
+              <span>Запчасти</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/kits">
+              <AppIcon name="package" :size="16" />
+              <span>Комплекты</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/drones">
+              <AppIcon name="drone" :size="16" />
+              <span>Дроны</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/categories">
+              <AppIcon name="folder" :size="16" />
+              <span>Категории</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/parts-import">
+              <AppIcon name="upload" :size="16" />
+              <span>Импорт</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/media?section=PARTS">
+              <AppIcon name="image" :size="16" />
+              <span>Медиа запчастей</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/media?section=SERVICE">
+              <AppIcon name="wrench" :size="16" />
+              <span>Медиа сервиса</span>
+            </RouterLink>
+          </template>
 
-        <template v-if="auth.isAdmin">
-          <p class="nav-group">Система</p>
-          <RouterLink class="nav-link" to="/users">Пользователи</RouterLink>
+          <template v-if="auth.canAccessMediaLibrary">
+            <p class="nav-group">Медиатека</p>
+            <RouterLink v-if="auth.isAdmin" class="nav-link icon-link" active-class="" exact-active-class="active" to="/media">
+              <AppIcon name="folder" :size="16" />
+              <span>Вся медиатека</span>
+            </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/media?section=OTHER">
+              <AppIcon name="folder" :size="16" />
+              <span>Другое</span>
+            </RouterLink>
+          </template>
+
+          <template v-if="auth.isAdmin">
+            <p class="nav-group">Система</p>
+            <RouterLink class="nav-link icon-link" to="/kp/drone-models">КП · Модели</RouterLink>
+            <RouterLink class="nav-link icon-link" to="/kp/proposals">КП · Архив</RouterLink>
+            <RouterLink class="nav-link icon-link" to="/users">
+              <AppIcon name="settings" :size="16" />
+              <span>Пользователи</span>
+            </RouterLink>
+            <a class="nav-link external icon-link" :href="managerHubUrl" target="_blank" rel="noopener">
+              <AppIcon name="drone" :size="16" />
+              <span>Менеджерский хаб</span>
+            </a>
+          </template>
         </template>
       </nav>
 
@@ -156,6 +227,12 @@ nav {
   color: #e8eef6;
 }
 
+.icon-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .nav-link.router-link-active,
 .nav-link.active,
 .nav-link:hover {
@@ -163,7 +240,7 @@ nav {
   color: #fff;
 }
 
-.nav-link.media-quick {
+.nav-link.external {
   color: #b6e86a;
   font-size: 0.88rem;
 }

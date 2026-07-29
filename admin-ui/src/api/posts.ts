@@ -153,6 +153,10 @@ export async function updateUserEnabled(id: string, enabled: boolean) {
   return data.data as AdminUser
 }
 
+export async function deleteUser(id: string) {
+  await api.delete(`/auth/admin/users/${id}`)
+}
+
 export function publicPostPath(slug: string) {
   return `/posts/${slug}`
 }

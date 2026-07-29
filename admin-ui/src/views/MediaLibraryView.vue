@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import AppIcon from '@/components/AppIcon.vue'
 import {
   deleteMedia,
   fetchMedia,
@@ -9,6 +10,7 @@ import {
   isProcessableImage,
   isWebp,
   mediaPublicUrl,
+  moveMedia,
   processMedia,
   processMediaBatch,
   uploadMedia,
@@ -19,9 +21,18 @@ import {
 } from '@/api/media'
 import { useAuthStore } from '@/stores/auth'
 import { useMediaLibraryStore } from '@/stores/mediaLibrary'
+import {
+  ALL_MEDIA_SECTIONS,
+  allowedMediaSectionOptions,
+  canAccessMediaSection,
+  defaultMediaSection,
+  mediaSectionLabel,
+  normalizeMediaSectionQuery
+} from '@/utils/mediaSections'
 
 const auth = useAuthStore()
 const route = useRoute()
+const router = useRouter()
 const mediaStore = useMediaLibraryStore()
 const {
   kind,
@@ -43,6 +54,7 @@ const loading = ref(false)
 const uploading = ref(false)
 const processing = ref(false)
 const deleting = ref(false)
+const moving = ref(false)
 const progress = ref(0)
 const processLabel = ref('')
 const error = ref('')
@@ -55,21 +67,9 @@ const settingsOpen = ref(false)
 const logoOk = ref(false)
 let loadRequestVersion = 0
 
-const sectionOptions: Array<{ value: MediaSection; label: string }> = [
-  { value: 'PARTS', label: 'Запчасти' },
-  { value: 'DRONES', label: 'Дроны' },
-  { value: 'ARTICLES', label: 'Статьи' },
-  { value: 'SERVICE', label: 'Сервис' },
-  { value: 'TRAILERS', label: 'Прицепы' },
-  { value: 'EDUCATION', label: 'Обучение' },
-  { value: 'OTHER', label: 'Другое' }
-]
-
-const sectionLabelByValue = Object.fromEntries(sectionOptions.map((s) => [s.value, s.label])) as Record<
-  MediaSection,
-  string
->
-
+const sectionOptions = computed(() => allowedMediaSectionOptions(auth.user?.roles))
+const showAllTab = computed(() => auth.isAdmin)
+const busy = computed(() => uploading.value || processing.value || loading.value || deleting.value || moving.value)
 const selectedCount = computed(() => selectedIds.value.length)
 const processableOnPage = computed(() => data.value?.content.filter(isProcessableImage) ?? [])
 const selectedProcessableCount = computed(() =>
@@ -81,13 +81,12 @@ const selectedProcessableCount = computed(() =>
 const allPageSelected = computed(
   () => processableOnPage.value.length > 0 && processableOnPage.value.every((i) => selectedIds.value.includes(i.id))
 )
-const busy = computed(() => uploading.value || processing.value || loading.value || deleting.value)
 const autoPipelineLabel = computed(() => {
   const parts: string[] = []
-  if (autoSquare.value) parts.push('квадрат')
-  if (autoWatermark.value) parts.push('знак')
+  if (autoSquare.value) parts.push('1:1')
+  if (autoWatermark.value) parts.push('WM')
   if (autoWebp.value) parts.push('WebP')
-  return parts.length ? parts.join(' → ') : 'без авто'
+  return parts.length ? parts.join(' · ') : 'выкл'
 })
 
 function formatSize(bytes: number) {
@@ -99,13 +98,17 @@ function imageSrc(item: MediaAsset) {
   return mediaPublicUrl(item.url, item.updatedAt)
 }
 
-function sectionLabel(value: MediaSection) {
-  return sectionLabelByValue[value]
+function applyRouteSection(raw?: string | null) {
+  const next = normalizeMediaSectionQuery(auth.user?.roles, raw)
+  section.value = next
+  uploadSection.value = next
 }
 
 function chooseSection(value: MediaSection | '') {
+  if (value && !canAccessMediaSection(auth.user?.roles, value)) return
   section.value = value
   if (value) uploadSection.value = value
+  router.replace({ query: value ? { section: value } : {} })
 }
 
 function openPreview(item: MediaAsset) {
@@ -204,10 +207,14 @@ function clearSelection() {
   selectedIds.value = []
 }
 
+function toggleSelectAll() {
+  if (allPageSelected.value) clearSelection()
+  else selectAllOnPage()
+}
+
 async function bulkDeleteSelected() {
   const ids = [...selectedIds.value]
-  if (!ids.length) return
-  if (!confirm(`Удалить выбранные медиа (${ids.length})?`)) return
+  if (!ids.length || !confirm(`Удалить выбранные медиа (${ids.length})?`)) return
   deleting.value = true
   error.value = ''
   message.value = ''
@@ -216,21 +223,12 @@ async function bulkDeleteSelected() {
     const failed = results.filter((r) => r.status === 'rejected').length
     selectedIds.value = []
     await load()
-    if (failed) {
-      error.value = `Не удалось удалить: ${failed}`
-    } else {
-      message.value = `Удалено: ${ids.length}`
-    }
+    message.value = failed ? `Удалено не всё: ошибок ${failed}` : `Удалено: ${ids.length}`
   } catch (e: any) {
     error.value = e?.response?.data?.message || 'Ошибка удаления'
   } finally {
     deleting.value = false
   }
-}
-
-function toggleSelectAll() {
-  if (allPageSelected.value) clearSelection()
-  else selectAllOnPage()
 }
 
 function mergeProcessed(updated: MediaAsset) {
@@ -272,14 +270,11 @@ async function runProcess(ids: string[], options: MediaProcessOptions, label: st
   }
 }
 
-function targetIds(fallbackSelected = true) {
-  if (fallbackSelected && selectedIds.value.length) {
-    return selectedIds.value.filter((id) => {
-      const item = data.value?.content.find((x) => x.id === id)
-      return item && isProcessableImage(item)
-    })
-  }
-  return []
+function targetIds() {
+  return selectedIds.value.filter((id) => {
+    const item = data.value?.content.find((x) => x.id === id)
+    return item && isProcessableImage(item)
+  })
 }
 
 async function runOnSelected(options: MediaProcessOptions, label: string) {
@@ -290,6 +285,24 @@ async function runOnOne(item: MediaAsset, options: MediaProcessOptions, label: s
   await runProcess([item.id], options, label)
 }
 
+async function onMove(item: MediaAsset, nextSection: MediaSection) {
+  if (item.section === nextSection) return
+  moving.value = true
+  error.value = ''
+  try {
+    const updated = await moveMedia(item.id, nextSection)
+    mergeProcessed(updated)
+    message.value = `Перемещено в «${mediaSectionLabel(nextSection)}»`
+    if (section.value && section.value !== nextSection) {
+      await load()
+    }
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || 'Не удалось переместить'
+  } finally {
+    moving.value = false
+  }
+}
+
 async function onFiles(files: FileList | null) {
   if (!files?.length) return
   uploading.value = true
@@ -297,7 +310,7 @@ async function onFiles(files: FileList | null) {
   message.value = ''
   const uploaded: MediaAsset[] = []
   try {
-    const targetSection = section.value || uploadSection.value
+    const targetSection = section.value || uploadSection.value || defaultMediaSection(auth.user?.roles)
     const list = Array.from(files)
     for (let i = 0; i < list.length; i++) {
       progress.value = Math.round(((i + 0.5) / list.length) * 100)
@@ -373,29 +386,14 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     if (previewItem.value) closePreview()
     else clearSelection()
-    return
-  }
-  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) {
-    return
-  }
-  if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault()
-    selectAllOnPage()
-  }
-  if (e.key === '1' && selectedCount.value) runOnSelected({ square: true }, 'Квадрат')
-  if (e.key === '2' && selectedCount.value) runOnSelected({ watermark: true }, 'Watermark')
-  if (e.key === '3' && selectedCount.value) runOnSelected({ convertToWebp: true }, 'WebP')
-  if (e.key === '4' && selectedCount.value) {
-    runOnSelected({ square: true, watermark: true, convertToWebp: true }, 'Полный пайплайн')
   }
 }
 
 onMounted(() => {
-  const qSection = typeof route.query.section === 'string' ? route.query.section.toUpperCase() : ''
-  const allowed: MediaSection[] = ['PARTS', 'DRONES', 'ARTICLES', 'SERVICE', 'TRAILERS', 'EDUCATION', 'OTHER']
-  if (allowed.includes(qSection as MediaSection)) {
-    section.value = qSection as MediaSection
-    uploadSection.value = qSection as MediaSection
+  applyRouteSection(typeof route.query.section === 'string' ? route.query.section : null)
+  if (!section.value && !showAllTab.value) {
+    section.value = uploadSection.value
+    router.replace({ query: { section: uploadSection.value } })
   }
   mediaStore.persistFilters()
   mediaStore.persistWorkflow()
@@ -403,17 +401,13 @@ onMounted(() => {
   load()
   window.addEventListener('keydown', onKeydown)
 })
+
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
 watch(
   () => route.query.section,
   (value) => {
-    if (typeof value !== 'string') return
-    const next = value.toUpperCase()
-    const allowed: MediaSection[] = ['PARTS', 'DRONES', 'ARTICLES', 'SERVICE', 'TRAILERS', 'EDUCATION', 'OTHER']
-    if (!allowed.includes(next as MediaSection)) return
-    section.value = next as MediaSection
-    uploadSection.value = next as MediaSection
+    applyRouteSection(typeof value === 'string' ? value : null)
     page.value = 0
     mediaStore.persistFilters()
     load()
@@ -425,7 +419,9 @@ watch([kind, section, processingFilter, pageSize], () => {
   mediaStore.persistFilters()
   load()
 })
+
 watch([q], () => mediaStore.persistFilters())
+
 watch(
   [autoSquare, autoWatermark, autoWebp, squareBackground, watermarkOpacity, bgThreshold, uploadSection],
   () => mediaStore.persistWorkflow()
@@ -438,14 +434,15 @@ watch(
       <div>
         <p class="eyebrow">Файлы</p>
         <h1>Медиатека</h1>
-        <p class="muted">Быстрая обработка: квадрат → watermark → WebP · logo {{ logoOk ? 'OK' : 'авто' }}</p>
+        <p class="muted">Разделы по роли · авто {{ autoPipelineLabel }} · logo {{ logoOk ? 'OK' : '—' }}</p>
       </div>
-      <div class="upload-group">
-        <select v-model="uploadSection" :disabled="busy">
+      <div class="header-actions">
+        <select v-model="uploadSection" :disabled="busy" title="Раздел загрузки">
           <option v-for="item in sectionOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
-        <label class="btn upload">
-          {{ uploading ? `${progress}%` : 'Загрузить' }}
+        <label class="btn icon-btn" :class="{ disabled: busy }">
+          <AppIcon name="upload" />
+          <span>{{ uploading ? `${progress}%` : 'Загрузить' }}</span>
           <input
             ref="fileInput"
             type="file"
@@ -460,68 +457,46 @@ watch(
     </header>
 
     <div class="drop card" @dragover.prevent @drop="onDrop">
-      Drop файлы сюда · авто: <strong>{{ autoPipelineLabel }}</strong>
+      <AppIcon name="upload" :size="20" />
+      <span>Перетащите файлы сюда</span>
     </div>
 
-    <div class="sticky-dock card">
-      <div class="dock-row">
-        <label class="check"><input v-model="autoSquare" type="checkbox" /> Квадрат</label>
-        <label class="check"><input v-model="autoWatermark" type="checkbox" /> Знак</label>
+    <div class="panel card">
+      <div class="panel-row">
+        <label class="check"><input v-model="autoSquare" type="checkbox" /> 1:1</label>
+        <label class="check"><input v-model="autoWatermark" type="checkbox" /> WM</label>
         <label class="check"><input v-model="autoWebp" type="checkbox" /> WebP</label>
-        <button class="btn secondary tiny" type="button" @click="settingsOpen = !settingsOpen">
-          {{ settingsOpen ? 'Скрыть настройки' : 'Настройки' }}
+        <button class="btn ghost icon-btn" type="button" @click="settingsOpen = !settingsOpen">
+          <AppIcon name="settings" />
+          <span>{{ settingsOpen ? 'Скрыть' : 'Настройки' }}</span>
+        </button>
+        <span class="sel">{{ selectedCount ? `Выбрано ${selectedCount}` : '' }}</span>
+        <button class="btn ghost icon-btn" type="button" :disabled="busy || !processableOnPage.length" @click="toggleSelectAll">
+          <AppIcon name="check" />
+          <span>{{ allPageSelected ? 'Снять' : 'Страница' }}</span>
+        </button>
+        <button class="btn ghost" :disabled="busy || !selectedProcessableCount" @click="runOnSelected({ square: true }, '1:1')">1:1</button>
+        <button class="btn ghost" :disabled="busy || !selectedProcessableCount" @click="runOnSelected({ watermark: true }, 'WM')">WM</button>
+        <button class="btn ghost" :disabled="busy || !selectedProcessableCount" @click="runOnSelected({ convertToWebp: true }, 'WebP')">WebP</button>
+        <button class="btn" :disabled="busy || !selectedProcessableCount" @click="runOnSelected({ square: true, watermark: true, convertToWebp: true }, 'Полный')">
+          Полный
+        </button>
+        <button v-if="auth.isAdmin" class="btn danger icon-btn" type="button" :disabled="busy || !selectedCount" @click="bulkDeleteSelected">
+          <AppIcon name="trash" />
         </button>
       </div>
-
       <div v-if="settingsOpen" class="settings-row">
         <label>Фон <input v-model="squareBackground" type="color" /><input v-model="squareBackground" class="hex" /></label>
         <label>Opacity <input v-model.number="watermarkOpacity" type="number" min="0.01" max="1" step="0.01" /></label>
         <label>Threshold <input v-model.number="bgThreshold" type="number" min="0" max="255" step="1" /></label>
       </div>
-
-      <div class="dock-actions">
-        <button class="btn secondary" type="button" :disabled="busy || !processableOnPage.length" @click="toggleSelectAll">
-          {{ allPageSelected ? 'Снять всё' : 'Выбрать страницу' }}
-        </button>
-        <span class="sel">{{ selectedCount ? `Выбрано ${selectedCount}` : 'Ничего не выбрано' }}</span>
-        <button
-          class="btn secondary"
-          :disabled="busy || !selectedProcessableCount"
-          @click="runOnSelected({ square: true }, 'Квадрат')"
-        >
-          1:1
-        </button>
-        <button
-          class="btn secondary"
-          :disabled="busy || !selectedProcessableCount"
-          @click="runOnSelected({ watermark: true }, 'Watermark')"
-        >
-          WM
-        </button>
-        <button
-          class="btn secondary"
-          :disabled="busy || !selectedProcessableCount"
-          @click="runOnSelected({ convertToWebp: true }, 'WebP')"
-        >
-          WebP
-        </button>
-        <button
-          class="btn"
-          :disabled="busy || !selectedProcessableCount"
-          @click="runOnSelected({ square: true, watermark: true, convertToWebp: true }, 'Полный пайплайн')"
-        >
-          1:1 + WM + WebP
-        </button>
-        <button class="btn secondary" type="button" :disabled="!selectedCount" @click="clearSelection">Сброс</button>
-        <button class="btn danger" type="button" :disabled="busy || !selectedCount" @click="bulkDeleteSelected">
-          Удалить выбранное
-        </button>
-      </div>
-      <p class="hint">Горячие клавиши: Ctrl+A · 1 квадрат · 2 знак · 3 WebP · 4 полный · Esc</p>
     </div>
 
     <div class="toolbar card">
-      <input v-model="q" placeholder="Поиск…" @keyup.enter="page = 0; load()" />
+      <div class="search-wrap">
+        <AppIcon name="search" />
+        <input v-model="q" placeholder="Поиск…" @keyup.enter="page = 0; load()" />
+      </div>
       <select v-model="kind">
         <option value="">Все типы</option>
         <option value="IMAGE">Фото</option>
@@ -539,11 +514,16 @@ watch(
         <option :value="48">48</option>
         <option :value="96">96</option>
       </select>
-      <button class="btn secondary" @click="page = 0; load()">Обновить</button>
+      <button class="btn ghost icon-btn" @click="page = 0; load()">
+        <AppIcon name="refresh" />
+      </button>
     </div>
 
     <div class="section-tabs">
-      <button class="tab" :class="{ active: section === '' }" type="button" @click="chooseSection('')">Все</button>
+      <button v-if="showAllTab" class="tab" :class="{ active: section === '' }" type="button" @click="chooseSection('')">
+        <AppIcon name="folder" :size="16" />
+        <span>Все</span>
+      </button>
       <button
         v-for="item in sectionOptions"
         :key="item.value"
@@ -552,13 +532,14 @@ watch(
         type="button"
         @click="chooseSection(item.value)"
       >
-        {{ item.label }}
+        <AppIcon :name="item.icon" :size="16" />
+        <span>{{ item.label }}</span>
       </button>
     </div>
 
     <p v-if="error" class="error">{{ error }}</p>
     <p v-if="message" class="ok">{{ message }}</p>
-    <p v-if="busy" class="status">{{ uploading ? `Загрузка ${progress}%` : processLabel || 'Обработка…' }}</p>
+    <p v-if="busy" class="status">{{ uploading ? `Загрузка ${progress}%` : processLabel || 'Загрузка…' }}</p>
 
     <div v-if="data" class="grid">
       <article
@@ -571,52 +552,53 @@ watch(
         <div class="preview">
           <img v-if="item.kind === 'IMAGE'" :src="imageSrc(item)" :alt="item.originalName" loading="lazy" />
           <video v-else :src="imageSrc(item)" muted preload="metadata" />
-          <span class="kind">{{ item.kind === 'IMAGE' ? 'Фото' : 'Видео' }}</span>
-          <span class="section-badge">{{ sectionLabel(item.section) }}</span>
+          <span class="kind">
+            <AppIcon :name="item.kind === 'IMAGE' ? 'image' : 'video'" :size="12" />
+          </span>
+          <span class="section-badge">{{ mediaSectionLabel(item.section) }}</span>
           <button
             class="select-chip"
             type="button"
             :class="{ selected: selectedIds.includes(item.id) }"
-            :aria-pressed="selectedIds.includes(item.id)"
             @click.stop="toggleSelect(item.id)"
           >
-            {{ selectedIds.includes(item.id) ? '✓' : '' }}
+            <AppIcon v-if="selectedIds.includes(item.id)" name="check" :size="14" />
           </button>
-          <span v-if="item.square" class="proc-badge square">1:1</span>
-          <span v-if="item.watermark" class="proc-badge wm">WM</span>
-          <span v-if="isWebp(item)" class="proc-badge webp">WebP</span>
-          <div v-if="isProcessableImage(item)" class="quick" @click.stop>
-            <button type="button" :disabled="busy" title="Квадрат" @click="runOnOne(item, { square: true }, 'Квадрат')">1:1</button>
-            <button type="button" :disabled="busy" title="Watermark" @click="runOnOne(item, { watermark: true }, 'WM')">WM</button>
-            <button type="button" :disabled="busy" title="WebP" @click="runOnOne(item, { convertToWebp: true }, 'WebP')">W</button>
-            <button
-              type="button"
-              class="full"
-              :disabled="busy"
-              title="Полный пайплайн"
-              @click="runOnOne(item, { square: true, watermark: true, convertToWebp: true }, 'Пайплайн')"
-            >
-              ★
-            </button>
-            <button type="button" title="Открыть" @click="openPreview(item)">⛶</button>
+          <div v-if="item.square || item.watermark || isWebp(item)" class="badges">
+            <span v-if="item.square">1:1</span>
+            <span v-if="item.watermark">WM</span>
+            <span v-if="isWebp(item)">WebP</span>
           </div>
         </div>
         <div class="meta">
           <strong :title="item.originalName">{{ item.originalName }}</strong>
-          <span>{{ formatSize(item.sizeBytes) }} · {{ item.contentType.replace('image/', '') }}</span>
+          <span>{{ formatSize(item.sizeBytes) }}</span>
         </div>
         <div class="actions" @click.stop>
-          <button class="btn secondary" @click="copy(item)">URL</button>
-          <button v-if="auth.isAdmin" class="btn danger" @click="remove(item)">✕</button>
+          <button class="icon-action" type="button" title="URL" @click="copy(item)"><AppIcon name="copy" :size="16" /></button>
+          <button class="icon-action" type="button" title="Открыть" @click="openPreview(item)"><AppIcon name="maximize" :size="16" /></button>
+          <select
+            v-if="auth.isAdmin"
+            class="move-select"
+            :value="item.section"
+            :disabled="moving"
+            title="Переместить"
+            @change="onMove(item, ($event.target as HTMLSelectElement).value as MediaSection)"
+          >
+            <option v-for="opt in ALL_MEDIA_SECTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          </select>
+          <button v-if="auth.isAdmin" class="icon-action danger" type="button" title="Удалить" @click="remove(item)">
+            <AppIcon name="trash" :size="16" />
+          </button>
         </div>
       </article>
-      <div v-if="!data.content.length" class="empty card">Пусто — загрузите файлы</div>
+      <div v-if="!data.content.length" class="empty card">Нет файлов в этом разделе</div>
     </div>
 
     <div v-if="data && data.totalPages > 1" class="pager">
-      <button class="btn secondary" :disabled="page === 0 || busy" @click="page--; load()">Назад</button>
+      <button class="btn ghost" :disabled="page === 0 || busy" @click="page--; load()">Назад</button>
       <span>{{ page + 1 }} / {{ data.totalPages }}</span>
-      <button class="btn secondary" :disabled="page + 1 >= data.totalPages || busy" @click="page++; load()">Далее</button>
+      <button class="btn ghost" :disabled="page + 1 >= data.totalPages || busy" @click="page++; load()">Далее</button>
     </div>
 
     <Teleport to="body">
@@ -625,30 +607,30 @@ watch(
           <header class="preview-header">
             <div>
               <strong>{{ previewItem.originalName }}</strong>
-              <span class="muted">
-                {{ formatSize(previewItem.sizeBytes) }} · {{ previewItem.contentType }}
-                <template v-if="previewItem.square"> · 1:1</template>
-                <template v-if="previewItem.watermark"> · WM</template>
-              </span>
+              <span class="muted">{{ mediaSectionLabel(previewItem.section) }} · {{ formatSize(previewItem.sizeBytes) }}</span>
             </div>
-            <button type="button" class="btn secondary" @click="closePreview">Закрыть</button>
+            <button type="button" class="btn ghost icon-btn" @click="closePreview"><AppIcon name="x" /></button>
           </header>
           <div class="preview-body">
             <img v-if="previewItem.kind === 'IMAGE'" :src="imageSrc(previewItem)" :alt="previewItem.originalName" />
             <video v-else :src="imageSrc(previewItem)" controls autoplay playsinline />
           </div>
-          <footer v-if="isProcessableImage(previewItem)" class="preview-footer">
-            <button class="btn secondary" :disabled="busy" @click="runOnOne(previewItem, { square: true }, 'Квадрат')">Квадрат</button>
-            <button class="btn secondary" :disabled="busy" @click="runOnOne(previewItem, { watermark: true }, 'WM')">Знак</button>
-            <button class="btn secondary" :disabled="busy" @click="runOnOne(previewItem, { convertToWebp: true }, 'WebP')">В WebP</button>
-            <button
-              class="btn"
-              :disabled="busy"
-              @click="runOnOne(previewItem, { square: true, watermark: true, convertToWebp: true }, 'Пайплайн')"
+          <footer class="preview-footer">
+            <template v-if="isProcessableImage(previewItem)">
+              <button class="btn ghost" :disabled="busy" @click="runOnOne(previewItem, { square: true }, '1:1')">1:1</button>
+              <button class="btn ghost" :disabled="busy" @click="runOnOne(previewItem, { watermark: true }, 'WM')">WM</button>
+              <button class="btn ghost" :disabled="busy" @click="runOnOne(previewItem, { convertToWebp: true }, 'WebP')">WebP</button>
+            </template>
+            <button class="btn ghost icon-btn" @click="copy(previewItem)"><AppIcon name="copy" /><span>URL</span></button>
+            <select
+              v-if="auth.isAdmin"
+              class="move-select"
+              :value="previewItem.section"
+              :disabled="moving"
+              @change="onMove(previewItem, ($event.target as HTMLSelectElement).value as MediaSection)"
             >
-              Полный пайплайн
-            </button>
-            <button class="btn secondary" @click="copy(previewItem)">URL</button>
+              <option v-for="opt in ALL_MEDIA_SECTIONS" :key="opt.value" :value="opt.value">→ {{ opt.label }}</option>
+            </select>
           </footer>
         </div>
       </div>
@@ -661,38 +643,42 @@ watch(
   padding-bottom: 2rem;
 }
 
-.upload-group {
+.header-actions {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
-.upload {
+.icon-btn {
   display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.icon-btn.disabled {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .drop {
-  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
   margin-bottom: 0.75rem;
-  text-align: center;
   color: var(--muted);
   border-style: dashed;
 }
 
-.sticky-dock {
-  position: sticky;
-  top: 0.5rem;
-  z-index: 20;
+.panel,
+.toolbar {
   margin-bottom: 0.75rem;
-  padding: 0.75rem 0.9rem;
-  display: grid;
-  gap: 0.55rem;
-  background: rgba(2, 18, 40, 0.88);
-  backdrop-filter: blur(10px);
+  padding: 0.75rem;
 }
 
-.dock-row,
-.dock-actions,
+.panel-row,
 .settings-row {
   display: flex;
   flex-wrap: wrap;
@@ -708,21 +694,10 @@ watch(
   color: var(--muted);
 }
 
-.tiny {
-  padding: 0.3rem 0.55rem;
-  font-size: 0.8rem;
-}
-
 .sel {
   font-size: 0.85rem;
   color: var(--muted);
-  margin-right: 0.25rem;
-}
-
-.hint {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--muted);
+  min-width: 5rem;
 }
 
 .settings-row label {
@@ -742,12 +717,26 @@ watch(
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.6rem;
+  align-items: center;
 }
 
-.toolbar input {
+.search-wrap {
   flex: 1;
   min-width: 160px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--input-bg);
+}
+
+.search-wrap input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 0.65rem 0;
 }
 
 .section-tabs {
@@ -758,12 +747,15 @@ watch(
 }
 
 .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
   color: var(--muted);
   border-radius: 10px;
-  padding: 0.3rem 0.55rem;
-  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.82rem;
   cursor: pointer;
 }
 
@@ -779,14 +771,13 @@ watch(
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 0.75rem;
 }
 
 .item {
   overflow: hidden;
   cursor: pointer;
-  transition: outline 0.12s ease;
 }
 
 .item.selected {
@@ -809,60 +800,27 @@ watch(
   display: block;
 }
 
-.item:hover .quick {
-  opacity: 1;
-}
-
-.quick {
-  position: absolute;
-  inset: auto 0.35rem 0.35rem;
-  display: flex;
-  gap: 0.25rem;
-  opacity: 0;
-  transition: opacity 0.12s ease;
-}
-
-.quick button {
-  border: 0;
-  background: rgba(2, 18, 40, 0.9);
-  color: #fff;
-  border-radius: 6px;
-  padding: 0.25rem 0.4rem;
-  font-size: 0.72rem;
-  cursor: pointer;
-}
-
-.quick button.full {
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-
-.quick button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.kind,
-.section-badge,
-.proc-badge {
-  position: absolute;
-  font-size: 0.65rem;
-  padding: 0.15rem 0.35rem;
-  border-radius: 999px;
-}
-
 .kind {
+  position: absolute;
   left: 0.4rem;
   top: 0.4rem;
   background: rgba(15, 31, 27, 0.75);
   color: #fff;
+  border-radius: 6px;
+  padding: 0.2rem;
+  display: grid;
+  place-items: center;
 }
 
 .section-badge {
+  position: absolute;
   right: 0.4rem;
   top: 0.4rem;
   background: rgba(255, 255, 255, 0.95);
   color: #111;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 999px;
   max-width: 45%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -872,76 +830,91 @@ watch(
 .select-chip {
   position: absolute;
   left: 0.4rem;
-  top: 1.85rem;
-  width: 22px;
-  height: 22px;
+  bottom: 0.4rem;
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(2, 18, 40, 0.78);
   color: #fff;
   display: grid;
   place-items: center;
-  font-size: 13px;
-  z-index: 4;
   padding: 0;
   cursor: pointer;
 }
 
 .select-chip.selected {
-  border-color: rgba(141, 198, 63, 0.95);
-  background: rgba(141, 198, 63, 0.92);
-  color: #062554;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
-.proc-badge {
-  bottom: 2.2rem;
-  color: #fff;
-}
-
-.proc-badge.square {
+.badges {
+  position: absolute;
   left: 0.4rem;
-  background: rgba(141, 198, 63, 0.92);
-  color: #062554;
+  bottom: 2.5rem;
+  display: flex;
+  gap: 0.2rem;
 }
 
-.proc-badge.wm {
-  left: 2.5rem;
+.badges span {
+  font-size: 0.62rem;
+  padding: 0.12rem 0.3rem;
+  border-radius: 999px;
   background: rgba(2, 18, 40, 0.88);
-}
-
-.proc-badge.webp {
-  left: 4.8rem;
-  background: rgba(100, 140, 255, 0.9);
+  color: #fff;
 }
 
 .meta {
   padding: 0.55rem 0.65rem 0.2rem;
   display: grid;
-  gap: 0.15rem;
+  gap: 0.1rem;
 }
 
 .meta strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 
 .meta span {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .actions {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.25rem;
   padding: 0.35rem 0.55rem 0.6rem;
+  align-items: center;
 }
 
-.actions .btn {
+.icon-action {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.icon-action.danger {
+  color: #ffb4b4;
+}
+
+.move-select {
   flex: 1;
-  padding: 0.35rem;
-  font-size: 0.78rem;
+  min-width: 0;
+  font-size: 0.72rem;
+  padding: 0.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  color: inherit;
 }
 
 .preview-modal {
@@ -993,7 +966,7 @@ watch(
 }
 
 .preview-footer {
-  border-top: 1px solid var(--line, #d8e3df);
+  border-top: 1px solid var(--line);
   justify-content: flex-start;
 }
 
@@ -1002,5 +975,10 @@ watch(
   gap: 0.75rem;
   align-items: center;
   margin-top: 1rem;
+}
+
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
 }
 </style>

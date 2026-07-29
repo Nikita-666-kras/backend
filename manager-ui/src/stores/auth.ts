@@ -1,8 +1,14 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import api from '@/api/http'
+import {
+  canUseManagerUi as userCanUseManagerUi,
+  hasRole,
+  isEditorOnly as userIsEditorOnly,
+  type Role
+} from '@/utils/roles'
 
-export type Role = 'ADMIN' | 'MANAGER' | 'EDITOR'
+export type { Role }
 
 export interface UserInfo {
   id: string
@@ -25,6 +31,12 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserInfo | null>(null)
 
   const isAuthenticated = computed(() => Boolean(accessToken.value))
+  const isAdmin = computed(() => hasRole(user.value?.roles, 'ADMIN'))
+  const isManager = computed(() => hasRole(user.value?.roles, 'MANAGER'))
+  const isEditor = computed(() => hasRole(user.value?.roles, 'EDITOR'))
+  const isEditorOnly = computed(() => userIsEditorOnly(user.value?.roles))
+  const canUseManagerUi = computed(() => userCanUseManagerUi(user.value?.roles))
+  const canUseAdminUi = computed(() => hasRole(user.value?.roles, 'ADMIN') || hasRole(user.value?.roles, 'EDITOR'))
 
   function persist() {
     sessionStorage.setItem(ACCESS_KEY, accessToken.value)
@@ -75,6 +87,12 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     user,
     isAuthenticated,
+    isAdmin,
+    isManager,
+    isEditor,
+    isEditorOnly,
+    canUseManagerUi,
+    canUseAdminUi,
     login,
     refresh,
     fetchMe,

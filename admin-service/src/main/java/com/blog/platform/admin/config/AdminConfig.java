@@ -31,7 +31,7 @@ public class AdminConfig {
     @Bean
     RestClient postServiceRestClient(
             @Value("${post-service.base-url}") String baseUrl,
-            @Value("${security.internal-api-key}") String internalApiKey
+            @Value("${security.internal-api-keys.post:${POST_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}") String internalApiKey
     ) {
         return RestClient.builder()
                 .baseUrl(baseUrl)
@@ -42,7 +42,7 @@ public class AdminConfig {
     @Bean
     RestClient partsServiceRestClient(
             @Value("${parts-service.base-url}") String baseUrl,
-            @Value("${security.internal-api-key}") String internalApiKey
+            @Value("${security.internal-api-keys.parts:${PARTS_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}") String internalApiKey
     ) {
         return RestClient.builder()
                 .baseUrl(baseUrl)
@@ -53,7 +53,7 @@ public class AdminConfig {
     @Bean
     RestClient proposalServiceRestClient(
             @Value("${proposal-service.base-url}") String baseUrl,
-            @Value("${security.internal-api-key}") String internalApiKey
+            @Value("${security.internal-api-keys.proposal:${PROPOSAL_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}") String internalApiKey
     ) {
         return RestClient.builder()
                 .baseUrl(baseUrl)

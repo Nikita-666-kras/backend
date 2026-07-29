@@ -53,13 +53,13 @@ public class AdminPartsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.searchParts(q, status, droneId, categoryId, page, size)));
     }
 
     @GetMapping("/parts/{id}")
     public ResponseEntity<ApiResponse<PartResponse>> getPart(HttpServletRequest request, @PathVariable UUID id) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.getPart(id)));
     }
 
@@ -68,7 +68,7 @@ public class AdminPartsController {
             HttpServletRequest request,
             @Valid @RequestBody PartRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.createPart(body)));
     }
 
@@ -78,19 +78,19 @@ public class AdminPartsController {
             @PathVariable UUID id,
             @Valid @RequestBody PartRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updatePart(id, body)));
     }
 
     @PostMapping("/parts/{id}/publish")
     public ResponseEntity<ApiResponse<PartResponse>> publishPart(HttpServletRequest request, @PathVariable UUID id) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updatePartStatus(id, "PUBLISHED")));
     }
 
     @PostMapping("/parts/{id}/archive")
     public ResponseEntity<ApiResponse<PartResponse>> archivePart(HttpServletRequest request, @PathVariable UUID id) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updatePartStatus(id, "ARCHIVED")));
     }
 
@@ -110,7 +110,7 @@ public class AdminPartsController {
         if ("DELETE".equals(action)) {
             accessGuard.requireAdmin(request);
         } else {
-            accessGuard.requireEditorOrAdmin(request);
+            accessGuard.requireCatalogOrAdmin(request);
         }
         return ResponseEntity.ok(ApiResponse.of(adminPartsBulkService.bulk(body)));
     }
@@ -124,13 +124,13 @@ public class AdminPartsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.searchKits(q, status, droneId, page, size)));
     }
 
     @GetMapping("/kits/{id}")
     public ResponseEntity<ApiResponse<KitResponse>> getKit(HttpServletRequest request, @PathVariable UUID id) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.getKit(id)));
     }
 
@@ -139,7 +139,7 @@ public class AdminPartsController {
             HttpServletRequest request,
             @Valid @RequestBody KitRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.createKit(body)));
     }
 
@@ -149,13 +149,13 @@ public class AdminPartsController {
             @PathVariable UUID id,
             @Valid @RequestBody KitRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateKit(id, body)));
     }
 
     @PostMapping("/kits/{id}/publish")
     public ResponseEntity<ApiResponse<KitResponse>> publishKit(HttpServletRequest request, @PathVariable UUID id) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateKitStatus(id, "PUBLISHED")));
     }
 
@@ -174,13 +174,13 @@ public class AdminPartsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.searchDrones(q, status, page, size)));
     }
 
     @GetMapping("/drones/{id}")
     public ResponseEntity<ApiResponse<DroneResponse>> getDrone(HttpServletRequest request, @PathVariable UUID id) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.getDrone(id)));
     }
 
@@ -189,7 +189,7 @@ public class AdminPartsController {
             HttpServletRequest request,
             @Valid @RequestBody DroneRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.createDrone(body)));
     }
 
@@ -199,13 +199,13 @@ public class AdminPartsController {
             @PathVariable UUID id,
             @Valid @RequestBody DroneRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateDrone(id, body)));
     }
 
     @PostMapping("/drones/{id}/publish")
     public ResponseEntity<ApiResponse<DroneResponse>> publishDrone(HttpServletRequest request, @PathVariable UUID id) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateDroneStatus(id, "PUBLISHED")));
     }
 
@@ -218,7 +218,7 @@ public class AdminPartsController {
 
     @GetMapping("/part-categories")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> listCategories(HttpServletRequest request) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.listCategories()));
     }
 
@@ -227,7 +227,7 @@ public class AdminPartsController {
             HttpServletRequest request,
             @Valid @RequestBody CategoryRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.createCategory(body)));
     }
 
@@ -237,7 +237,7 @@ public class AdminPartsController {
             @PathVariable UUID id,
             @Valid @RequestBody CategoryRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateCategory(id, body)));
     }
 
@@ -250,7 +250,7 @@ public class AdminPartsController {
 
     @GetMapping("/parts/import/template.csv")
     public ResponseEntity<byte[]> importTemplate(HttpServletRequest request) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         byte[] body = partsServiceClient.importTemplate();
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=\"parts-import-template.csv\"")
@@ -263,7 +263,7 @@ public class AdminPartsController {
             HttpServletRequest request,
             @RequestParam("file") MultipartFile file
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         return ResponseEntity.ok(ApiResponse.of(partsServiceClient.previewImport(file)));
     }
 
@@ -273,7 +273,7 @@ public class AdminPartsController {
             @RequestParam("file") MultipartFile file,
             @RequestPart(value = "options", required = false) PartsAdminDtos.ImportApplyRequest options
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireCatalogOrAdmin(request);
         PartsAdminDtos.ImportApplyRequest body = options == null
                 ? new PartsAdminDtos.ImportApplyRequest(null, true, true, true, "DRAFT")
                 : options;

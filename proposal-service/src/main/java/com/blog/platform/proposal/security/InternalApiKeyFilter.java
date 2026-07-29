@@ -1,5 +1,6 @@
 package com.blog.platform.proposal.security;
 
+import com.blog.platform.common.security.InternalAuthSupport;
 import com.blog.platform.common.security.InternalHeaders;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,8 +19,7 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path.startsWith("/application/");
+        return request.getRequestURI().startsWith("/application/");
     }
 
     @Override
@@ -29,7 +29,7 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String key = request.getHeader(InternalHeaders.API_KEY);
-        if (key == null || !key.equals(internalApiKey)) {
+        if (!InternalAuthSupport.isValidKey(key, internalApiKey)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

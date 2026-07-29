@@ -7,7 +7,8 @@ const STATUS_LABELS: Record<string, string> = {
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: 'Администратор',
   EDITOR: 'Редактор',
-  MANAGER: 'Менеджер'
+  MANAGER: 'Менеджер',
+  PURCHASER: 'Закупщик'
 }
 
 export function statusLabel(status: string): string {

@@ -15,7 +15,9 @@ parts-service:
   base-url: ${PARTS_SERVICE_URL:http://parts-service:9006}
 
 security:
-  internal-api-key: ${INTERNAL_API_KEY}
+  internal-api-key: ${PROPOSAL_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
+  internal-api-keys:
+    parts: ${PARTS_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
 
 storage:
   kp-dir: ${KP_STORAGE_PATH:/data/kp}

@@ -2,8 +2,11 @@ package com.blog.platform.article.api;
 
 import com.blog.platform.article.api.dto.ArticleDto;
 import com.blog.platform.article.domain.ArticleStatus;
+import com.blog.platform.article.security.TrustedInternalRequest;
 import com.blog.platform.article.service.ArticleService;
 import com.blog.platform.common.api.ApiResponse;
+import com.blog.platform.common.exception.UnauthorizedException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +37,10 @@ public class ArticleController {
     }
 
     @GetMapping("/by-id/{id}")
-    public ResponseEntity<ApiResponse<ArticleDto>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<ArticleDto>> getById(@PathVariable UUID id, HttpServletRequest request) {
+        if (!TrustedInternalRequest.isTrusted(request)) {
+            throw new UnauthorizedException("Authentication required");
+        }
         return ResponseEntity.ok(ApiResponse.of(articleService.getById(id)));
     }
 
@@ -58,9 +64,11 @@ public class ArticleController {
             @RequestParam(required = false) String tag,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) ArticleStatus status,
-            Pageable pageable
+            Pageable pageable,
+            HttpServletRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.of(articleService.search(q, authorId, tag, category, status, pageable)));
+        ArticleStatus effectiveStatus = TrustedInternalRequest.isTrusted(request) ? status : ArticleStatus.PUBLISHED;
+        return ResponseEntity.ok(ApiResponse.of(articleService.search(q, authorId, tag, category, effectiveStatus, pageable)));
     }
 
     @PutMapping("/{id}")

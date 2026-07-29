@@ -10,6 +10,8 @@ import com.blog.platform.admin.api.dto.AdminDtos.PostResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.StatusCounts;
 import com.blog.platform.admin.client.PartsServiceClient;
 import com.blog.platform.admin.client.PostServiceClient;
+import com.blog.platform.admin.security.AdminAccessGuard;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -24,28 +26,38 @@ public class AdminPostService {
 
     private final PostServiceClient postServiceClient;
     private final PartsServiceClient partsServiceClient;
+    private final AdminAccessGuard accessGuard;
 
-    public PageResponse list(String q, String status, int page, int size) {
-        return postServiceClient.search(q, status, page, size);
+    public PageResponse list(HttpServletRequest request, String q, String status, int page, int size) {
+        UUID authorFilter = accessGuard.isAdmin(request) ? null : accessGuard.userId(request);
+        return postServiceClient.search(q, status, authorFilter, page, size);
     }
 
-    public PostResponse get(UUID id) {
-        return postServiceClient.getById(id);
+    public PostResponse get(HttpServletRequest request, UUID id) {
+        PostResponse post = postServiceClient.getById(id);
+        accessGuard.requirePostOwnerOrAdmin(request, post.authorId());
+        return post;
     }
 
     public PostResponse create(PostRequest request, UUID authorId) {
         return postServiceClient.create(request, authorId);
     }
 
-    public PostResponse update(UUID id, PostRequest request, UUID authorId) {
-        return postServiceClient.update(id, request, authorId);
+    public PostResponse update(HttpServletRequest request, UUID id, PostRequest body, UUID authorId) {
+        PostResponse existing = postServiceClient.getById(id);
+        accessGuard.requirePostOwnerOrAdmin(request, existing.authorId());
+        return postServiceClient.update(id, body, authorId);
     }
 
-    public PostResponse publish(UUID id) {
+    public PostResponse publish(HttpServletRequest request, UUID id) {
+        PostResponse existing = postServiceClient.getById(id);
+        accessGuard.requirePostOwnerOrAdmin(request, existing.authorId());
         return postServiceClient.updateStatus(id, "PUBLISHED");
     }
 
-    public PostResponse archive(UUID id) {
+    public PostResponse archive(HttpServletRequest request, UUID id) {
+        PostResponse existing = postServiceClient.getById(id);
+        accessGuard.requirePostOwnerOrAdmin(request, existing.authorId());
         return postServiceClient.updateStatus(id, "ARCHIVED");
     }
 
@@ -53,15 +65,15 @@ public class AdminPostService {
         postServiceClient.delete(id);
     }
 
-    public BulkResult bulk(BulkRequest request) {
-        String action = request.action().trim().toUpperCase(Locale.ROOT);
+    public BulkResult bulk(HttpServletRequest request, BulkRequest body) {
+        String action = body.action().trim().toUpperCase(Locale.ROOT);
         int success = 0;
         List<String> errors = new ArrayList<>();
-        for (UUID id : request.ids()) {
+        for (UUID id : body.ids()) {
             try {
                 switch (action) {
-                    case "PUBLISH" -> publish(id);
-                    case "ARCHIVE" -> archive(id);
+                    case "PUBLISH" -> publish(request, id);
+                    case "ARCHIVE" -> archive(request, id);
                     case "DELETE" -> delete(id);
                     default -> throw new IllegalArgumentException("Неизвестное действие: " + action);
                 }
@@ -74,7 +86,7 @@ public class AdminPostService {
     }
 
     public DashboardStats dashboard() {
-        StatusCounts posts = statusCounts((status, size) -> postServiceClient.search(null, status, 0, size).totalElements());
+        StatusCounts posts = statusCounts((status, size) -> postServiceClient.search(null, status, null, 0, size).totalElements());
         StatusCounts parts = statusCounts((status, size) ->
                 partsServiceClient.searchParts(null, status, null, null, 0, size).totalElements());
         StatusCounts kits = statusCounts((status, size) ->

@@ -1,8 +1,22 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import api from '@/api/http'
+import {
+  canAccessCatalog as userCanAccessCatalog,
+  canAccessEditorContent as userCanAccessEditorContent,
+  canUseAdminUi as userCanUseAdminUi,
+  hasRole,
+  isEditorOnly as userIsEditorOnly,
+  isManagerOnly as userIsManagerOnly,
+  isPurchaserOnly as userIsPurchaserOnly,
+  type Role
+} from '@/utils/roles'
+import {
+  allowedMediaSectionOptions,
+  canAccessMediaLibrary as userCanAccessMediaLibrary
+} from '@/utils/mediaSections'
 
-export type Role = 'ADMIN' | 'EDITOR'
+export type { Role }
 
 export interface UserInfo {
   id: string
@@ -25,7 +39,19 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserInfo | null>(null)
 
   const isAuthenticated = computed(() => Boolean(accessToken.value))
-  const isAdmin = computed(() => user.value?.roles.includes('ADMIN') ?? false)
+  const isAdmin = computed(() => hasRole(user.value?.roles, 'ADMIN'))
+  const isEditor = computed(() => hasRole(user.value?.roles, 'EDITOR'))
+  const isManager = computed(() => hasRole(user.value?.roles, 'MANAGER'))
+  const isPurchaser = computed(() => hasRole(user.value?.roles, 'PURCHASER'))
+  const isEditorOnly = computed(() => userIsEditorOnly(user.value?.roles))
+  const isPurchaserOnly = computed(() => userIsPurchaserOnly(user.value?.roles))
+  const isManagerOnly = computed(() => userIsManagerOnly(user.value?.roles))
+  const canUseAdminUi = computed(() => userCanUseAdminUi(user.value?.roles))
+  const canAccessCatalog = computed(() => userCanAccessCatalog(user.value?.roles))
+  const canAccessEditorContent = computed(() => userCanAccessEditorContent(user.value?.roles))
+  const canAccessMediaLibrary = computed(() => userCanAccessMediaLibrary(user.value?.roles))
+  const mediaSectionOptions = computed(() => allowedMediaSectionOptions(user.value?.roles))
+  const canUseManagerUi = computed(() => hasRole(user.value?.roles, 'ADMIN') || hasRole(user.value?.roles, 'MANAGER'))
 
   function persist() {
     sessionStorage.setItem(ACCESS_KEY, accessToken.value)
@@ -77,6 +103,18 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     isAuthenticated,
     isAdmin,
+    isEditor,
+    isManager,
+    isPurchaser,
+    isEditorOnly,
+    isPurchaserOnly,
+    isManagerOnly,
+    canUseAdminUi,
+    canAccessCatalog,
+    canAccessEditorContent,
+    canAccessMediaLibrary,
+    mediaSectionOptions,
+    canUseManagerUi,
     login,
     refresh,
     fetchMe,

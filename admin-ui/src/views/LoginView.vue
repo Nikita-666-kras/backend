@@ -2,6 +2,14 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { redirectToManagerHub, defaultAdminRoute } from '@/utils/roles'
+
+function resolveRedirect(target: string) {
+  if (!target.includes('?')) return target
+  const [path, query] = target.split('?')
+  const params = Object.fromEntries(new URLSearchParams(query))
+  return { path, query: params }
+}
 
 const username = ref('')
 const password = ref('')
@@ -12,14 +20,29 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
+if (route.query.error === 'forbidden') {
+  error.value = 'Недостаточно прав для входа в админку'
+}
+
 async function submit() {
   if (loading.value) return
   error.value = ''
   loading.value = true
   try {
     await auth.login(username.value, password.value)
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-    await router.push(redirect)
+    if (auth.isManagerOnly && auth.canUseManagerUi && !route.query.redirect) {
+      redirectToManagerHub()
+      return
+    }
+    if (!auth.canUseAdminUi) {
+      await auth.logout()
+      error.value = 'Недостаточно прав для входа в админку'
+      return
+    }
+    const redirect = typeof route.query.redirect === 'string'
+      ? route.query.redirect
+      : defaultAdminRoute(auth.user?.roles)
+    await router.push(resolveRedirect(redirect))
   } catch (e: any) {
     if (e?.response?.status === 429) {
       error.value = 'Слишком много попыток входа. Подождите немного и попробуйте снова.'

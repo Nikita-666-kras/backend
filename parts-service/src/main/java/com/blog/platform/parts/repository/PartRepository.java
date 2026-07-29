@@ -39,4 +39,12 @@ public interface PartRepository extends JpaRepository<Part, UUID> {
             @Param("categoryId") UUID categoryId,
             Pageable pageable
     );
+
+    @Query(value = """
+            SELECT COUNT(*) > 0 FROM parts p
+            LEFT JOIN part_media pm ON pm.part_id = p.id
+            WHERE p.status = 'PUBLISHED'
+              AND (p.cover_media_id = :mediaId OR pm.media_id = :mediaId)
+            """, nativeQuery = true)
+    boolean existsPublishedMediaReference(@Param("mediaId") UUID mediaId);
 }

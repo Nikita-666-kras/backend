@@ -29,4 +29,11 @@ public interface DroneRepository extends JpaRepository<Drone, UUID> {
               )
             """)
     Page<Drone> search(@Param("q") String q, @Param("status") CatalogStatus status, Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(d) > 0 FROM Drone d
+            WHERE d.status = com.blog.platform.parts.domain.CatalogStatus.PUBLISHED
+              AND d.imageMediaId = :mediaId
+            """)
+    boolean existsPublishedMediaReference(@Param("mediaId") UUID mediaId);
 }

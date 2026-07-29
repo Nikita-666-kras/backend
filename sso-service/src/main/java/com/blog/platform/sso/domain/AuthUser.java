@@ -39,4 +39,13 @@ public class AuthUser extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     private Set<Role> roles = new HashSet<>();
+
+    @Column(name = "access_token_version", nullable = false)
+    private long accessTokenVersion;
+
+    @Column(name = "failed_login_attempts", nullable = false)
+    private int failedLoginAttempts;
+
+    @Column(name = "locked_until")
+    private java.time.Instant lockedUntil;
 }

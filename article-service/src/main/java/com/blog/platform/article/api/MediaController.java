@@ -6,14 +6,18 @@ import com.blog.platform.article.api.dto.MediaDtos.MediaResponse;
 import com.blog.platform.article.api.dto.MediaDtos.PageResponse;
 import com.blog.platform.article.api.dto.MediaDtos.ProcessRequest;
 import com.blog.platform.article.api.dto.MediaDtos.ProcessingSettingsResponse;
+import com.blog.platform.article.api.dto.MediaDtos.SectionUpdateRequest;
 import com.blog.platform.article.service.MediaFileService;
+import com.blog.platform.article.security.TrustedInternalRequest;
 import com.blog.platform.common.api.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,9 +74,19 @@ public class MediaController {
         return ResponseEntity.ok(ApiResponse.of(mediaFileService.getMeta(id)));
     }
 
+    @PatchMapping("/{id}/section")
+    public ResponseEntity<ApiResponse<MediaResponse>> updateSection(
+            @PathVariable UUID id,
+            @RequestBody SectionUpdateRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.of(
+                mediaFileService.updateSection(id, request.section().name())
+        ));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Resource> file(@PathVariable UUID id) {
-        return mediaFileService.stream(id);
+    public ResponseEntity<Resource> file(@PathVariable UUID id, HttpServletRequest request) {
+        return mediaFileService.stream(id, TrustedInternalRequest.isTrusted(request));
     }
 
     @PostMapping("/{id}/process")

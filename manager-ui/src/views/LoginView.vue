@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { redirectToAdminUi, isPurchaserOnly as userIsPurchaserOnly } from '@/utils/roles'
 
 const username = ref('')
 const password = ref('')
@@ -11,11 +12,28 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
+if (route.query.error === 'forbidden') {
+  error.value = 'Доступ только для менеджеров и администраторов'
+}
+
 async function submit() {
   error.value = ''
   loading.value = true
   try {
     await auth.login(username.value, password.value)
+    if (auth.isEditorOnly) {
+      redirectToAdminUi('/posts')
+      return
+    }
+    if (userIsPurchaserOnly(auth.user?.roles)) {
+      redirectToAdminUi('/parts')
+      return
+    }
+    if (!auth.canUseManagerUi) {
+      await auth.logout()
+      error.value = 'Недостаточно прав для входа в менеджерский хаб'
+      return
+    }
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     await router.push(redirect)
   } catch (e: unknown) {

@@ -83,6 +83,11 @@ export async function deleteMedia(id: string) {
   await api.delete(`/admin/media/${id}`)
 }
 
+export async function moveMedia(id: string, section: MediaSection) {
+  const { data } = await api.patch(`/admin/media/${id}/section`, { section })
+  return data.data as MediaAsset
+}
+
 export async function processMedia(id: string, options: MediaProcessOptions) {
   const { data } = await api.post(`/admin/media/${id}/process`, {
     square: !!options.square,

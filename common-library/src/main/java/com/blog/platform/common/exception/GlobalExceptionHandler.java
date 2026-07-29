@@ -58,6 +58,12 @@ public class GlobalExceptionHandler {
                 .body(new ApiError("NOT_FOUND", ex.getMessage(), List.of(), Instant.now()));
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ApiError> handleTooManyRequests(TooManyRequestsException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(new ApiError("TOO_MANY_REQUESTS", ex.getMessage(), List.of(), Instant.now()));
+    }
+
     @ExceptionHandler(HttpStatusCodeException.class)
     public ResponseEntity<ApiError> handleDownstreamHttpStatus(HttpStatusCodeException ex) {
         int statusCode = ex.getStatusCode().value();

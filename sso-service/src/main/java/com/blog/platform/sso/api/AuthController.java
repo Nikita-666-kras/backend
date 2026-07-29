@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,13 +41,19 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(ApiResponse.of(authService.login(request)));
+    public ResponseEntity<ApiResponse<AuthResponse>> login(
+            HttpServletRequest httpRequest,
+            @Valid @RequestBody LoginRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.of(authService.login(request, clientIp(httpRequest))));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<AuthResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
-        return ResponseEntity.ok(ApiResponse.of(authService.refresh(request)));
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(
+            HttpServletRequest httpRequest,
+            @Valid @RequestBody RefreshRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.of(authService.refresh(request, clientIp(httpRequest))));
     }
 
     @PostMapping("/logout")
@@ -99,6 +106,16 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.of(authService.updateEnabled(id, body.enabled(), actorId(request))));
     }
 
+    @DeleteMapping("/admin/users/{id}")
+    public ResponseEntity<Void> deleteUser(
+            HttpServletRequest request,
+            @PathVariable UUID id
+    ) {
+        requireAdmin(request);
+        authService.deleteUser(id, actorId(request));
+        return ResponseEntity.noContent().build();
+    }
+
     private UUID actorId(HttpServletRequest request) {
         String value = request.getHeader(SecurityHeaders.USER_ID);
         if (value == null || value.isBlank()) {
@@ -127,5 +144,13 @@ public class AuthController {
             throw new UnauthorizedException("Missing bearer token");
         }
         return header.substring(7);
+    }
+
+    private String clientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }

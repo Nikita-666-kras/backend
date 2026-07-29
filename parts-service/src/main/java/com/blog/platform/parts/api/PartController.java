@@ -1,12 +1,15 @@
 package com.blog.platform.parts.api;
 
 import com.blog.platform.common.api.ApiResponse;
+import com.blog.platform.common.exception.UnauthorizedException;
 import com.blog.platform.parts.api.dto.PartsDtos.PageResponse;
 import com.blog.platform.parts.api.dto.PartsDtos.PartRequest;
 import com.blog.platform.parts.api.dto.PartsDtos.PartResponse;
 import com.blog.platform.parts.api.dto.PartsDtos.StatusBody;
 import com.blog.platform.parts.domain.CatalogStatus;
+import com.blog.platform.parts.security.TrustedInternalRequest;
 import com.blog.platform.parts.service.PartService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -36,13 +39,18 @@ public class PartController {
             @RequestParam(required = false) UUID droneId,
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            HttpServletRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.of(partService.search(q, status, droneId, categoryId, page, size)));
+        CatalogStatus effectiveStatus = TrustedInternalRequest.isTrusted(request) ? status : CatalogStatus.PUBLISHED;
+        return ResponseEntity.ok(ApiResponse.of(partService.search(q, effectiveStatus, droneId, categoryId, page, size)));
     }
 
     @GetMapping("/by-id/{id}")
-    public ResponseEntity<ApiResponse<PartResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<PartResponse>> getById(@PathVariable UUID id, HttpServletRequest request) {
+        if (!TrustedInternalRequest.isTrusted(request)) {
+            throw new UnauthorizedException("Authentication required");
+        }
         return ResponseEntity.ok(ApiResponse.of(partService.get(id)));
     }
 

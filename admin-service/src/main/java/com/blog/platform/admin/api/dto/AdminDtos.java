@@ -173,4 +173,9 @@ public final class AdminDtos {
             int size
     ) {
     }
+
+    public record MediaSectionUpdateRequest(
+            String section
+    ) {
+    }
 }

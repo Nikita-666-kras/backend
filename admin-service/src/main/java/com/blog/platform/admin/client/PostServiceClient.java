@@ -64,7 +64,7 @@ public class PostServiceClient {
         return requireData(response);
     }
 
-    public PageResponse search(String q, String status, int page, int size) {
+    public PageResponse search(String q, String status, UUID authorId, int page, int size) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/posts")
                 .queryParam("page", page)
                 .queryParam("size", size)
@@ -74,6 +74,9 @@ public class PostServiceClient {
         }
         if (status != null && !status.isBlank()) {
             builder.queryParam("status", status);
+        }
+        if (authorId != null) {
+            builder.queryParam("authorId", authorId);
         }
 
         ApiResponse<JsonNode> response = postServiceRestClient.get()
@@ -201,6 +204,25 @@ public class PostServiceClient {
     public ProcessingSettingsResponse processingSettings() {
         ApiResponse<ProcessingSettingsResponse> response = postServiceRestClient.get()
                 .uri("/media/processing-settings")
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+        return requireData(response);
+    }
+
+    public MediaResponse getMediaMeta(UUID id) {
+        ApiResponse<MediaResponse> response = postServiceRestClient.get()
+                .uri("/media/{id}/meta", id)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+        return requireData(response);
+    }
+
+    public MediaResponse updateMediaSection(UUID id, String section) {
+        ApiResponse<MediaResponse> response = postServiceRestClient.patch()
+                .uri("/media/{id}/section", id)
+                .body(Map.of("section", section))
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
                 });

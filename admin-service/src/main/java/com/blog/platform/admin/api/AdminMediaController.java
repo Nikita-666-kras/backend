@@ -5,6 +5,7 @@ import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchProcessResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaPageResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaProcessRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaResponse;
+import com.blog.platform.admin.api.dto.AdminDtos.MediaSectionUpdateRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.ProcessingSettingsResponse;
 import com.blog.platform.admin.client.PostServiceClient;
 import com.blog.platform.admin.security.AdminAccessGuard;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,8 +39,11 @@ public class AdminMediaController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false) String section
     ) {
-        accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(postServiceClient.uploadMedia(file, accessGuard.userId(request), section)));
+        String effectiveSection = section == null || section.isBlank() ? "OTHER" : section;
+        accessGuard.requireMediaAccess(request, effectiveSection);
+        return ResponseEntity.ok(ApiResponse.of(
+                postServiceClient.uploadMedia(file, accessGuard.userId(request), effectiveSection)
+        ));
     }
 
     @GetMapping
@@ -53,7 +58,7 @@ public class AdminMediaController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireMediaAccess(request, section);
         return ResponseEntity.ok(ApiResponse.of(
                 postServiceClient.listMedia(kind, section, q, square, watermark, incomplete, page, size)
         ));
@@ -61,7 +66,7 @@ public class AdminMediaController {
 
     @GetMapping("/processing-settings")
     public ResponseEntity<ApiResponse<ProcessingSettingsResponse>> processingSettings(HttpServletRequest request) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireAnyMediaAccess(request);
         return ResponseEntity.ok(ApiResponse.of(postServiceClient.processingSettings()));
     }
 
@@ -76,7 +81,8 @@ public class AdminMediaController {
             @PathVariable UUID id,
             @RequestBody MediaProcessRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        MediaResponse meta = postServiceClient.getMediaMeta(id);
+        accessGuard.requireMediaAccess(request, meta.section());
         return ResponseEntity.ok(ApiResponse.of(postServiceClient.processMedia(id, body)));
     }
 
@@ -85,8 +91,27 @@ public class AdminMediaController {
             HttpServletRequest request,
             @RequestBody MediaBatchProcessRequest body
     ) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireAnyMediaAccess(request);
+        if (body.ids() != null) {
+            for (UUID id : body.ids()) {
+                MediaResponse meta = postServiceClient.getMediaMeta(id);
+                accessGuard.requireMediaAccess(request, meta.section());
+            }
+        }
         return ResponseEntity.ok(ApiResponse.of(postServiceClient.processMediaBatch(body)));
+    }
+
+    @PatchMapping("/{id}/section")
+    public ResponseEntity<ApiResponse<MediaResponse>> updateSection(
+            HttpServletRequest request,
+            @PathVariable UUID id,
+            @RequestBody MediaSectionUpdateRequest body
+    ) {
+        accessGuard.requireAdmin(request);
+        if (body.section() == null || body.section().isBlank()) {
+            throw new IllegalArgumentException("Section is required");
+        }
+        return ResponseEntity.ok(ApiResponse.of(postServiceClient.updateMediaSection(id, body.section())));
     }
 
     @DeleteMapping("/{id}")

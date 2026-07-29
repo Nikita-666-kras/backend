@@ -1,5 +1,6 @@
 ﻿import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { redirectToAdminUi, isPurchaserOnly as userIsPurchaserOnly } from '@/utils/roles'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -23,21 +24,57 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
+
   if (to.meta.public) {
-    if (auth.isAuthenticated) return { name: 'dashboard' }
+    if (auth.isAuthenticated) {
+      if (!auth.user) {
+        try {
+          await auth.fetchMe()
+        } catch {
+          auth.clearSession()
+          return true
+        }
+      }
+      if (auth.isEditorOnly) {
+        redirectToAdminUi('/posts')
+        return false
+      }
+      if (!auth.canUseManagerUi) {
+        auth.clearSession()
+        return { name: 'login', query: { error: 'forbidden' } }
+      }
+      return { name: 'dashboard' }
+    }
     return true
   }
+
   if (!auth.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
+
   if (!auth.user) {
     try {
       await auth.fetchMe()
     } catch {
-      auth.logout()
+      auth.clearSession()
       return { name: 'login' }
     }
   }
+
+  if (auth.isEditorOnly) {
+    redirectToAdminUi('/posts')
+    return false
+  }
+  if (auth.user && userIsPurchaserOnly(auth.user.roles)) {
+    redirectToAdminUi('/parts')
+    return false
+  }
+
+  if (!auth.canUseManagerUi) {
+    auth.clearSession()
+    return { name: 'login', query: { error: 'forbidden' } }
+  }
+
   return true
 })
 

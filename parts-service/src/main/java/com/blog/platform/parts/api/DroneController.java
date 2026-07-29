@@ -1,12 +1,15 @@
 package com.blog.platform.parts.api;
 
 import com.blog.platform.common.api.ApiResponse;
+import com.blog.platform.common.exception.UnauthorizedException;
 import com.blog.platform.parts.api.dto.PartsDtos.DroneRequest;
 import com.blog.platform.parts.api.dto.PartsDtos.DroneResponse;
 import com.blog.platform.parts.api.dto.PartsDtos.PageResponse;
 import com.blog.platform.parts.api.dto.PartsDtos.StatusBody;
 import com.blog.platform.parts.domain.CatalogStatus;
+import com.blog.platform.parts.security.TrustedInternalRequest;
 import com.blog.platform.parts.service.DroneService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -34,13 +37,18 @@ public class DroneController {
             @RequestParam(required = false) String q,
             @RequestParam(required = false) CatalogStatus status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size
+            @RequestParam(defaultValue = "50") int size,
+            HttpServletRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.of(droneService.search(q, status, page, size)));
+        CatalogStatus effectiveStatus = TrustedInternalRequest.isTrusted(request) ? status : CatalogStatus.PUBLISHED;
+        return ResponseEntity.ok(ApiResponse.of(droneService.search(q, effectiveStatus, page, size)));
     }
 
     @GetMapping("/by-id/{id}")
-    public ResponseEntity<ApiResponse<DroneResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<DroneResponse>> getById(@PathVariable UUID id, HttpServletRequest request) {
+        if (!TrustedInternalRequest.isTrusted(request)) {
+            throw new UnauthorizedException("Authentication required");
+        }
         return ResponseEntity.ok(ApiResponse.of(droneService.get(id)));
     }
 

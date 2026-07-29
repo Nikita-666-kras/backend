@@ -34,7 +34,7 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public ResponseEntity<ApiResponse<DashboardStats>> dashboard(HttpServletRequest request) {
-        accessGuard.requireEditorOrAdmin(request);
+        accessGuard.requireAdminUiAccess(request);
         return ResponseEntity.ok(ApiResponse.of(adminPostService.dashboard()));
     }
 
@@ -47,13 +47,13 @@ public class AdminController {
             @RequestParam(defaultValue = "10") int size
     ) {
         accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.list(q, status, page, size)));
+        return ResponseEntity.ok(ApiResponse.of(adminPostService.list(request, q, status, page, size)));
     }
 
     @GetMapping("/posts/{id}")
     public ResponseEntity<ApiResponse<PostResponse>> get(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.get(id)));
+        return ResponseEntity.ok(ApiResponse.of(adminPostService.get(request, id)));
     }
 
     @PostMapping("/posts")
@@ -74,19 +74,19 @@ public class AdminController {
     ) {
         accessGuard.requireEditorOrAdmin(request);
         UUID authorId = accessGuard.userId(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.update(id, body, authorId)));
+        return ResponseEntity.ok(ApiResponse.of(adminPostService.update(request, id, body, authorId)));
     }
 
     @PostMapping("/posts/{id}/publish")
     public ResponseEntity<ApiResponse<PostResponse>> publish(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.publish(id)));
+        return ResponseEntity.ok(ApiResponse.of(adminPostService.publish(request, id)));
     }
 
     @PostMapping("/posts/{id}/archive")
     public ResponseEntity<ApiResponse<PostResponse>> archive(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.archive(id)));
+        return ResponseEntity.ok(ApiResponse.of(adminPostService.archive(request, id)));
     }
 
     @PostMapping("/posts/bulk")
@@ -100,7 +100,7 @@ public class AdminController {
         } else {
             accessGuard.requireEditorOrAdmin(request);
         }
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.bulk(body)));
+        return ResponseEntity.ok(ApiResponse.of(adminPostService.bulk(request, body)));
     }
 
     @DeleteMapping("/posts/{id}")

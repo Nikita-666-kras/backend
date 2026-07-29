@@ -1,5 +1,6 @@
 package com.blog.platform.article.security;
 
+import com.blog.platform.common.security.InternalAuthSupport;
 import com.blog.platform.common.security.InternalHeaders;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,18 +20,7 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (path.startsWith("/application/")) {
-            return true;
-        }
-        if (HttpMethod.GET.matches(request.getMethod()) && path.startsWith("/posts") && !path.startsWith("/posts/by-id/")) {
-            return true;
-        }
-        // Public file streaming: GET /media/{uuid} (not /media list or /meta)
-        if (HttpMethod.GET.matches(request.getMethod()) && path.matches("^/media/[0-9a-fA-F-]{36}$")) {
-            return true;
-        }
-        return false;
+        return request.getRequestURI().startsWith("/application/");
     }
 
     @Override
@@ -40,10 +30,27 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String key = request.getHeader(InternalHeaders.API_KEY);
-        if (key == null || !key.equals(internalApiKey)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        boolean trusted = InternalAuthSupport.isValidKey(key, internalApiKey);
+        request.setAttribute(InternalAuthSupport.TRUSTED_INTERNAL_ATTRIBUTE, trusted);
+
+        if (trusted || allowsUntrustedAccess(request)) {
+            filterChain.doFilter(request, response);
             return;
         }
-        filterChain.doFilter(request, response);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+
+    private boolean allowsUntrustedAccess(HttpServletRequest request) {
+        if (!HttpMethod.GET.matches(request.getMethod())) {
+            return false;
+        }
+        String path = request.getRequestURI();
+        if (path.matches("^/media/[0-9a-fA-F-]{36}$")) {
+            return true;
+        }
+        if (path.startsWith("/posts/by-id/")) {
+            return false;
+        }
+        return path.startsWith("/posts");
     }
 }

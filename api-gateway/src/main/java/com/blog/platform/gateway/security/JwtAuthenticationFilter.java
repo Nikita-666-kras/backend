@@ -8,8 +8,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -34,14 +36,23 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     public static final String HEADER_INTERNAL_API_KEY = "X-Internal-Api-Key";
     public static final String CLAIM_USER_ID = "uid";
     public static final String CLAIM_ROLES = "roles";
+    public static final String CLAIM_TOKEN_VERSION = "ver";
 
     private static final Set<String> EDITOR_ROLES = Set.of("ADMIN", "EDITOR");
     private static final Set<String> MANAGER_ROLES = Set.of("ADMIN", "MANAGER");
+    private static final Set<String> CATALOG_ROLES = Set.of("ADMIN", "PURCHASER");
 
     @Value("${security.jwt.secret}")
     private String jwtSecret;
-    @Value("${security.internal-api-key}")
-    private String internalApiKey;
+    @Value("${security.internal-api-keys.post:${POST_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}")
+    private String postInternalApiKey;
+    @Value("${security.internal-api-keys.parts:${PARTS_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}")
+    private String partsInternalApiKey;
+    @Value("${security.internal-api-keys.proposal:${PROPOSAL_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}")
+    private String proposalInternalApiKey;
+
+    @Autowired
+    private TokenVersionCache tokenVersionCache;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -50,7 +61,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
         stripIdentityHeaders(requestBuilder);
-        requestBuilder.header(HEADER_INTERNAL_API_KEY, internalApiKey);
 
         if (isBlockedPublic(path) || isBlockedDirectMediaApi(path, method)) {
             exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
@@ -77,6 +87,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
+        requestBuilder.header(HEADER_INTERNAL_API_KEY, resolveInternalApiKey(path));
+
         String token = authHeader.substring(7);
         try {
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
@@ -86,7 +98,23 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             String roles = extractRoles(claims);
             Set<String> roleSet = splitRoles(roles);
 
+            if (userId != null && !userId.isBlank()) {
+                long tokenVersion = extractTokenVersion(claims);
+                if (tokenVersionCache.isRevoked(UUID.fromString(userId), tokenVersion)) {
+                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                    return exchange.getResponse().setComplete();
+                }
+            }
+
+            if (requiresAdminPath(path) && !isAllowedAdminPath(path, roleSet)) {
+                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                return exchange.getResponse().setComplete();
+            }
             if (requiresEditorRole(path, method) && roleSet.stream().noneMatch(EDITOR_ROLES::contains)) {
+                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                return exchange.getResponse().setComplete();
+            }
+            if (requiresCatalogMutationRole(path, method) && roleSet.stream().noneMatch(CATALOG_ROLES::contains)) {
                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                 return exchange.getResponse().setComplete();
             }
@@ -174,16 +202,56 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return false;
         }
         if (path.startsWith("/admin/")) {
+            return false;
+        }
+        if (path.startsWith("/posts/by-id/")) {
             return true;
         }
         if (path.startsWith("/posts") && !HttpMethod.GET.equals(method)) {
             return true;
         }
-        if ((path.startsWith("/parts") || path.startsWith("/kits") || path.startsWith("/drones") || path.startsWith("/part-categories"))
-                && !HttpMethod.GET.equals(method)) {
-            return true;
-        }
         return path.startsWith("/auth/admin/");
+    }
+
+    private boolean requiresCatalogMutationRole(String path, HttpMethod method) {
+        if (HttpMethod.GET.equals(method)) {
+            return false;
+        }
+        return path.startsWith("/parts")
+                || path.startsWith("/kits")
+                || path.startsWith("/drones")
+                || path.startsWith("/part-categories");
+    }
+
+    private boolean requiresAdminPath(String path) {
+        return path.startsWith("/admin/");
+    }
+
+    private boolean isAllowedAdminPath(String path, Set<String> roleSet) {
+        if (path.startsWith("/admin/kp/")) {
+            return roleSet.contains("ADMIN");
+        }
+        if (path.startsWith("/admin/posts") || "/admin/dashboard".equals(path) || path.startsWith("/admin/dashboard/")) {
+            return roleSet.stream().anyMatch(EDITOR_ROLES::contains)
+                    || roleSet.stream().anyMatch(CATALOG_ROLES::contains);
+        }
+        if (isCatalogAdminPath(path)) {
+            return roleSet.stream().anyMatch(CATALOG_ROLES::contains);
+        }
+        if (path.startsWith("/admin/media")) {
+            return roleSet.contains("ADMIN")
+                    || roleSet.contains("EDITOR")
+                    || roleSet.contains("PURCHASER")
+                    || roleSet.contains("MANAGER");
+        }
+        return roleSet.contains("ADMIN");
+    }
+
+    private boolean isCatalogAdminPath(String path) {
+        return path.startsWith("/admin/parts")
+                || path.startsWith("/admin/kits")
+                || path.startsWith("/admin/drones")
+                || path.startsWith("/admin/part-categories");
     }
 
     private boolean requiresManagerRole(String path) {
@@ -234,6 +302,34 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    private String resolveInternalApiKey(String path) {
+        if (path.startsWith("/manager/kp")) {
+            return proposalInternalApiKey;
+        }
+        if (path.startsWith("/parts")
+                || path.startsWith("/kits")
+                || path.startsWith("/drones")
+                || path.startsWith("/part-categories")) {
+            return partsInternalApiKey;
+        }
+        return postInternalApiKey;
+    }
+
+    private long extractTokenVersion(Claims claims) {
+        Object raw = claims.get(CLAIM_TOKEN_VERSION);
+        if (raw instanceof Number number) {
+            return number.longValue();
+        }
+        if (raw instanceof String value && !value.isBlank()) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException ignored) {
+                return 0L;
+            }
+        }
+        return 0L;
     }
 
     @Override

@@ -34,4 +34,12 @@ public interface KitRepository extends JpaRepository<Kit, UUID> {
             @Param("droneId") UUID droneId,
             Pageable pageable
     );
+
+    @Query(value = """
+            SELECT COUNT(*) > 0 FROM kits k
+            LEFT JOIN kit_media km ON km.kit_id = k.id
+            WHERE k.status = 'PUBLISHED'
+              AND (k.cover_media_id = :mediaId OR km.media_id = :mediaId)
+            """, nativeQuery = true)
+    boolean existsPublishedMediaReference(@Param("mediaId") UUID mediaId);
 }

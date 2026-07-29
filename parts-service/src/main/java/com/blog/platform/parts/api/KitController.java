@@ -1,12 +1,15 @@
 package com.blog.platform.parts.api;
 
 import com.blog.platform.common.api.ApiResponse;
+import com.blog.platform.common.exception.UnauthorizedException;
 import com.blog.platform.parts.api.dto.PartsDtos.KitRequest;
 import com.blog.platform.parts.api.dto.PartsDtos.KitResponse;
 import com.blog.platform.parts.api.dto.PartsDtos.PageResponse;
 import com.blog.platform.parts.api.dto.PartsDtos.StatusBody;
 import com.blog.platform.parts.domain.CatalogStatus;
+import com.blog.platform.parts.security.TrustedInternalRequest;
 import com.blog.platform.parts.service.KitService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -35,13 +38,18 @@ public class KitController {
             @RequestParam(required = false) CatalogStatus status,
             @RequestParam(required = false) UUID droneId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            HttpServletRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.of(kitService.search(q, status, droneId, page, size)));
+        CatalogStatus effectiveStatus = TrustedInternalRequest.isTrusted(request) ? status : CatalogStatus.PUBLISHED;
+        return ResponseEntity.ok(ApiResponse.of(kitService.search(q, effectiveStatus, droneId, page, size)));
     }
 
     @GetMapping("/by-id/{id}")
-    public ResponseEntity<ApiResponse<KitResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<KitResponse>> getById(@PathVariable UUID id, HttpServletRequest request) {
+        if (!TrustedInternalRequest.isTrusted(request)) {
+            throw new UnauthorizedException("Authentication required");
+        }
         return ResponseEntity.ok(ApiResponse.of(kitService.get(id)));
     }
 

@@ -2,7 +2,10 @@ package com.blog.platform.sso.security;
 
 import com.blog.platform.common.security.JwtClaims;
 import com.blog.platform.common.security.SecurityHeaders;
+import com.blog.platform.sso.domain.AuthUser;
+import com.blog.platform.sso.repository.AuthUserRepository;
 import io.jsonwebtoken.Claims;
+import java.util.UUID;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +28,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final AuthUserRepository authUserRepository;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -32,6 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith("/auth/login")
                 || path.startsWith("/auth/refresh")
                 || path.startsWith("/auth/logout")
+                || path.startsWith("/internal/")
                 || path.startsWith("/application/");
     }
 
@@ -48,11 +53,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         try {
             Claims claims = jwtProvider.parse(authHeader.substring(7));
-            String userId = claims.get(JwtClaims.USER_ID, String.class);
+            UUID userId = UUID.fromString(claims.get(JwtClaims.USER_ID, String.class));
+            AuthUser user = authUserRepository.findById(userId)
+                    .orElseThrow(() -> new UnauthorizedException("User not found"));
+            ensureTokenVersion(claims, user);
+            if (!user.isEnabled()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
             String username = claims.getSubject();
             String roles = extractRoles(claims);
             HeaderOverrideRequest wrapped = new HeaderOverrideRequest(request);
-            wrapped.putHeader(SecurityHeaders.USER_ID, userId == null ? "" : userId);
+            wrapped.putHeader(SecurityHeaders.USER_ID, userId.toString());
             wrapped.putHeader(SecurityHeaders.USERNAME, username == null ? "" : username);
             wrapped.putHeader(SecurityHeaders.USER_ROLES, roles);
             filterChain.doFilter(wrapped, response);
@@ -67,6 +79,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return list.stream().map(Object::toString).collect(Collectors.joining(","));
         }
         return "";
+    }
+
+    private void ensureTokenVersion(Claims claims, AuthUser user) {
+        long tokenVersion = extractTokenVersion(claims);
+        if (tokenVersion < user.getAccessTokenVersion()) {
+            throw new UnauthorizedException("Token revoked");
+        }
+    }
+
+    private long extractTokenVersion(Claims claims) {
+        Object raw = claims.get(JwtClaims.TOKEN_VERSION);
+        if (raw instanceof Number number) {
+            return number.longValue();
+        }
+        if (raw instanceof String value && !value.isBlank()) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException ignored) {
+                return 0L;
+            }
+        }
+        return 0L;
     }
 
     private static final class HeaderOverrideRequest extends HttpServletRequestWrapper {

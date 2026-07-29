@@ -85,7 +85,7 @@ public class PartsCatalogClient {
         @org.springframework.context.annotation.Bean
         RestClient partsRestClient(
                 @Value("${parts-service.base-url}") String baseUrl,
-                @Value("${security.internal-api-key}") String apiKey
+                @Value("${security.internal-api-keys.parts:${PARTS_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}") String apiKey
         ) {
             return RestClient.builder()
                     .baseUrl(baseUrl)

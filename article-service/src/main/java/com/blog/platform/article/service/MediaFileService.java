@@ -9,6 +9,8 @@ import com.blog.platform.article.domain.MediaFile;
 import com.blog.platform.article.domain.MediaKind;
 import com.blog.platform.article.domain.MediaSection;
 import com.blog.platform.article.repository.MediaFileRepository;
+import com.blog.platform.common.exception.NotFoundException;
+import com.blog.platform.common.security.ContentDispositionSupport;
 import jakarta.annotation.PostConstruct;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -40,17 +42,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class MediaFileService {
 
-    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-            "image/gif"
-    );
-    private static final Set<String> ALLOWED_VIDEO_TYPES = Set.of("video/mp4", "video/webm");
-
     private final MediaFileRepository mediaFileRepository;
     private final MediaProperties mediaProperties;
     private final ImageProcessingService imageProcessingService;
+    private final MediaPublicAccessService mediaPublicAccessService;
 
     private Path storageRoot;
 
@@ -65,7 +60,12 @@ public class MediaFileService {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Файл не выбран");
         }
-        String contentType = normalizeContentType(file.getContentType());
+        String contentType;
+        try {
+            contentType = MediaContentTypeSniffer.detectAndValidate(file);
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Не удалось прочитать файл", ex);
+        }
         MediaKind kind = detectKind(contentType);
         long maxBytes = kind == MediaKind.IMAGE
                 ? mediaProperties.getMaxImageBytes()
@@ -158,8 +158,18 @@ public class MediaFileService {
         return toResponse(require(id));
     }
 
+    @Transactional
+    public MediaResponse updateSection(UUID id, String sectionRaw) {
+        MediaFile media = require(id);
+        media.setSection(parseSection(sectionRaw));
+        return toResponse(mediaFileRepository.save(media));
+    }
+
     @Transactional(readOnly = true)
-    public ResponseEntity<Resource> stream(UUID id) {
+    public ResponseEntity<Resource> stream(UUID id, boolean trustedInternal) {
+        if (!trustedInternal && !mediaPublicAccessService.isPubliclyAccessible(id)) {
+            throw new NotFoundException("Media not found");
+        }
         MediaFile media = require(id);
         Path path = storageRoot.resolve(media.getStoredName());
         if (!Files.isRegularFile(path)) {
@@ -168,7 +178,7 @@ public class MediaFileService {
         Resource resource = new FileSystemResource(path);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(media.getContentType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + media.getOriginalName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDispositionSupport.inlineFilename(media.getOriginalName()))
                 .body(resource);
     }
 
@@ -331,10 +341,10 @@ public class MediaFileService {
     }
 
     private MediaKind detectKind(String contentType) {
-        if (ALLOWED_IMAGE_TYPES.contains(contentType)) {
+        if (MediaContentTypeSniffer.isAllowedImage(contentType)) {
             return MediaKind.IMAGE;
         }
-        if (ALLOWED_VIDEO_TYPES.contains(contentType)) {
+        if (MediaContentTypeSniffer.isAllowedVideo(contentType)) {
             return MediaKind.VIDEO;
         }
         throw new IllegalArgumentException("Неподдерживаемый тип файла: " + contentType);

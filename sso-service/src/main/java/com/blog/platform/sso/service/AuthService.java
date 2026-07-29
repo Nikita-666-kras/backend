@@ -16,8 +16,10 @@ import com.blog.platform.sso.repository.RefreshTokenRepository;
 import com.blog.platform.sso.security.JwtProvider;
 import com.blog.platform.sso.security.TokenHasher;
 import io.jsonwebtoken.Claims;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -34,19 +36,26 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final TokenHasher tokenHasher;
+    private final LoginRateLimitService loginRateLimitService;
 
     @Transactional
-    public AuthResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request, String ipAddress) {
         AuthUser user = authUserRepository.findByUsername(request.username())
                 .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
+        loginRateLimitService.ensureLoginAllowed(user, ipAddress);
         if (!user.isEnabled() || !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            loginRateLimitService.onLoginFailure(user);
+            authUserRepository.save(user);
             throw new UnauthorizedException("Invalid credentials");
         }
+        loginRateLimitService.onLoginSuccess(user);
+        authUserRepository.save(user);
         return issueTokens(user);
     }
 
     @Transactional
-    public AuthResponse refresh(RefreshRequest request) {
+    public AuthResponse refresh(RefreshRequest request, String ipAddress) {
+        loginRateLimitService.ensureRefreshAllowed(ipAddress);
         String tokenHash = tokenHasher.hash(request.refreshToken());
         RefreshToken stored = refreshTokenRepository.findByTokenAndRevokedFalse(tokenHash)
                 .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
@@ -71,6 +80,7 @@ public class AuthService {
         refreshTokenRepository.findByTokenAndRevokedFalse(tokenHash).ifPresent(token -> {
             token.setRevoked(true);
             refreshTokenRepository.save(token);
+            authUserRepository.findById(token.getUserId()).ifPresent(this::invalidateAccessTokens);
         });
     }
 
@@ -80,10 +90,20 @@ public class AuthService {
         UUID userId = UUID.fromString(claims.get(JwtClaims.USER_ID, String.class));
         AuthUser user = authUserRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
+        ensureTokenVersion(claims, user);
         if (!user.isEnabled()) {
             throw new UnauthorizedException("User disabled");
         }
         return toResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, Long> activeTokenVersions() {
+        Map<UUID, Long> versions = new HashMap<>();
+        for (AuthUser user : authUserRepository.findAll()) {
+            versions.put(user.getId(), user.getAccessTokenVersion());
+        }
+        return versions;
     }
 
     @Transactional
@@ -116,6 +136,7 @@ public class AuthService {
             throw new ForbiddenException("Нельзя снять у себя роль ADMIN");
         }
         user.setRoles(new HashSet<>(roles));
+        invalidateAccessTokens(user);
         return toResponse(authUserRepository.save(user));
     }
 
@@ -131,8 +152,19 @@ public class AuthService {
                 token.setRevoked(true);
                 refreshTokenRepository.save(token);
             }
+            invalidateAccessTokens(user);
         }
         return toResponse(authUserRepository.save(user));
+    }
+
+    @Transactional
+    public void deleteUser(UUID id, UUID actorId) {
+        AuthUser user = requireUser(id);
+        if (user.getId().equals(actorId)) {
+            throw new ForbiddenException("Нельзя удалить собственный аккаунт");
+        }
+        refreshTokenRepository.deleteAll(refreshTokenRepository.findByUserIdAndRevokedFalse(user.getId()));
+        authUserRepository.delete(user);
     }
 
     private AuthUser requireUser(UUID id) {
@@ -141,7 +173,12 @@ public class AuthService {
     }
 
     private AuthResponse issueTokens(AuthUser user) {
-        String access = jwtProvider.createAccessToken(user.getId(), user.getUsername(), user.getRoles());
+        String access = jwtProvider.createAccessToken(
+                user.getId(),
+                user.getUsername(),
+                user.getRoles(),
+                user.getAccessTokenVersion()
+        );
         String refresh = tokenHasher.newOpaqueToken();
 
         RefreshToken refreshToken = new RefreshToken();
@@ -152,6 +189,33 @@ public class AuthService {
         refreshTokenRepository.save(refreshToken);
 
         return new AuthResponse(access, refresh, "Bearer");
+    }
+
+    private void invalidateAccessTokens(AuthUser user) {
+        user.setAccessTokenVersion(user.getAccessTokenVersion() + 1);
+        authUserRepository.save(user);
+    }
+
+    private void ensureTokenVersion(Claims claims, AuthUser user) {
+        long tokenVersion = extractTokenVersion(claims);
+        if (tokenVersion < user.getAccessTokenVersion()) {
+            throw new UnauthorizedException("Token revoked");
+        }
+    }
+
+    private long extractTokenVersion(Claims claims) {
+        Object raw = claims.get(JwtClaims.TOKEN_VERSION);
+        if (raw instanceof Number number) {
+            return number.longValue();
+        }
+        if (raw instanceof String value && !value.isBlank()) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException ignored) {
+                return 0L;
+            }
+        }
+        return 0L;
     }
 
     private UserResponse toResponse(AuthUser user) {

@@ -3,11 +3,14 @@ import { computed, ref } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { hubGroupLabels, hubModules } from '@/config/modules'
 import { useAuthStore } from '@/stores/auth'
+import { rolesLabel } from '@/utils/labels'
+import { adminUiUrl } from '@/utils/roles'
 
 const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const navOpen = ref(false)
+const adminUiLink = adminUiUrl()
 
 const groups = computed(() => {
   const order: Array<'main' | 'kp' | 'soon'> = ['main', 'kp', 'soon']
@@ -56,12 +59,18 @@ function closeNav() {
             <span v-else class="nav-link disabled">{{ item.title }} <span v-if="item.badge" class="nav-badge">{{ item.badge }}</span></span>
           </template>
         </template>
+
+        <template v-if="auth.canUseAdminUi || auth.isManagerOnly">
+          <p class="nav-group">Админка</p>
+          <a class="nav-link external" :href="`${adminUiLink}/media?section=OTHER`" target="_blank" rel="noopener">Медиа · Другое</a>
+          <a v-if="auth.canUseAdminUi" class="nav-link external" :href="adminUiLink" target="_blank" rel="noopener">Посты и каталог</a>
+        </template>
       </nav>
 
       <div class="userbox">
         <div>
           <strong>{{ auth.user?.username }}</strong>
-          <p class="muted">Менеджер</p>
+          <p class="muted">{{ rolesLabel(auth.user?.roles) }}</p>
         </div>
         <button class="btn secondary" type="button" @click="logout">Выйти</button>
       </div>
@@ -86,6 +95,7 @@ nav { display: grid; gap: 0.15rem; flex: 1; overflow: auto; }
 .nav-link { padding: 0.55rem 0.75rem; border-radius: 10px; color: #e8eef6; display: flex; align-items: center; gap: 0.4rem; }
 .nav-link.active, .nav-link:hover { background: rgba(141, 198, 63, 0.14); color: #fff; }
 .nav-link.disabled { opacity: 0.55; cursor: default; }
+.nav-link.external { color: #b6e86a; font-size: 0.88rem; }
 .nav-badge { font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 999px; background: rgba(255, 255, 255, 0.1); color: var(--muted); }
 .userbox { display: grid; gap: 0.6rem; padding-top: 0.85rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
 .content { min-width: 0; }
