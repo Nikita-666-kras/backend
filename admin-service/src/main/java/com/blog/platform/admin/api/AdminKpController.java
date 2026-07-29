@@ -22,31 +22,41 @@ public class AdminKpController {
     @GetMapping("/drone-models")
     public ApiResponse<?> models(HttpServletRequest request) {
         accessGuard.requireAdmin(request);
-        return ApiResponse.of(proposalServiceClient.droneModels());
+        var userId = accessGuard.userId(request);
+        var roles = accessGuard.roles(request);
+        return ApiResponse.of(proposalServiceClient.droneModels(userId, roles));
     }
 
     @PostMapping("/drone-models")
     public ApiResponse<?> createModel(HttpServletRequest request, @RequestBody DroneModelRequest body) {
         accessGuard.requireAdmin(request);
-        return ApiResponse.of(proposalServiceClient.createDroneModel(body));
+        var userId = accessGuard.userId(request);
+        var roles = accessGuard.roles(request);
+        return ApiResponse.of(proposalServiceClient.createDroneModel(body, userId, roles));
     }
 
     @PutMapping("/drone-models/{id}")
     public ApiResponse<?> updateModel(HttpServletRequest request, @PathVariable UUID id, @RequestBody DroneModelRequest body) {
         accessGuard.requireAdmin(request);
-        return ApiResponse.of(proposalServiceClient.updateDroneModel(id, body));
+        var userId = accessGuard.userId(request);
+        var roles = accessGuard.roles(request);
+        return ApiResponse.of(proposalServiceClient.updateDroneModel(id, body, userId, roles));
     }
 
     @GetMapping("/proposals")
     public ApiResponse<?> proposals(HttpServletRequest request) {
         accessGuard.requireAdmin(request);
-        return ApiResponse.of(proposalServiceClient.proposals());
+        var userId = accessGuard.userId(request);
+        var roles = accessGuard.roles(request);
+        return ApiResponse.of(proposalServiceClient.proposals(userId, roles));
     }
 
     @GetMapping("/proposals/{id}/pdf")
     public ResponseEntity<byte[]> downloadPdf(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireAdmin(request);
-        byte[] file = proposalServiceClient.downloadPdf(id);
+        var userId = accessGuard.userId(request);
+        var roles = accessGuard.roles(request);
+        byte[] file = proposalServiceClient.downloadPdf(id, userId, roles);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"kp-" + id + ".pdf\"")
                 .contentType(MediaType.APPLICATION_PDF)

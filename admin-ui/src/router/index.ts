@@ -49,7 +49,7 @@ router.beforeEach(async (to) => {
     try {
       await auth.fetchMe()
     } catch {
-      auth.logout()
+      auth.clearSession()
       return { name: 'login' }
     }
   }

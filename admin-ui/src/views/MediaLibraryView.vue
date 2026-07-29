@@ -42,6 +42,7 @@ const data = ref<MediaPage | null>(null)
 const loading = ref(false)
 const uploading = ref(false)
 const processing = ref(false)
+const deleting = ref(false)
 const progress = ref(0)
 const processLabel = ref('')
 const error = ref('')
@@ -70,10 +71,16 @@ const sectionLabelByValue = Object.fromEntries(sectionOptions.map((s) => [s.valu
 
 const selectedCount = computed(() => selectedIds.value.length)
 const processableOnPage = computed(() => data.value?.content.filter(isProcessableImage) ?? [])
+const selectedProcessableCount = computed(() =>
+  selectedIds.value.filter((id) => {
+    const item = data.value?.content.find((x) => x.id === id)
+    return item && isProcessableImage(item)
+  }).length
+)
 const allPageSelected = computed(
   () => processableOnPage.value.length > 0 && processableOnPage.value.every((i) => selectedIds.value.includes(i.id))
 )
-const busy = computed(() => uploading.value || processing.value || loading.value)
+const busy = computed(() => uploading.value || processing.value || loading.value || deleting.value)
 const autoPipelineLabel = computed(() => {
   const parts: string[] = []
   if (autoSquare.value) parts.push('квадрат')
@@ -187,6 +194,30 @@ function selectAllOnPage() {
 
 function clearSelection() {
   selectedIds.value = []
+}
+
+async function bulkDeleteSelected() {
+  const ids = [...selectedIds.value]
+  if (!ids.length) return
+  if (!confirm(`Удалить выбранные медиа (${ids.length})?`)) return
+  deleting.value = true
+  error.value = ''
+  message.value = ''
+  try {
+    const results = await Promise.allSettled(ids.map((id) => deleteMedia(id)))
+    const failed = results.filter((r) => r.status === 'rejected').length
+    selectedIds.value = []
+    await load()
+    if (failed) {
+      error.value = `Не удалось удалить: ${failed}`
+    } else {
+      message.value = `Удалено: ${ids.length}`
+    }
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || 'Ошибка удаления'
+  } finally {
+    deleting.value = false
+  }
 }
 
 function toggleSelectAll() {
@@ -441,33 +472,36 @@ watch(
         <span class="sel">{{ selectedCount ? `Выбрано ${selectedCount}` : 'Ничего не выбрано' }}</span>
         <button
           class="btn secondary"
-          :disabled="busy || !selectedCount"
+          :disabled="busy || !selectedProcessableCount"
           @click="runOnSelected({ square: true }, 'Квадрат')"
         >
           1:1
         </button>
         <button
           class="btn secondary"
-          :disabled="busy || !selectedCount"
+          :disabled="busy || !selectedProcessableCount"
           @click="runOnSelected({ watermark: true }, 'Watermark')"
         >
           WM
         </button>
         <button
           class="btn secondary"
-          :disabled="busy || !selectedCount"
+          :disabled="busy || !selectedProcessableCount"
           @click="runOnSelected({ convertToWebp: true }, 'WebP')"
         >
           WebP
         </button>
         <button
           class="btn"
-          :disabled="busy || !selectedCount"
+          :disabled="busy || !selectedProcessableCount"
           @click="runOnSelected({ square: true, watermark: true, convertToWebp: true }, 'Полный пайплайн')"
         >
           1:1 + WM + WebP
         </button>
         <button class="btn secondary" type="button" :disabled="!selectedCount" @click="clearSelection">Сброс</button>
+        <button class="btn danger" type="button" :disabled="busy || !selectedCount" @click="bulkDeleteSelected">
+          Удалить выбранное
+        </button>
       </div>
       <p class="hint">Горячие клавиши: Ctrl+A · 1 квадрат · 2 знак · 3 WebP · 4 полный · Esc</p>
     </div>
@@ -525,6 +559,15 @@ watch(
           <video v-else :src="imageSrc(item)" muted preload="metadata" />
           <span class="kind">{{ item.kind === 'IMAGE' ? 'Фото' : 'Видео' }}</span>
           <span class="section-badge">{{ sectionLabel(item.section) }}</span>
+          <button
+            class="select-chip"
+            type="button"
+            :class="{ selected: selectedIds.includes(item.id) }"
+            :aria-pressed="selectedIds.includes(item.id)"
+            @click.stop="toggleSelect(item.id)"
+          >
+            {{ selectedIds.includes(item.id) ? '✓' : '' }}
+          </button>
           <span v-if="item.square" class="proc-badge square">1:1</span>
           <span v-if="item.watermark" class="proc-badge wm">WM</span>
           <span v-if="isWebp(item)" class="proc-badge webp">WebP</span>
@@ -810,6 +853,30 @@ watch(
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.select-chip {
+  position: absolute;
+  left: 0.4rem;
+  top: 1.85rem;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(2, 18, 40, 0.78);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  z-index: 4;
+  padding: 0;
+  cursor: pointer;
+}
+
+.select-chip.selected {
+  border-color: rgba(141, 198, 63, 0.95);
+  background: rgba(141, 198, 63, 0.92);
+  color: #062554;
 }
 
 .proc-badge {

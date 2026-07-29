@@ -84,6 +84,7 @@ option {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   color: var(--ink);
+  box-shadow: 0 8px 24px rgba(4, 16, 34, 0.22);
 }
 
 .btn {
@@ -97,6 +98,7 @@ option {
 
 .btn:hover {
   filter: brightness(1.05);
+  transform: translateY(-1px);
 }
 
 .btn.secondary {
@@ -191,6 +193,39 @@ select:focus {
   color: var(--on-light-muted);
 }
 
+.on-light .btn.secondary,
+.surface-light .btn.secondary {
+  background: #e8eef5;
+  color: #12375d;
+  border-color: #bccadb;
+}
+
+.on-light .btn.secondary:hover,
+.surface-light .btn.secondary:hover {
+  background: #dbe6f1;
+  color: #0d2c4c;
+  border-color: #9fb5cd;
+}
+
+.on-light .btn.danger,
+.surface-light .btn.danger {
+  background: #fee2e2;
+  color: #8f1d1d;
+  border-color: #f3b0b0;
+}
+
+.on-light .btn.danger:hover,
+.surface-light .btn.danger:hover {
+  background: #fecaca;
+  color: #7f1d1d;
+  border-color: #ea9a9a;
+}
+
+.on-light .btn.ghost,
+.surface-light .btn.ghost {
+  color: #3b526a;
+}
+
 .on-light input,
 .on-light textarea,
 .on-light select,
@@ -278,6 +313,16 @@ select:focus {
   align-items: center;
   padding: 0.75rem;
   margin-bottom: 0.75rem;
+  border-radius: 10px;
+}
+
+table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.on-light table tr:hover td,
+.surface-light table tr:hover td {
+  background: #eaf1f8;
 }
 
 .rise {
@@ -293,4 +338,54 @@ input[type="color"] {
 input[type="checkbox"],
 input[type="radio"] {
   accent-color: var(--accent);
+}
+
+@media (max-width: 960px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbar {
+    padding: 0.65rem;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
+
+  .card {
+    border-radius: 10px;
+  }
+
+  .btn {
+    min-height: 40px;
+    padding: 0.55rem 0.8rem;
+  }
+
+  .toolbar > * {
+    width: 100%;
+  }
+
+  .toolbar .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .page-header h1,
+  .login-card h1 {
+    font-size: 1.35rem;
+  }
+
+  .eyebrow {
+    letter-spacing: 0.08em;
+  }
+
+  table th,
+  table td {
+    font-size: 0.82rem;
+  }
 }

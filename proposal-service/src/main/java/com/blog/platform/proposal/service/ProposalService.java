@@ -4,8 +4,11 @@ import com.blog.platform.proposal.api.dto.KpDtos;
 import com.blog.platform.proposal.api.dto.KpDtos.DroneModelDto;
 import com.blog.platform.proposal.api.dto.KpDtos.DroneModelUpsertRequest;
 import com.blog.platform.proposal.api.dto.KpDtos.ProposalDto;
+import com.blog.platform.proposal.api.dto.KpDtos.ProposalKitItemDto;
 import com.blog.platform.proposal.api.dto.KpDtos.ProposalLineDto;
 import com.blog.platform.proposal.api.dto.KpDtos.ProposalUpsertRequest;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProposalService {
     private final JdbcTemplate jdbc;
     private final KpHtmlPdfService kpHtmlPdfService;
+    private final ObjectMapper objectMapper;
 
     public List<DroneModelDto> listModels(boolean onlyActive) {
         String sql = "select id, code, name, default_price, sort_order, active from kp_drone_models "
@@ -124,7 +128,8 @@ public class ProposalService {
                 lr.getInt("qty"),
                 lr.getBigDecimal("unit_price"),
                 lr.getInt("discount_pct"),
-                lr.getBigDecimal("line_total")
+                lr.getBigDecimal("line_total"),
+                readKitItems(lr.getString("kit_items"))
         ), proposalId);
         return new ProposalDto(
                 proposalId, rs.getInt("number"), rs.getObject("manager_id", UUID.class), rs.getString("manager_username"),
@@ -139,10 +144,27 @@ public class ProposalService {
             int discount = l.lineType() == KpDtos.LineType.KIT ? normalizeDiscount(l.discountPct()) : 0;
             BigDecimal raw = l.unitPrice().multiply(BigDecimal.valueOf(l.qty()));
             BigDecimal total = raw.multiply(BigDecimal.valueOf(100 - discount)).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            String kitJson = null;
+            if (l.lineType() == KpDtos.LineType.KIT && l.kitItems() != null && !l.kitItems().isEmpty()) {
+                try {
+                    kitJson = objectMapper.writeValueAsString(l.kitItems());
+                } catch (Exception ex) {
+                    throw new IllegalStateException("Failed to serialize kit items", ex);
+                }
+            }
             jdbc.update("""
-                    insert into kp_proposal_lines(id, proposal_id, line_type, ref_id, sku, name, qty, unit_price, discount_pct, line_total)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, UUID.randomUUID(), proposalId, l.lineType().name(), l.refId(), l.sku(), l.name(), l.qty(), l.unitPrice(), discount, total);
+                    insert into kp_proposal_lines(id, proposal_id, line_type, ref_id, sku, name, qty, unit_price, discount_pct, line_total, kit_items)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb)
+                    """, UUID.randomUUID(), proposalId, l.lineType().name(), l.refId(), l.sku(), l.name(), l.qty(), l.unitPrice(), discount, total, kitJson);
+        }
+    }
+
+    private List<ProposalKitItemDto> readKitItems(String json) {
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<ProposalKitItemDto>>() {});
+        } catch (Exception ex) {
+            return List.of();
         }
     }
 

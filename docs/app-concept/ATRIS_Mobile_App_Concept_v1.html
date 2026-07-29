@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<title>АТРИС — Концепт мобильного приложения</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #F7F9FC;
+    background: #021331;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    padding: 12mm 14mm 18mm;
+    position: relative;
+    page-break-after: always;
+    overflow: hidden;
+    background: #062554;
+  }
+  .page:last-child { page-break-after: auto; }
+  header {
+    overflow: hidden;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #1E3F6E;
+  }
+  .brand {
+    float: left;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #FFFFFF;
+  }
+  .brand span { color: #8DC63F; }
+  .contacts {
+    float: right;
+    text-align: right;
+    font-size: 10.5px;
+    line-height: 1.45;
+    color: #B8C4D9;
+  }
+  .contacts strong { color: #FFFFFF; }
+  .kicker {
+    clear: both;
+    color: #8DC63F;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 9.5px;
+    font-weight: 700;
+    margin: 8px 0 6px;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #FFFFFF;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: #B8C4D9;
+    max-width: 560px;
+    margin-bottom: 12px;
+  }
+  .meta {
+    font-size: 11px;
+    color: #D8E0EC;
+    margin-bottom: 14px;
+  }
+  .meta strong { color: #FFFFFF; }
+  .tags { margin-bottom: 14px; }
+  .tag {
+    display: inline-block;
+    border: 1px solid #1E3F6E;
+    background: #0A2E5C;
+    color: #B8C4D9;
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 5px 9px;
+    border-radius: 8px;
+    margin: 0 5px 5px 0;
+  }
+  .section-label {
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8DC63F;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+  .panel {
+    background: #0A2E5C;
+    border: 1px solid #1E3F6E;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .panel p {
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: #D0D8E4;
+  }
+  .panel strong { color: #FFFFFF; }
+  .grid-2 {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+  }
+  .grid-2 td {
+    width: 50%;
+    vertical-align: top;
+    padding: 0 8px 8px 0;
+    border: none;
+  }
+  .card {
+    background: #0A2E5C;
+    border: 1px solid #1E3F6E;
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 92px;
+  }
+  .card .num {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #8DC63F;
+    color: #062554;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 22px;
+    margin-bottom: 6px;
+  }
+  .card h3 {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    margin-bottom: 4px;
+  }
+  .card p {
+    font-size: 10.5px;
+    color: #B8C4D9;
+    line-height: 1.35;
+  }
+  .shot-wrap {
+    text-align: center;
+    margin-top: 6px;
+  }
+  .shot {
+    max-width: 100%;
+    max-height: 195mm;
+    border-radius: 14px;
+    border: 1px solid #1E3F6E;
+    background: #021331;
+  }
+  .shot.phone {
+    max-height: 210mm;
+  }
+  .caption {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #B8C4D9;
+    line-height: 1.4;
+  }
+  .caption strong { color: #FFFFFF; }
+  .total-box {
+    border: 2px solid #8DC63F;
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: #0A2E5C;
+    margin-top: 10px;
+  }
+  .total-box .cap {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8DC63F;
+    font-weight: 700;
+  }
+  .total-box .amt {
+    font-size: 18px;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 4px 0;
+  }
+  .total-box .note { font-size: 10.5px; color: #B8C4D9; line-height: 1.4; }
+  footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 8px 14mm;
+    background: #021331;
+    border-top: 1px solid #1E3F6E;
+    font-size: 8.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #B8C4D9;
+    font-weight: 600;
+  }
+  footer .right { float: right; color: #FFFFFF; }
+  ul.bullets {
+    margin: 6px 0 0 16px;
+    color: #D0D8E4;
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+  ul.bullets li { margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<section class="page">
+  <header>
+    <div class="brand">АТР<span>ИС</span></div>
+    <div class="contacts">
+      <strong>+7 (938) 119-29-82</strong><br/>
+      privet@atris.su<br/>
+      www.atris.su<br/>
+      Ростов-на-Дону
+    </div>
+  </header>
+
+  <div class="kicker">Концепт-презентация</div>
+  <h1>Мобильный хаб АТРИС</h1>
+  <p class="subtitle">Единое приложение для обучения, ремонта, заказа запчастей и расчёта химии для агродронов DJI Agras и Vector AGR.</p>
+  <p class="meta">Статус: <strong>UI-концепт</strong> · Версия v1 · Июль 2026</p>
+
+  <div class="tags">
+    <span class="tag">Ремонт</span>
+    <span class="tag">Каталог</span>
+    <span class="tag">Обучение</span>
+    <span class="tag">Калькулятор химии</span>
+    <span class="tag">Поддержка</span>
+    <span class="tag">Форум</span>
+  </div>
+
+  <div class="section-label">— Зачем это нужно</div>
+  <div class="panel">
+    <p>
+      Операторы и сервисные инженеры работают с агродронами в поле и на базе.
+      Сейчас знания, инструкции, запчасти и расчёты разрознены.
+      <strong>Мобильный хаб АТРИС</strong> собирает это в одном приложении в фирменном стиле компании.
+    </p>
+  </div>
+
+  <div class="section-label">— Ключевые сценарии</div>
+  <table class="grid-2"><tr>
+    <td><div class="card"><div class="num">01</div><h3>Интерактивный ремонт</h3><p>Выбор модели → кликабельные узлы на схеме дрона → материалы и таймкоды видеогайда.</p></div></td>
+    <td><div class="card"><div class="num">02</div><h3>Каталог запчастей</h3><p>Поиск по артикулу, корзина и заказ оригинальных комплектующих.</p></div></td>
+  </tr><tr>
+    <td><div class="card"><div class="num">03</div><h3>Калькулятор химии</h3><p>Норма, площадь, рабочий раствор → объём препарата, воды и число заправок бака.</p></div></td>
+    <td><div class="card"><div class="num">04</div><h3>Обучение и поддержка</h3><p>Видео по сборке/разборке, чат с инженерами АТРИС и форум пользователей.</p></div></td>
+  </tr></table>
+
+  <div class="total-box">
+    <div class="cap">Фокус презентации</div>
+    <div class="amt">Concept art · UX-сценарии</div>
+    <div class="note">Ниже — экраны приложения в стиле АТРИС. Это концепт интерфейса, не финальный релиз.</div>
+  </div>
+
+  <footer>
+    <span>Простые решения. Реальный результат.</span>
+    <span class="right">ООО «АТРИС»</span>
+  </footer>
+</section>
+
+<!-- 01 HUB -->
+<section class="page">
+  <header>
+    <div class="brand">АТР<span>ИС</span></div>
+    <div class="contacts"><strong>Экран 01</strong><br/>Главная</div>
+  </header>
+  <div class="kicker">Мобильный хаб</div>
+  <h1>Точка входа в экосистему</h1>
+  <p class="subtitle">Шесть модулей на одном экране: ремонт, каталог, обучение, химия, поддержка и форум.</p>
+  <div class="shot-wrap">
+    <img class="shot phone" src="slides/01-hub.png" alt="Главный экран хаба"/>
+    <p class="caption"><strong>Пользовательский путь:</strong> открыл приложение → выбрал задачу. Акцент «Ремонт» показывает приоритетный сценарий для сервиса.</p>
+  </div>
+  <footer>
+    <span>Концепт мобильного приложения</span>
+    <span class="right">01 / 07</span>
+  </footer>
+</section>
+
+<!-- 02 HOTSPOTS T50 -->
+<section class="page">
+  <header>
+    <div class="brand">АТР<span>ИС</span></div>
+    <div class="contacts"><strong>Экран 02</strong><br/>Ремонт · T50</div>
+  </header>
+  <div class="kicker">Интерактивная схема</div>
+  <h1>DJI AGRAS T50</h1>
+  <p class="subtitle">Кликабельные узлы на изображении дрона: АКБ, мотор, форсунка, радар, шасси.</p>
+  <div class="shot-wrap">
+    <img class="shot phone" src="slides/02-hotspots-t50.png" alt="Интерактивная схема T50"/>
+    <p class="caption"><strong>Сценарий:</strong> нажатие на узел открывает список материалов по ремонту и обслуживанию этой части.</p>
+  </div>
+  <footer>
+    <span>Концепт мобильного приложения</span>
+    <span class="right">02 / 07</span>
+  </footer>
+</section>
+
+<!-- 03 MATERIALS -->
+<section class="page">
+  <header>
+    <div class="brand">АТР<span>ИС</span></div>
+    <div class="contacts"><strong>Экран 03</strong><br/>Материалы узла</div>
+  </header>
+  <div class="kicker">Ремонт · контент</div>
+  <h1>Гайды + таймкоды видео</h1>
+  <p class="subtitle">Для выбранного узла — список материалов и видеогайд с точными метками времени.</p>
+  <div class="shot-wrap">
+    <img class="shot phone" src="slides/03-part-materials.png" alt="Материалы по ремонту мотора"/>
+    <p class="caption"><strong>Ценность:</strong> инженер сразу попадает на нужный фрагмент ролика (например, «05:40 — Установка нового мотора»).</p>
+  </div>
+  <footer>
+    <span>Концепт мобильного приложения</span>
+    <span class="right">03 / 07</span>
+  </footer>
+</section>
+
+<!-- 04 CATALOG -->
+<section class="page">
+  <header>
+    <div class="brand">АТР<span>ИС</span></div>
+    <div class="contacts"><strong>Экран 04</strong><br/>Каталог</div>
+  </header>
+  <div class="kicker">Коммерция</div>
+  <h1>Каталог запчастей</h1>
+  <p class="subtitle">Поиск, категории, карточки позиций и корзина для заказа комплектующих агродрона.</p>
+  <div class="shot-wrap">
+    <img class="shot phone" src="slides/04-parts-catalog.png" alt="Каталог запчастей"/>
+    <p class="caption"><strong>Ассортимент концепта:</strong> моторы, АКБ, форсунки распылителя, радары ФАР — позиции именно дроновой номенклатуры.</p>
+  </div>
+  <footer>
+    <span>Концепт мобильного приложения</span>
+    <span class="right">04 / 07</span>
+  </footer>
+</section>
+
+<!-- 05 CHEM -->
+<section class="page">
+  <header>
+    <div class="brand">АТР<span>ИС</span></div>
+    <div class="contacts"><strong>Экран 05</strong><br/>Калькулятор</div>
+  </header>
+  <div class="kicker">Полевая утилита</div>
+  <h1>Калькулятор химии</h1>
+  <p class="subtitle">Расчёт препарата, воды и числа заправок бака под выбранную модель (в т.ч. HD580).</p>
+  <div class="shot-wrap">
+    <img class="shot phone" src="slides/05-chem-calc.png" alt="Калькулятор химии"/>
+    <p class="caption"><strong>Вход:</strong> культура, препарат, норма, площадь, раствор. <strong>Выход:</strong> литры препарата/воды и заправки бака.</p>
+  </div>
+  <footer>
+    <span>Концепт мобильного приложения</span>
+    <span class="right">05 / 07</span>
+  </footer>
+</section>
+
+<!-- 06 SUPPORT CHAT -->
+<section class="page">
+  <header>
+    <div class="brand">АТР<span>ИС</span></div>
+    <div class="contacts"><strong>Экран 06</strong><br/>Поддержка</div>
+  </header>
+  <div class="kicker">Сервис 24/7 · FR ⇄ RU</div>
+  <h1>Чат с поддержкой</h1>
+  <p class="subtitle">Прямая связь с инженером АТРИС с автопереводом: клиент пишет на своём языке, специалист отвечает на русском.</p>
+  <div class="shot-wrap">
+    <img class="shot phone" src="slides/06-support-chat.png" alt="Чат поддержки АТРИС с автопереводом FR⇄RU"/>
+    <p class="caption"><strong>Сценарий:</strong> оператор пишет по-французски → текст переводится на русский для инженера → ответ инженера переводится обратно на французский.</p>
+  </div>
+  <footer>
+    <span>Концепт мобильного приложения</span>
+    <span class="right">06 / 07</span>
+  </footer>
+</section>
+
+<!-- CLOSE -->
+<section class="page">
+  <header>
+    <div class="brand">АТР<span>ИС</span></div>
+    <div class="contacts">
+      <strong>+7 (938) 119-29-82</strong><br/>
+      privet@atris.su<br/>
+      www.atris.su
+    </div>
+  </header>
+  <div class="kicker">Следующий шаг</div>
+  <h1>От концепта к пилоту</h1>
+  <p class="subtitle">Готовы обсудить приоритеты модулей, контент (видео/схемы) и формат партнёрского пилота.</p>
+
+  <div class="section-label">— Что уже показано</div>
+  <div class="panel">
+    <ul class="bullets">
+      <li>Единый фирменный UI в стиле АТРИС (тёмно-синий + зелёный акцент)</li>
+      <li>Сценарий ремонта с интерактивной схемой T50 и HD580</li>
+      <li>Материалы узла с таймкодами видеогайда</li>
+      <li>Каталог запчастей с корзиной</li>
+      <li>Калькулятор химии с привязкой к баку дрона</li>
+      <li>Чат поддержки с инженером АТРИС и автопереводом FR ⇄ RU</li>
+    </ul>
+  </div>
+
+  <div class="section-label">— Roadmap (концептуально)</div>
+  <table class="grid-2"><tr>
+    <td><div class="card"><div class="num">1</div><h3>MVP</h3><p>Ремонт + каталог + видеогайды по 1–2 моделям.</p></div></td>
+    <td><div class="card"><div class="num">2</div><h3>Рост</h3><p>Калькулятор химии, чат поддержки, личный кабинет заказов.</p></div></td>
+  </tr><tr>
+    <td><div class="card"><div class="num">3</div><h3>Сообщество</h3><p>Форум, база кейсов, обучение операторов.</p></div></td>
+    <td><div class="card"><div class="num">4</div><h3>Интеграции</h3><p>Связка с CRM/складом и менеджерским хабом АТРИС.</p></div></td>
+  </tr></table>
+
+  <div class="total-box">
+    <div class="cap">Контакты</div>
+    <div class="amt">ООО «АТРИС»</div>
+    <div class="note">+7 (938) 119-29-82 · privet@atris.su · www.atris.su · Ростов-на-Дону<br/>Документ: ATRIS_Mobile_App_Concept_v1 · Concept UI, не коммерческое предложение на разработку.</div>
+  </div>
+
+  <footer>
+    <span>Простые решения. Реальный результат.</span>
+    <span class="right">07 / 07</span>
+  </footer>
+</section>
+
+</body>
+</html>

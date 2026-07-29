@@ -7,27 +7,27 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: "Arial", sans-serif;
-    color: #062554;
-    background: #EEF2F8;
+    color: #F7F9FC;
+    background: #021331;
     -fs-pdf-font-embed: embed;
   }
   .page {
     width: 210mm;
     height: 297mm;
-    padding: 11mm 13mm 14mm;
+    padding: 11mm 13mm 16mm;
     position: relative;
     page-break-after: always;
     overflow: hidden;
-    background-color: #FFFFFF;
+    background-color: #062554;
   }
   .page:last-child { page-break-after: auto; }
   header {
     display: block;
     margin-bottom: 12px;
-    padding-bottom: 10px;
+    padding-bottom: 9px;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: #D8E0EC;
+    border-bottom-color: #1E3F6E;
     overflow: hidden;
   }
   .logo { height: 36px; float: left; }
@@ -35,101 +35,97 @@
     float: right;
     text-align: right;
     font-size: 10.5px;
-    line-height: 1.5;
-    color: #5A6B85;
+    line-height: 1.45;
+    color: #B8C4D9;
   }
-  .contacts strong { color: #062554; font-weight: 700; }
+  .contacts strong { color: #FFFFFF; }
   .kicker {
     color: #8DC63F;
     text-transform: uppercase;
     letter-spacing: .16em;
     font-size: 9.5px;
     font-weight: 700;
-    margin: 6px 0 5px;
+    margin: 4px 0 6px;
     clear: both;
   }
   h1 {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 800;
     line-height: 1.05;
-    color: #062554;
+    color: #FFFFFF;
     margin-bottom: 6px;
-    letter-spacing: -.02em;
   }
   .subtitle {
     font-size: 12px;
-    line-height: 1.45;
-    color: #5A6B85;
-    margin-bottom: 4px;
-    max-width: 560px;
+    line-height: 1.4;
+    color: #B8C4D9;
+    margin-bottom: 6px;
+    max-width: 580px;
   }
-  .recipient {
+  .meta {
     font-size: 11px;
-    color: #062554;
+    color: #D8E0EC;
     margin-bottom: 10px;
   }
-  .recipient strong { font-weight: 700; }
+  .meta strong { color: #FFFFFF; }
   .tags { margin-bottom: 10px; }
   .tag {
     display: inline-block;
     border-width: 1px;
     border-style: solid;
-    border-color: #D8E0EC;
-    background: #F4F7FB;
-    color: #5A6B85;
+    border-color: #1E3F6E;
+    background: #0A2E5C;
+    color: #B8C4D9;
     font-size: 9.5px;
     font-weight: 600;
-    padding: 5px 10px;
+    padding: 5px 9px;
     border-radius: 8px;
     margin: 0 5px 5px 0;
   }
   .section-label {
     font-size: 9.5px;
-    letter-spacing: .14em;
+    letter-spacing: .12em;
     text-transform: uppercase;
     color: #8DC63F;
     font-weight: 700;
-    margin: 8px 0 6px;
-  }
-  .section-label:before {
-    content: "— ";
-    color: #8DC63F;
+    margin: 6px 0 6px;
   }
   .panel {
+    background: #0A2E5C;
     border-width: 1px;
     border-style: solid;
-    border-color: #D8E0EC;
-    border-radius: 10px;
+    border-color: #1E3F6E;
+    border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 10px;
+    margin-bottom: 9px;
   }
   table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
   thead th {
     text-align: left;
     padding: 7px 9px;
     font-size: 8.5px;
-    letter-spacing: .08em;
+    letter-spacing: .06em;
     text-transform: uppercase;
-    color: #FFFFFF;
+    color: #B8C4D9;
     font-weight: 700;
-    background: #062554;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #1E3F6E;
   }
   tbody td {
     padding: 6px 9px;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: #E8EDF4;
-    color: #062554;
+    border-bottom-color: #1E3F6E;
+    color: #D8E0EC;
     vertical-align: top;
   }
   tbody tr:last-child td { border-bottom: none; }
-  tbody td strong { font-weight: 700; }
-  tbody td.num { color: #8DC63F; font-weight: 800; width: 28px; }
-  tbody td.purpose { color: #5A6B85; font-size: 10px; }
-  .included {
-    padding: 10px 12px;
-    background: #F8FAFD;
-  }
+  tbody td strong { color: #FFFFFF; }
+  .num { color: #8DC63F; font-weight: 800; width: 28px; }
+  .purpose { color: #B8C4D9; font-size: 10px; }
+  .green { color: #8DC63F !important; }
+  .included { padding: 10px 11px; }
   .included h2 {
     font-size: 9.5px;
     letter-spacing: .12em;
@@ -138,92 +134,83 @@
     margin-bottom: 7px;
     font-weight: 700;
   }
-  .included h2:before { content: "— "; }
   .included-grid { width: 100%; }
-  .included-grid td { width: 50%; vertical-align: top; padding-right: 8px; }
+  .included-grid td { width: 50%; vertical-align: top; padding-right: 8px; border: none; }
   .included li {
     font-size: 10.5px;
-    color: #062554;
-    margin: 0 0 4px 14px;
+    color: #D0D8E4;
+    margin: 0 0 4px 12px;
   }
-  .bottom-row { width: 100%; margin-top: 8px; }
-  .bottom-row td { vertical-align: bottom; }
+  .bottom-row { width: 100%; margin-top: 6px; }
+  .bottom-row td { vertical-align: bottom; border: none; padding: 0; }
   .about {
     font-size: 10.5px;
     line-height: 1.45;
-    color: #5A6B85;
+    color: #B8C4D9;
     padding-right: 12px;
   }
-  .about strong { color: #062554; display: block; margin-top: 4px; }
+  .about strong { color: #FFFFFF; display: block; margin-top: 4px; }
   .total-box {
     border-width: 2px;
     border-style: solid;
     border-color: #8DC63F;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 10px 14px;
     text-align: right;
-    min-width: 170px;
+    background: #0A2E5C;
   }
   .total-box .cap {
     font-size: 9px;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: #5A6B85;
+    color: #8DC63F;
     font-weight: 700;
   }
   .total-box .amt {
     font-size: 24px;
     font-weight: 800;
-    color: #062554;
+    color: #FFFFFF;
     margin: 2px 0;
   }
-  .total-box .note {
-    font-size: 9.5px;
-    color: #5A6B85;
-  }
+  .total-box .note { font-size: 9.5px; color: #B8C4D9; }
   .term {
-    margin-bottom: 10px;
-    padding-bottom: 10px;
+    margin-bottom: 9px;
+    padding-bottom: 9px;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: #E8EDF4;
+    border-bottom-color: #1E3F6E;
   }
-  .term:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .term .num {
+  .term:last-child { border-bottom: none; }
+  .term .num-badge {
     display: inline-block;
     width: 22px;
     height: 22px;
     border-radius: 50%;
     background: #8DC63F;
-    color: #FFFFFF;
+    color: #062554;
     font-weight: 800;
     font-size: 10px;
     text-align: center;
     line-height: 22px;
     margin-right: 8px;
   }
-  .term h3 {
-    display: inline;
-    font-size: 12px;
-    color: #062554;
-    font-weight: 700;
-  }
+  .term h3 { display: inline; font-size: 12px; color: #FFFFFF; font-weight: 700; }
   .term p {
     font-size: 10.5px;
-    color: #5A6B85;
+    color: #B8C4D9;
     margin: 4px 0 0 30px;
-    line-height: 1.45;
+    line-height: 1.4;
   }
-  .cards { width: 100%; margin-top: 8px; }
-  .cards td { width: 50%; vertical-align: top; padding: 0 5px 8px 0; }
+  .cards { width: 100%; margin-top: 6px; }
+  .cards td { width: 50%; vertical-align: top; padding: 0 5px 8px 0; border: none; }
   .card {
-    background: #F4F7FB;
+    background: #0A2E5C;
     border-width: 1px;
     border-style: solid;
-    border-color: #D8E0EC;
-    border-radius: 10px;
+    border-color: #1E3F6E;
+    border-radius: 12px;
     padding: 10px 11px;
-    min-height: 88px;
+    min-height: 86px;
   }
   .card .icon {
     display: inline-block;
@@ -231,7 +218,7 @@
     height: 22px;
     border-radius: 6px;
     background: #8DC63F;
-    color: #FFFFFF;
+    color: #062554;
     font-size: 9px;
     font-weight: 800;
     text-align: center;
@@ -242,46 +229,39 @@
     font-size: 10px;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color: #062554;
+    color: #FFFFFF;
     font-weight: 800;
     margin-bottom: 4px;
   }
-  .card p {
-    font-size: 10px;
-    color: #5A6B85;
-    line-height: 1.4;
-  }
-  .closing { width: 100%; margin-top: 10px; }
-  .closing td { vertical-align: bottom; }
-  .closing-text h2 {
-    font-size: 14px;
-    color: #062554;
-    font-weight: 800;
-    margin-bottom: 3px;
-  }
-  .closing-text p {
-    font-size: 10.5px;
-    color: #5A6B85;
-  }
+  .card p { font-size: 10px; color: #B8C4D9; line-height: 1.35; }
+  .closing { width: 100%; margin-top: 8px; }
+  .closing td { vertical-align: bottom; border: none; padding: 0; }
+  .closing-text h2 { font-size: 14px; color: #FFFFFF; font-weight: 800; margin-bottom: 3px; }
+  .closing-text p { font-size: 10.5px; color: #B8C4D9; }
   .qr-box {
     border-width: 2px;
     border-style: solid;
-    border-color: #062554;
+    border-color: #8DC63F;
     border-radius: 10px;
     padding: 8px;
     text-align: center;
-    width: 110px;
+    width: 120px;
+    background: #0A2E5C;
   }
-  .qr-box .site {
-    font-size: 11px;
+  .qr-box .site { font-size: 11px; font-weight: 800; color: #8DC63F; margin-bottom: 4px; }
+  .qr-box p { font-size: 8.5px; color: #B8C4D9; line-height: 1.3; }
+  .page-title {
+    font-size: 24px;
     font-weight: 800;
-    color: #062554;
-    margin-bottom: 4px;
+    color: #FFFFFF;
+    margin-bottom: 8px;
+    line-height: 1.05;
   }
-  .qr-box p {
-    font-size: 8.5px;
-    color: #5A6B85;
-    line-height: 1.3;
+  .page-lead {
+    font-size: 11.5px;
+    color: #B8C4D9;
+    margin-bottom: 12px;
+    line-height: 1.4;
   }
   footer {
     position: absolute;
@@ -289,7 +269,10 @@
     right: 0;
     bottom: 0;
     padding: 7px 13mm;
-    background: #062554;
+    background: #021331;
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: #1E3F6E;
     font-size: 8.5px;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -297,19 +280,6 @@
     font-weight: 600;
   }
   footer .right { float: right; color: #FFFFFF; }
-  .page-title {
-    font-size: 26px;
-    font-weight: 800;
-    color: #062554;
-    margin-bottom: 8px;
-    line-height: 1.05;
-  }
-  .page-lead {
-    font-size: 11.5px;
-    color: #5A6B85;
-    margin-bottom: 12px;
-    line-height: 1.45;
-  }
 </style>
 </head>
 <body>
@@ -328,17 +298,11 @@
   <div class="kicker">Коммерческое предложение</div>
   <h1>{{DRONE_FULL_NAME}}</h1>
   <p class="subtitle">Комплекс для авиаобработки сельхозугодий с инженерным сопровождением от АТРИС</p>
-  <p class="recipient">Получатель: <strong>{{RECIPIENT}}</strong> · КП №{{KP_NUMBER}} от {{DATE}}</p>
+  <p class="meta">Получатель: <strong>{{RECIPIENT}}</strong> · КП №{{KP_NUMBER}} от {{DATE}}</p>
 
-  <div class="tags">
-    <span class="tag">Внесение СЗР</span>
-    <span class="tag">Десикация</span>
-    <span class="tag">Разбрасывание</span>
-    <span class="tag">12 га/час</span>
-    <span class="tag">С регистрацией</span>
-  </div>
+  <div class="tags">{{TAGS_HTML}}</div>
 
-  <div class="section-label">Состав комплекта</div>
+  <div class="section-label">— Предлагаемые позиции</div>
   <div class="panel">
     <table>
       <thead>
@@ -355,8 +319,8 @@
           <td class="num">01</td>
           <td><strong>БАС {{DRONE_FULL_NAME}}</strong></td>
           <td>1 шт.</td>
-          <td><strong>{{DRONE_PRICE}}*</strong></td>
-          <td class="purpose">Основное воздушное судно *НДС 0% — подробнее стр. 2</td>
+          <td><strong class="green">{{DRONE_PRICE}}{{DRONE_VAT_MARK}}</strong></td>
+          <td class="purpose">{{DRONE_PURPOSE}}</td>
         </tr>
         {{LINES_HTML}}
       </tbody>
@@ -364,7 +328,7 @@
   </div>
 
   <div class="panel included">
-    <h2>В стоимость входит</h2>
+    <h2>— В стоимость входит</h2>
     <table class="included-grid"><tr>
       <td><ul>
         <li>Регистрация БВС в реестре ФАВТ</li>
@@ -378,14 +342,15 @@
   </div>
 
   <table class="bottom-row"><tr>
-    <td style="width:62%">
+    <td style="width:58%">
       <p class="about">
-        АТРИС — команда инженеров и практиков агроприменения. Поставляем агродроны DJI и Vector AGR,
-        помогаем запускать технологию на полях.
+        <strong style="color:#8DC63F;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px;">О компании АТРИС</strong>
+        АТРИС — команда инженеров и практиков агроприменения. Мы поставляем агродроны DJI и Vector AGR,
+        сопровождаем внедрение технологии и помогаем сельхозпредприятиям повышать эффективность обработки полей.
         <strong>Технологии, которые работают в поле.</strong>
       </p>
     </td>
-    <td style="width:38%">
+    <td style="width:42%">
       <div class="total-box">
         <div class="cap">Итого</div>
         <div class="amt">{{GRAND_TOTAL}} ₽</div>
@@ -413,24 +378,25 @@
 
   <div class="kicker">Страница 2</div>
   <div class="page-title">Условия поставки</div>
+  <p class="page-lead">Коммерческое предложение на поставку {{DRONE_FULL_NAME}}</p>
 
-  <div class="term"><span class="num">1</span><h3>Стоимость комплекта</h3>
+  <div class="term"><span class="num-badge">1</span><h3>Стоимость комплекта</h3>
     <p>{{GRAND_TOTAL}} ₽, включая НДС.</p></div>
-  <div class="term"><span class="num">2</span><h3>Налогообложение</h3>
-    <p>«БАС {{DRONE_FULL_NAME}}» поставляется со ставкой НДС 0% согласно ст. 164 НК РФ. Остальные позиции облагаются НДС 22%. Общая сумма к вычету: {{NDS_DEDUCTIBLE}} ₽.</p></div>
-  <div class="term"><span class="num">3</span><h3>Срок действия предложения</h3>
+  <div class="term"><span class="num-badge">2</span><h3>Налогообложение</h3>
+    <p>{{TAX_TEXT}}</p></div>
+  <div class="term"><span class="num-badge">3</span><h3>Срок действия предложения</h3>
     <p>15 рабочих дней с даты выставления коммерческого предложения ({{DATE}}).</p></div>
-  <div class="term"><span class="num">4</span><h3>Условия оплаты</h3>
+  <div class="term"><span class="num-badge">4</span><h3>Условия оплаты</h3>
     <p>100% предоплата путём перечисления денежных средств на расчётный счёт поставщика.</p></div>
-  <div class="term"><span class="num">5</span><h3>Доставка</h3>
+  <div class="term"><span class="num-badge">5</span><h3>Доставка</h3>
     <p>Доставка осуществляется за счёт покупателя. Возможна организация доставки через транспортные компании.</p></div>
-  <div class="term"><span class="num">6</span><h3>Наличие оборудования</h3>
+  <div class="term"><span class="num-badge">6</span><h3>Наличие оборудования</h3>
     <p>Оборудование доступно к заказу с ближайшей поставкой со склада поставщика в г. Ростов-на-Дону. Срок подготовки к отгрузке составляет до 60 дней.</p></div>
-  <div class="term"><span class="num">7</span><h3>Срок отгрузки</h3>
+  <div class="term"><span class="num-badge">7</span><h3>Срок отгрузки</h3>
     <p>До 5 рабочих дней с момента поступления оплаты на расчётный счёт поставщика и готовности товара к отгрузке.</p></div>
-  <div class="term"><span class="num">8</span><h3>Гарантийные обязательства</h3>
+  <div class="term"><span class="num-badge">8</span><h3>Гарантийные обязательства</h3>
     <p>{{DRONE_FULL_NAME}} — 12 месяцев официальной гарантии производителя. Аксессуары — 1 месяц на проверку работоспособности.</p></div>
-  <div class="term"><span class="num">9</span><h3>Регистрация БВС</h3>
+  <div class="term"><span class="num-badge">9</span><h3>Регистрация БВС</h3>
     <p>Регистрация в реестре ФАВТ входит в стоимость комплекта. До передачи клиенту дрон регистрируется на компанию АТРИС. После подписания акта приёма-передачи осуществляется смена собственника в упрощённом порядке.</p></div>
 
   <footer>
@@ -472,13 +438,13 @@
   </tr></table>
 
   <table class="closing"><tr>
-    <td style="width:65%">
+    <td style="width:62%">
       <div class="closing-text">
         <h2>АТРИС — технологии, которые работают в поле.</h2>
         <p>Инженерные решения для современного сельского хозяйства.</p>
       </div>
     </td>
-    <td style="width:35%; text-align:right;">
+    <td style="width:38%; text-align:right;">
       <div class="qr-box">
         <div class="site">www.atris.su</div>
         <p>Подробнее о компании<br/>и технологии агродронов</p>
@@ -491,6 +457,8 @@
     <span class="right">ООО «АТРИС»</span>
   </footer>
 </section>
+
+{{KIT_DETAILS_SECTION}}
 
 </body>
 </html>

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import type { MediaSection } from '@/api/media'
 
 const FILTERS_KEY = 'media-library-filters-v2'
-const WORKFLOW_KEY = 'media-library-workflow-v1'
+const WORKFLOW_KEY = 'media-library-workflow-v2'
 
 interface StoredFilters {
   kind: string
@@ -47,8 +47,8 @@ function readWorkflow(): StoredWorkflow {
         autoWatermark: true,
         autoWebp: true,
         squareBackground: '#ffffff',
-        watermarkOpacity: 0.15,
-        bgThreshold: 40,
+        watermarkOpacity: 0.2,
+        bgThreshold: 8,
         uploadSection: 'PARTS'
       }
     }
@@ -58,8 +58,8 @@ function readWorkflow(): StoredWorkflow {
       autoWatermark: parsed.autoWatermark ?? true,
       autoWebp: parsed.autoWebp ?? true,
       squareBackground: parsed.squareBackground ?? '#ffffff',
-      watermarkOpacity: parsed.watermarkOpacity ?? 0.15,
-      bgThreshold: parsed.bgThreshold ?? 40,
+      watermarkOpacity: parsed.watermarkOpacity ?? 0.2,
+      bgThreshold: parsed.bgThreshold ?? 8,
       uploadSection: parsed.uploadSection ?? 'PARTS'
     }
   } catch {
@@ -68,8 +68,8 @@ function readWorkflow(): StoredWorkflow {
       autoWatermark: true,
       autoWebp: true,
       squareBackground: '#ffffff',
-      watermarkOpacity: 0.15,
-      bgThreshold: 40,
+      watermarkOpacity: 0.2,
+      bgThreshold: 8,
       uploadSection: 'PARTS'
     }
   }

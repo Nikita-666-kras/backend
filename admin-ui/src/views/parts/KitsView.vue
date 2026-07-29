@@ -49,12 +49,20 @@ const baseline = ref('')
 
 useUnsavedGuard(dirty)
 
+const partById = computed(() => {
+  const map = new Map<string, Part>()
+  for (const p of parts.value) map.set(p.id, p)
+  return map
+})
+
 const sumPreview = computed(() =>
   items.value.reduce((acc, item) => {
-    const part = parts.value.find((p) => p.id === item.partId) || parts.value.find((p) => p.id === item.partId)
+    const part = partById.value.get(item.partId)
     return acc + (part ? Number(part.price) * item.qty : 0)
   }, 0)
 )
+
+const totalItemsQty = computed(() => items.value.reduce((acc, item) => acc + item.qty, 0))
 
 const filteredParts = computed(() => {
   const q = partQuery.value.trim().toLowerCase()
@@ -149,6 +157,23 @@ function removeItem(partId: string) {
   touchDirty()
 }
 
+function setItemQty(partId: string, qty: number) {
+  const value = Number.isFinite(qty) ? Math.max(1, Math.floor(qty)) : 1
+  items.value = items.value.map((i) => (i.partId === partId ? { ...i, qty: value } : i))
+  touchDirty()
+}
+
+function changeQty(partId: string, delta: number) {
+  const current = items.value.find((i) => i.partId === partId)
+  if (!current) return
+  setItemQty(partId, current.qty + delta)
+}
+
+function lineTotal(partId: string, qty: number) {
+  const part = partById.value.get(partId)
+  return part ? Number(part.price) * qty : 0
+}
+
 function payload() {
   return {
     name: name.value.trim(),
@@ -166,6 +191,14 @@ function payload() {
 }
 
 async function save() {
+  if (!name.value.trim() || !sku.value.trim()) {
+    toast.error('Заполните название и артикул комплекта')
+    return
+  }
+  if (!items.value.length) {
+    toast.error('Добавьте хотя бы одну запчасть в комплект')
+    return
+  }
   saving.value = true
   try {
     if (route.name === 'kit-new') {
@@ -286,15 +319,16 @@ watch(
       <p v-if="!list.content.length" class="muted">Пока нет комплектов</p>
     </div>
 
-    <div v-else class="card editor">
+    <div v-else class="editor-shell">
+      <div class="card editor">
       <div class="grid-2">
         <div class="field">
           <label>Название</label>
-          <input v-model="name" />
+          <input v-model="name" placeholder="Например: Базовый комплект T40" />
         </div>
         <div class="field">
           <label>Артикул комплекта</label>
-          <input v-model="sku" />
+          <input v-model="sku" placeholder="KIT-T40-BASE" />
         </div>
       </div>
       <div class="grid-2">
@@ -329,11 +363,14 @@ watch(
       </div>
       <div class="field">
         <label>Описание</label>
-        <textarea v-model="description" rows="4" />
+        <textarea v-model="description" rows="3" placeholder="Коротко опишите состав и назначение комплекта" />
       </div>
 
-      <div class="items">
-        <h3>Состав</h3>
+      <div class="items surface-light">
+        <div class="items-head">
+          <h3>Состав комплекта</h3>
+          <p class="muted">{{ items.length }} поз. · {{ totalItemsQty }} шт. · {{ formatPrice(sumPreview, 'RUB') }}</p>
+        </div>
         <div class="add-row">
           <input v-model="partQuery" placeholder="Поиск артикула / названия…" />
           <select v-model="partPick">
@@ -342,11 +379,51 @@ watch(
           </select>
           <button class="btn secondary" type="button" @click="addItem">Добавить</button>
         </div>
-        <div v-for="item in items" :key="item.partId" class="item-row">
-          <span>{{ parts.find((p) => p.id === item.partId)?.sku }} — {{ parts.find((p) => p.id === item.partId)?.name || item.partId }}</span>
-          <input v-model.number="item.qty" type="number" min="1" />
-          <button class="btn ghost" type="button" @click="removeItem(item.partId)">Убрать</button>
+
+        <div v-if="!items.length" class="empty">Пока нет запчастей в комплекте</div>
+
+        <table v-else class="items-table">
+          <thead>
+            <tr>
+              <th>Позиция</th>
+              <th>Цена</th>
+              <th>Кол-во</th>
+              <th>Сумма</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in items" :key="item.partId">
+              <td>
+                <strong>{{ partById.get(item.partId)?.sku || '—' }}</strong>
+                <p>{{ partById.get(item.partId)?.name || item.partId }}</p>
+              </td>
+              <td>{{ formatPrice(Number(partById.get(item.partId)?.price || 0), 'RUB') }}</td>
+              <td>
+                <div class="qty-box">
+                  <button class="qty-btn" type="button" @click="changeQty(item.partId, -1)">−</button>
+                  <input
+                    :value="item.qty"
+                    type="number"
+                    min="1"
+                    @change="setItemQty(item.partId, Number(($event.target as HTMLInputElement).value))"
+                  />
+                  <button class="qty-btn" type="button" @click="changeQty(item.partId, 1)">+</button>
+                </div>
+              </td>
+              <td>{{ formatPrice(lineTotal(item.partId, item.qty), 'RUB') }}</td>
+              <td>
+                <button class="btn ghost danger-link" type="button" @click="removeItem(item.partId)">Убрать</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="sticky-actions">
+          <button class="btn secondary" :disabled="saving" type="button" @click="save">Сохранить</button>
+          <button v-if="editingId" class="btn" type="button" @click="doPublish(editingId)">Опубликовать</button>
         </div>
+      </div>
       </div>
     </div>
   </section>
@@ -358,14 +435,26 @@ watch(
 .row { display: grid; grid-template-columns: 64px 1fr auto auto; gap: 0.75rem; align-items: center; padding: 0.9rem 1rem; }
 .thumb { width: 64px; height: 48px; border-radius: 8px; overflow: hidden; background: rgba(255,255,255,0.05); }
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.editor-shell { display: grid; gap: 0.75rem; }
 .editor { padding: 1.1rem; display: grid; gap: 0.9rem; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
-.items { display: grid; gap: 0.55rem; }
-.items h3 { margin: 0; font-size: 0.95rem; }
+.items { display: grid; gap: 0.65rem; border-radius: 12px; border: 1px solid var(--on-light-line); padding: 0.85rem; }
+.items-head { display: flex; align-items: end; justify-content: space-between; gap: 0.75rem; }
+.items h3 { margin: 0; font-size: 1rem; color: var(--on-light-ink); }
 .add-row { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 0.5rem; }
-.item-row { display: grid; grid-template-columns: 1fr 80px auto; gap: 0.5rem; align-items: center; }
+.items-table { width: 100%; border-collapse: collapse; }
+.items-table th, .items-table td { border-bottom: 1px solid var(--on-light-line); padding: 0.55rem 0.45rem; text-align: left; vertical-align: middle; }
+.items-table th { font-size: 0.75rem; color: var(--on-light-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.items-table p { margin: 0.1rem 0 0; color: var(--on-light-muted); font-size: 0.82rem; }
+.qty-box { display: inline-flex; align-items: center; gap: 0.35rem; }
+.qty-box input { width: 66px; text-align: center; }
+.qty-btn { border: 1px solid var(--on-light-line); background: #fff; border-radius: 8px; width: 28px; height: 28px; font-weight: 700; color: var(--on-light-ink); }
+.danger-link { color: #9e2e2e; }
+.sticky-actions { display: flex; justify-content: end; gap: 0.5rem; padding-top: 0.35rem; }
 .muted { margin: 0.2rem 0 0; color: var(--muted); }
 @media (max-width: 860px) {
-  .grid-2, .row, .item-row, .add-row { grid-template-columns: 1fr; }
+  .grid-2, .row, .add-row { grid-template-columns: 1fr; }
+  .items-head { align-items: start; flex-direction: column; }
+  .items-table { display: block; overflow-x: auto; }
 }
 </style>

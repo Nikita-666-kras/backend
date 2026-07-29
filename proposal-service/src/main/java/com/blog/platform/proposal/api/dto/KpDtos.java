@@ -33,6 +33,31 @@ public final class KpDtos {
             String currency
     ) {}
 
+    public record KitCatalogItemDto(
+            UUID partId,
+            String partSku,
+            String partName,
+            Integer qty,
+            BigDecimal partPrice
+    ) {}
+
+    public record KitCatalogDetailDto(
+            UUID id,
+            String sku,
+            String name,
+            BigDecimal price,
+            String currency,
+            List<KitCatalogItemDto> items
+    ) {}
+
+    public record ProposalKitItemDto(
+            UUID partId,
+            String partSku,
+            String partName,
+            Integer qty,
+            BigDecimal partPrice
+    ) {}
+
     public record ProposalLineRequest(
             @NotNull LineType lineType,
             UUID refId,
@@ -40,8 +65,15 @@ public final class KpDtos {
             @NotBlank String name,
             @NotNull @Min(1) Integer qty,
             @NotNull @DecimalMin("0.00") BigDecimal unitPrice,
-            @Min(0) @Max(20) Integer discountPct
-    ) {}
+            @Min(0) @Max(20) Integer discountPct,
+            List<ProposalKitItemDto> kitItems
+    ) {
+        public ProposalLineRequest {
+            if (kitItems == null) {
+                kitItems = List.of();
+            }
+        }
+    }
 
     public record ProposalUpsertRequest(
             @NotBlank String recipient,
@@ -59,8 +91,15 @@ public final class KpDtos {
             Integer qty,
             BigDecimal unitPrice,
             Integer discountPct,
-            BigDecimal lineTotal
-    ) {}
+            BigDecimal lineTotal,
+            List<ProposalKitItemDto> kitItems
+    ) {
+        public ProposalLineDto {
+            if (kitItems == null) {
+                kitItems = List.of();
+            }
+        }
+    }
 
     public record ProposalDto(
             UUID id,
@@ -88,5 +127,26 @@ public final class KpDtos {
             @NotNull @DecimalMin("0.00") BigDecimal defaultPrice,
             Integer sortOrder,
             Boolean active
+    ) {}
+
+    public record KitPresetLineDto(
+            LineType lineType,
+            UUID refId,
+            String sku,
+            String name,
+            Integer qty,
+            BigDecimal unitPrice,
+            Integer discountPct
+    ) {}
+
+    public record KitPresetDto(
+            String code,
+            BigDecimal dronePrice,
+            List<KitPresetLineDto> lines
+    ) {}
+
+    public record CreateFromPresetRequest(
+            @NotBlank String recipient,
+            @NotNull UUID droneModelId
     ) {}
 }

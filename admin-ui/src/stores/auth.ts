@@ -32,6 +32,14 @@ export const useAuthStore = defineStore('auth', () => {
     sessionStorage.setItem(REFRESH_KEY, refreshToken.value)
   }
 
+  function clearSession() {
+    accessToken.value = ''
+    refreshToken.value = ''
+    user.value = null
+    sessionStorage.removeItem(ACCESS_KEY)
+    sessionStorage.removeItem(REFRESH_KEY)
+  }
+
   async function login(username: string, password: string) {
     const { data } = await api.post('/auth/login', { username, password })
     accessToken.value = data.data.accessToken
@@ -60,11 +68,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch {
       // ignore logout errors
     }
-    accessToken.value = ''
-    refreshToken.value = ''
-    user.value = null
-    sessionStorage.removeItem(ACCESS_KEY)
-    sessionStorage.removeItem(REFRESH_KEY)
+    clearSession()
   }
 
   return {
@@ -76,6 +80,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     refresh,
     fetchMe,
+    clearSession,
     logout
   }
 })

@@ -1,7 +1,10 @@
 package com.blog.platform.proposal.service;
 
 import com.blog.platform.proposal.api.dto.KpDtos.ProposalDto;
+import com.blog.platform.proposal.api.dto.KpDtos.LineType;
+import com.blog.platform.proposal.api.dto.KpDtos.ProposalKitItemDto;
 import com.blog.platform.proposal.api.dto.KpDtos.ProposalLineDto;
+import com.blog.platform.proposal.client.PartsCatalogClient;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import java.io.ByteArrayOutputStream;
@@ -16,6 +19,9 @@ import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -26,9 +32,11 @@ import org.springframework.stereotype.Service;
 public class KpHtmlPdfService {
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("dd.MM.yy");
+    private static final Set<String> VAT0_CODES = Set.of("HD525", "HD540", "HD580", "T40", "T50");
 
     @Value("${storage.kp-dir:/data/kp}")
     private String kpDir;
+    private final PartsCatalogClient partsCatalogClient;
 
     public String generate(ProposalDto proposal) {
         try {
@@ -74,9 +82,13 @@ public class KpHtmlPdfService {
             template = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
 
+        String code = modelCode(p.droneModelName());
         String droneFullName = displayDroneName(p.droneModelName());
+        boolean vat0 = VAT0_CODES.contains(code);
+
         BigDecimal accessoriesTotal = p.grandTotal().subtract(p.dronePrice()).max(BigDecimal.ZERO);
-        BigDecimal ndsDeductible = accessoriesTotal.multiply(BigDecimal.valueOf(22))
+        BigDecimal taxable = vat0 ? accessoriesTotal : p.grandTotal();
+        BigDecimal ndsDeductible = taxable.multiply(BigDecimal.valueOf(22))
                 .divide(BigDecimal.valueOf(122), 2, RoundingMode.HALF_UP);
 
         StringBuilder lines = new StringBuilder();
@@ -91,56 +103,200 @@ public class KpHtmlPdfService {
                     .append("</tr>");
         }
 
+        String kitDetailsSection = buildKitDetailsSection(p.lines());
+
+        String dronePurpose = vat0
+                ? "Основное воздушное судно *НДС 0% — подробнее стр. 2"
+                : "Основное воздушное судно";
+        String taxText = vat0
+                ? "«БАС " + droneFullName + "» поставляется со ставкой НДС 0% согласно ст. 164 НК РФ. "
+                + "Остальные позиции облагаются НДС 22%. Общая сумма к вычету: " + moneyDecimals(ndsDeductible) + " ₽."
+                : "Все позиции комплекта облагаются НДС 22%. Общая сумма к вычету: "
+                + moneyDecimals(ndsDeductible) + " ₽.";
+
         return template
                 .replace("{{KP_NUMBER}}", String.valueOf(p.number()))
                 .replace("{{RECIPIENT}}", esc(p.recipient()))
+                .replace("{{DATE}}", LocalDate.now().format(DF))
                 .replace("{{DRONE_FULL_NAME}}", esc(droneFullName))
                 .replace("{{DRONE_PRICE}}", money(p.dronePrice()))
+                .replace("{{DRONE_VAT_MARK}}", vat0 ? "*" : "")
+                .replace("{{DRONE_PURPOSE}}", esc(dronePurpose))
                 .replace("{{GRAND_TOTAL}}", money(p.grandTotal()))
                 .replace("{{NDS_DEDUCTIBLE}}", moneyDecimals(ndsDeductible))
-                .replace("{{DATE}}", LocalDate.now().format(DF))
-                .replace("{{LINES_HTML}}", lines.toString());
+                .replace("{{TAX_TEXT}}", esc(taxText))
+                .replace("{{TAGS_HTML}}", tagsHtml(code))
+                .replace("{{LINES_HTML}}", lines.toString())
+                .replace("{{KIT_DETAILS_SECTION}}", kitDetailsSection);
+    }
+
+    private String buildKitDetailsSection(List<ProposalLineDto> proposalLines) {
+        var kitLines = proposalLines.stream()
+                .filter(line -> line.lineType() == LineType.KIT)
+                .toList();
+        if (kitLines.isEmpty()) return "";
+
+        var kitTables = new ArrayList<String>();
+        for (ProposalLineDto kitLine : kitLines) {
+            List<ProposalKitItemDto> items = resolveKitItems(kitLine);
+            if (items.isEmpty()) continue;
+
+            var table = new StringBuilder();
+            String header = (kitLine.sku() != null && !kitLine.sku().isBlank())
+                    ? kitLine.sku() + " · " + kitLine.name()
+                    : kitLine.name();
+            table.append("<div class=\"section-label\">— ").append(esc(header)).append("</div>");
+            table.append("""
+                    <div class="panel">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th style="width:28px">№</th>
+                            <th>Запчасть</th>
+                            <th style="width:62px">Кол-во</th>
+                            <th style="width:92px">Цена, ₽</th>
+                            <th style="width:92px">Сумма, ₽</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                    """);
+            int index = 1;
+            for (ProposalKitItemDto item : items) {
+                var price = item.partPrice() == null ? BigDecimal.ZERO : item.partPrice();
+                int qty = item.qty() == null ? 0 : item.qty();
+                var rowTotal = price.multiply(BigDecimal.valueOf(qty));
+                table.append("<tr>")
+                        .append("<td class=\"num\">").append(String.format("%02d", index++)).append("</td>")
+                        .append("<td><strong>").append(esc(item.partSku())).append("</strong><br/>")
+                        .append("<span class=\"purpose\">").append(esc(item.partName())).append("</span></td>")
+                        .append("<td>").append(qtyLabel(qty)).append("</td>")
+                        .append("<td>").append(money(price)).append("</td>")
+                        .append("<td><strong>").append(money(rowTotal)).append("</strong></td>")
+                        .append("</tr>");
+            }
+            table.append("""
+                        </tbody>
+                      </table>
+                    </div>
+                    """);
+            kitTables.add(table.toString());
+        }
+
+        if (kitTables.isEmpty()) return "";
+
+        var html = new StringBuilder();
+        html.append("""
+                <section class="page">
+                  <header>
+                    <img class="logo" src="static/LOGO_ATRIS.svg" alt="АТРИС"/>
+                    <div class="contacts">
+                      <strong>+7 (938) 119-29-82</strong><br/>
+                      privet@atris.su<br/>
+                      www.atris.su<br/>
+                      Ростов-на-Дону
+                    </div>
+                  </header>
+                  <div class="kicker">Приложение</div>
+                  <div class="page-title">Состав комплекта</div>
+                  <p class="page-lead">Детализация комплектов, указанных в коммерческом предложении.</p>
+                """);
+        for (String kitTable : kitTables) {
+            html.append(kitTable);
+        }
+        html.append("""
+                  <footer>
+                    <span>Простые решения. Реальный результат.</span>
+                    <span class="right">ООО «АТРИС»</span>
+                  </footer>
+                </section>
+                """);
+        return html.toString();
+    }
+
+    private List<ProposalKitItemDto> resolveKitItems(ProposalLineDto kitLine) {
+        if (kitLine.kitItems() != null && !kitLine.kitItems().isEmpty()) {
+            return kitLine.kitItems();
+        }
+        if (kitLine.refId() == null) return List.of();
+        try {
+            var detail = partsCatalogClient.getKitById(kitLine.refId());
+            if (detail.items() == null || detail.items().isEmpty()) return List.of();
+            return detail.items().stream()
+                    .map(i -> new ProposalKitItemDto(
+                            i.partId(),
+                            i.partSku(),
+                            i.partName(),
+                            i.qty(),
+                            i.partPrice()))
+                    .toList();
+        } catch (Exception ignored) {
+            return List.of();
+        }
+    }
+
+    private String tagsHtml(String code) {
+        String ha = switch (code) {
+            case "T40", "T50" -> "15 га/час";
+            default -> "12 га/час";
+        };
+        return """
+                <span class="tag">Внесение СЗР</span>
+                <span class="tag">Десикация</span>
+                <span class="tag">Разбрасывание</span>
+                <span class="tag">%s</span>
+                <span class="tag">С регистрацией</span>
+                """.formatted(ha);
+    }
+
+    private String modelCode(String name) {
+        if (name == null) return "";
+        String upper = name.toUpperCase(Locale.ROOT).replace("VECTOR AGR ", "").replace("DJI AGRAS ", "").trim();
+        if (upper.contains("HD580")) return "HD580";
+        if (upper.contains("HD540")) return "HD540";
+        if (upper.contains("HD525")) return "HD525";
+        if (upper.contains("T50")) return "T50";
+        if (upper.contains("T40")) return "T40";
+        if (upper.contains("T30")) return "T30";
+        return upper;
     }
 
     private String displayDroneName(String name) {
-        if (name == null || name.isBlank()) {
-            return "VECTOR AGR";
-        }
+        if (name == null || name.isBlank()) return "VECTOR AGR";
         String upper = name.toUpperCase(Locale.ROOT);
-        if (upper.contains("VECTOR") || upper.contains("DJI") || upper.contains("AGRAS")) {
-            return name;
-        }
-        if (upper.startsWith("HD") || upper.matches("HD\\d+.*")) {
-            return "VECTOR AGR " + name;
-        }
-        if (upper.startsWith("T") && upper.length() <= 4) {
-            return "DJI AGRAS " + name;
-        }
+        if (upper.contains("VECTOR") || upper.contains("DJI") || upper.contains("AGRAS")) return name;
+        if (upper.startsWith("HD")) return "VECTOR AGR " + name;
+        if (upper.startsWith("T") && upper.length() <= 4) return "DJI AGRAS " + name;
         return name;
     }
 
     private String purpose(ProposalLineDto line) {
         String n = line.name() == null ? "" : line.name().toLowerCase(Locale.ROOT);
-        if (n.contains("аккумулятор") || n.contains("акб") && n.contains("30")) {
-            return "Автономная работа в поле";
-        }
-        if (n.contains("заряд") && n.contains("пульт")) {
-            return "Зарядка АКБ пульта управления";
-        }
-        if (n.contains("заряд")) {
+        if (n.contains("генератор")) {
             return "Зарядка батарей в полевых условиях";
         }
-        if (n.contains("пульт") && n.contains("акб")) {
+        if (n.contains("заряд") || n.contains("устройство заряд") || n.contains("станция")) {
+            if (n.contains("пульт") || n.contains("wb37")) {
+                return "Зарядка АКБ пульта управления";
+            }
+            return "Зарядка батарей в полевых условиях";
+        }
+        if (n.contains("аккумулятор") || n.contains("батарея") || n.contains("battery")) {
+            if (n.contains("пульт") || n.contains("wb37")) {
+                return "Питание пульта управления";
+            }
+            return "Автономная работа в поле";
+        }
+        if (n.contains("акб")) {
+            if (n.contains("пульт") || n.contains("wb37")) {
+                return "Питание пульта управления";
+            }
+            return "Автономная работа в поле";
+        }
+        if (n.contains("пульт") || n.contains("wb37")) {
             return "Питание пульта управления";
         }
-        if (n.contains("пилот")) {
-            return "Профессиональное пилотирование на объёме хозяйства";
-        }
-        if (n.contains("распыл") || n.contains("форсун")) {
-            return "Распылительная система";
-        }
-        if (n.contains("пропеллер") || n.contains("лопаст")) {
-            return "Расходный элемент";
+        if (line.lineType() == LineType.KIT) {
+            return "Состав комплекта — в приложении на последней странице";
         }
         return "Комплектация и сопровождение";
     }
@@ -174,16 +330,12 @@ public class KpHtmlPdfService {
     }
 
     private String esc(String value) {
-        if (value == null) {
-            return "";
-        }
+        if (value == null) return "";
         return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 
     private String sanitize(String value) {
-        if (value == null) {
-            return "model";
-        }
+        if (value == null) return "model";
         return value.replaceAll("[^A-Za-z0-9._-]+", "_");
     }
 }

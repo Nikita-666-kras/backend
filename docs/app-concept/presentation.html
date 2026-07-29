@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>АТРИС — Концепт мобильного приложения</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green: #8dc63f;
+      --text: #f7f9fc;
+      --muted: #9eb0c8;
+      --line: rgba(255, 255, 255, 0.1);
+      --surface: rgba(255, 255, 255, 0.045);
+      --surface-hover: rgba(255, 255, 255, 0.065);
+      --bg-top: #021228;
+      --bg-mid: #041d48;
+      --bg-bottom: #03173b;
+      --container: 1200px;
+      --radius: 20px;
+      --shadow: 0 22px 48px rgba(0, 0, 0, 0.28);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+
+    body {
+      font-family: "Manrope", sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
+      background-size: 40px 40px, 40px 40px, 100% 100%;
+      background-attachment: fixed;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(2, 18, 40, 0.82);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #fff;
+      text-decoration: none;
+    }
+    .brand span { color: var(--green); }
+
+    .topbar__right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .topbar__right a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .topbar__right a:hover { color: var(--green); }
+
+    .slide-counter {
+      font-weight: 700;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slide {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      display: flex;
+      flex-direction: column;
+      padding: 88px 24px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -80px;
+      width: 480px;
+      height: 200px;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse, rgba(141, 198, 63, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .slide__inner {
+      width: min(var(--container), 100%);
+      margin: 0 auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 6px 12px;
+      border: 1px solid rgba(141, 198, 63, 0.28);
+      border-radius: 999px;
+      background: rgba(141, 198, 63, 0.08);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      width: fit-content;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(141, 198, 63, 0.65);
+    }
+
+    h1 {
+      font-size: clamp(28px, 4.5vw, 48px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 14px;
+      max-width: 820px;
+    }
+
+    .lead {
+      font-size: clamp(15px, 2vw, 18px);
+      line-height: 1.6;
+      color: var(--muted);
+      max-width: 680px;
+      margin-bottom: 20px;
+    }
+
+    .meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .meta strong { color: var(--text); }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .tag {
+      padding: 7px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .panel p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    .panel strong { color: var(--text); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .card:hover {
+      border-color: rgba(141, 198, 63, 0.35);
+      background: var(--surface-hover);
+    }
+
+    .card__num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--green);
+      color: var(--bg-top);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .highlight {
+      border: 2px solid rgba(141, 198, 63, 0.5);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      background: rgba(141, 198, 63, 0.06);
+      margin-top: auto;
+    }
+    .highlight__cap {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .highlight__title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .highlight__note {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Screen slides: two columns */
+    .screen-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 40px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .screen-layout__text { max-width: 560px; }
+
+    .screen-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .caption {
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-left: 3px solid var(--green);
+      background: var(--surface);
+      border-radius: 0 12px 12px 0;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .caption strong { color: var(--text); }
+
+    .phone-frame {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .phone-frame img {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow), 0 0 60px rgba(141, 198, 63, 0.08);
+      background: var(--bg-top);
+    }
+
+    .phone-frame::before {
+      content: "";
+      position: absolute;
+      inset: -20px;
+      border-radius: 40px;
+      background: radial-gradient(ellipse at center, rgba(141, 198, 63, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .bullets {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .bullets li { margin-bottom: 6px; }
+
+    .slide-footer {
+      width: min(var(--container), 100%);
+      margin: 32px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* Nav dots */
+    .nav-dots {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 99;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-dots a {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: transparent;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .nav-dots a:hover,
+    .nav-dots a.active {
+      background: var(--green);
+      border-color: var(--green);
+      transform: scale(1.2);
+    }
+
+    .cover-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+      gap: 24px;
+    }
+
+    .contacts {
+      text-align: right;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    .contacts strong { color: var(--text); display: block; }
+
+    @media (max-width: 960px) {
+      .screen-layout {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+      .phone-frame { order: -1; }
+      .phone-frame img { max-width: 260px; margin: 0 auto; }
+      .cards { grid-template-columns: 1fr; }
+      .nav-dots { display: none; }
+      .cover-header { flex-direction: column; }
+      .contacts { text-align: left; }
+    }
+
+    @media (max-width: 560px) {
+      .slide { padding: 76px 16px 32px; }
+      .topbar { padding: 12px 16px; }
+    }
+
+    @media print {
+      html { scroll-snap-type: none; }
+      .topbar, .nav-dots { display: none; }
+      .slide { min-height: auto; page-break-after: always; padding: 20px; }
+      body { background: #021228; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#cover">АТР<span>ИС</span></a>
+  <div class="topbar__right">
+    <a href="https://www.atris.su" target="_blank" rel="noopener">atris.su</a>
+    <span class="slide-counter" id="counter">01 / 08</span>
+  </div>
+</header>
+
+<nav class="nav-dots" aria-label="Навигация по слайдам">
+  <a href="#cover" title="Обложка"></a>
+  <a href="#slide-01" title="Главный хаб"></a>
+  <a href="#slide-02" title="T50"></a>
+  <a href="#slide-03" title="Материалы"></a>
+  <a href="#slide-04" title="Каталог"></a>
+  <a href="#slide-05" title="Калькулятор"></a>
+  <a href="#slide-06" title="Поддержка"></a>
+  <a href="#closing" title="Roadmap"></a>
+</nav>
+
+<!-- COVER -->
+<section class="slide" id="cover" data-slide="01">
+  <div class="slide__inner">
+    <div class="cover-header">
+      <div>
+        <div class="eyebrow">Концепт-презентация</div>
+        <h1>Мобильный хаб АТРИС</h1>
+        <p class="lead">Единое приложение для обучения, ремонта, заказа запчастей и расчёта химии для агродронов DJI Agras и Vector AGR.</p>
+        <p class="meta">Статус: <strong>UI-концепт</strong> · Версия v1 · Июль 2026</p>
+        <div class="tags">
+          <span class="tag">Ремонт</span>
+          <span class="tag">Каталог</span>
+          <span class="tag">Обучение</span>
+          <span class="tag">Калькулятор химии</span>
+          <span class="tag">Поддержка</span>
+          <span class="tag">Форум</span>
+        </div>
+      </div>
+      <div class="contacts">
+        <strong>+7 (938) 119-29-82</strong>
+        privet@atris.su<br/>
+        www.atris.su<br/>
+        Ростов-на-Дону
+      </div>
+    </div>
+
+    <div class="section-label">— Зачем это нужно</div>
+    <div class="panel">
+      <p>
+        Операторы и сервисные инженеры работают с агродронами в поле и на базе.
+        Сейчас знания, инструкции, запчасти и расчёты разрознены.
+        <strong>Мобильный хаб АТРИС</strong> собирает это в одном приложении в фирменном стиле компании.
+      </p>
+    </div>
+
+    <div class="section-label">— Ключевые сценарии</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card__num">01</div>
+        <h3>Интерактивный ремонт</h3>
+        <p>Выбор модели → кликабельные узлы на схеме дрона → материалы и таймкоды видеогайда.</p>
+      </div>
+      <div class="card">
+        <div class="card__num">02</div>
+        <h3>Каталог запчастей</h3>
+        <p>Поиск по артикулу, корзина и заказ оригинальных комплектующих.</p>
+      </div>
+      <div class="card">
+        <div class="card__num">03</div>
+        <h3>Калькулятор химии</h3>
+        <p>Норма, площадь, рабочий раствор → объём препарата, воды и число заправок бака.</p>
+      </div>
+      <div class="card">
+        <div class="card__num">04</div>
+        <h3>Обучение и поддержка</h3>
+        <p>Видео по сборке/разборке, чат с инженерами АТРИС и форум пользователей.</p>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <div class="highlight__cap">Фокус презентации</div>
+      <div class="highlight__title">Concept art · UX-сценарии</div>
+      <div class="highlight__note">Ниже — экраны приложения в стиле АТРИС. Это концепт интерфейса, не финальный релиз.</div>
+    </div>
+  </div>
+  <footer class="slide-footer">
+    <span>Простые решения. Реальный результат.</span>
+    <span>ООО «АТРИС»</span>
+  </footer>
+</section>
+
+<!-- 01 HUB -->
+<section class="slide" id="slide-01" data-slide="02">
+  <div class="slide__inner screen-layout">
+    <div class="screen-layout__text">
+      <span class="screen-badge">Экран 01 · Главная</span>
+      <div class="eyebrow">Мобильный хаб</div>
+      <h1>Точка входа в экосистему</h1>
+      <p class="lead">Шесть модулей на одном экране: ремонт, каталог, обучение, химия, поддержка и форум.</p>
+      <div class="caption">
+        <strong>Пользовательский путь:</strong> открыл приложение → выбрал задачу. Акцент «Ремонт» показывает приоритетный сценарий для сервиса.
+      </div>
+    </div>
+    <div class="phone-frame">
+      <img src="slides/01-hub.png" alt="Главный экран хаба"/>
+    </div>
+  </div>
+  <footer class="slide-footer">
+    <span>Концепт мобильного приложения</span>
+    <span>01 / 07</span>
+  </footer>
+</section>
+
+<!-- 02 HOTSPOTS -->
+<section class="slide" id="slide-02" data-slide="03">
+  <div class="slide__inner screen-layout">
+    <div class="screen-layout__text">
+      <span class="screen-badge">Экран 02 · Ремонт · T50</span>
+      <div class="eyebrow">Интерактивная схема</div>
+      <h1>DJI AGRAS T50</h1>
+      <p class="lead">Кликабельные узлы на изображении дрона: АКБ, мотор, форсунка, радар, шасси.</p>
+      <div class="caption">
+        <strong>Сценарий:</strong> нажатие на узел открывает список материалов по ремонту и обслуживанию этой части.
+      </div>
+    </div>
+    <div class="phone-frame">
+      <img src="slides/02-hotspots-t50.png" alt="Интерактивная схема T50"/>
+    </div>
+  </div>
+  <footer class="slide-footer">
+    <span>Концепт мобильного приложения</span>
+    <span>02 / 07</span>
+  </footer>
+</section>
+
+<!-- 03 MATERIALS -->
+<section class="slide" id="slide-03" data-slide="04">
+  <div class="slide__inner screen-layout">
+    <div class="screen-layout__text">
+      <span class="screen-badge">Экран 03 · Материалы узла</span>
+      <div class="eyebrow">Ремонт · контент</div>
+      <h1>Гайды + таймкоды видео</h1>
+      <p class="lead">Для выбранного узла — список материалов и видеогайд с точными метками времени.</p>
+      <div class="caption">
+        <strong>Ценность:</strong> инженер сразу попадает на нужный фрагмент ролика (например, «05:40 — Установка нового мотора»).
+      </div>
+    </div>
+    <div class="phone-frame">
+      <img src="slides/03-part-materials.png" alt="Материалы по ремонту мотора"/>
+    </div>
+  </div>
+  <footer class="slide-footer">
+    <span>Концепт мобильного приложения</span>
+    <span>03 / 07</span>
+  </footer>
+</section>
+
+<!-- 04 CATALOG -->
+<section class="slide" id="slide-04" data-slide="05">
+  <div class="slide__inner screen-layout">
+    <div class="screen-layout__text">
+      <span class="screen-badge">Экран 04 · Каталог</span>
+      <div class="eyebrow">Коммерция</div>
+      <h1>Каталог запчастей</h1>
+      <p class="lead">Поиск, категории, карточки позиций и корзина для заказа комплектующих агродрона.</p>
+      <div class="caption">
+        <strong>Ассортимент концепта:</strong> моторы, АКБ, форсунки распылителя, радары ФАР — позиции именно дроновой номенклатуры.
+      </div>
+    </div>
+    <div class="phone-frame">
+      <img src="slides/04-parts-catalog.png" alt="Каталог запчастей"/>
+    </div>
+  </div>
+  <footer class="slide-footer">
+    <span>Концепт мобильного приложения</span>
+    <span>04 / 07</span>
+  </footer>
+</section>
+
+<!-- 05 CHEM -->
+<section class="slide" id="slide-05" data-slide="06">
+  <div class="slide__inner screen-layout">
+    <div class="screen-layout__text">
+      <span class="screen-badge">Экран 05 · Калькулятор</span>
+      <div class="eyebrow">Полевая утилита</div>
+      <h1>Калькулятор химии</h1>
+      <p class="lead">Расчёт препарата, воды и числа заправок бака под выбранную модель (в т.ч. HD580).</p>
+      <div class="caption">
+        <strong>Вход:</strong> культура, препарат, норма, площадь, раствор.
+        <strong>Выход:</strong> литры препарата/воды и заправки бака.
+      </div>
+    </div>
+    <div class="phone-frame">
+      <img src="slides/05-chem-calc.png" alt="Калькулятор химии"/>
+    </div>
+  </div>
+  <footer class="slide-footer">
+    <span>Концепт мобильного приложения</span>
+    <span>05 / 07</span>
+  </footer>
+</section>
+
+<!-- 06 SUPPORT -->
+<section class="slide" id="slide-06" data-slide="07">
+  <div class="slide__inner screen-layout">
+    <div class="screen-layout__text">
+      <span class="screen-badge">Экран 06 · Поддержка · FR ⇄ RU</span>
+      <div class="eyebrow">Сервис 24/7</div>
+      <h1>Чат с поддержкой</h1>
+      <p class="lead">Прямая связь с инженером АТРИС с автопереводом: клиент пишет на своём языке, специалист отвечает на русском.</p>
+      <div class="caption">
+        <strong>Сценарий:</strong> оператор пишет по-французски → текст переводится на русский для инженера → ответ инженера переводится обратно на французский.
+      </div>
+    </div>
+    <div class="phone-frame">
+      <img src="slides/06-support-chat.png" alt="Чат поддержки АТРИС с автопереводом FR⇄RU"/>
+    </div>
+  </div>
+  <footer class="slide-footer">
+    <span>Концепт мобильного приложения</span>
+    <span>06 / 07</span>
+  </footer>
+</section>
+
+<!-- CLOSING -->
+<section class="slide" id="closing" data-slide="08">
+  <div class="slide__inner">
+    <div class="cover-header">
+      <div>
+        <div class="eyebrow">Следующий шаг</div>
+        <h1>От концепта к пилоту</h1>
+        <p class="lead">Готовы обсудить приоритеты модулей, контент (видео/схемы) и формат партнёрского пилота.</p>
+      </div>
+      <div class="contacts">
+        <strong>+7 (938) 119-29-82</strong>
+        privet@atris.su<br/>
+        www.atris.su
+      </div>
+    </div>
+
+    <div class="section-label">— Что уже показано</div>
+    <div class="panel">
+      <ul class="bullets">
+        <li>Единый фирменный UI в стиле АТРИС (тёмно-синий + зелёный акцент)</li>
+        <li>Сценарий ремонта с интерактивной схемой DJI AGRAS T50</li>
+        <li>Материалы узла с таймкодами видеогайда</li>
+        <li>Каталог запчастей с корзиной</li>
+        <li>Калькулятор химии с привязкой к баку дрона</li>
+        <li>Чат поддержки с инженером АТРИС и автопереводом FR ⇄ RU</li>
+      </ul>
+    </div>
+
+    <div class="section-label">— Roadmap (концептуально)</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card__num">1</div>
+        <h3>MVP</h3>
+        <p>Ремонт + каталог + видеогайды по 1–2 моделям.</p>
+      </div>
+      <div class="card">
+        <div class="card__num">2</div>
+        <h3>Рост</h3>
+        <p>Калькулятор химии, чат поддержки, личный кабинет заказов.</p>
+      </div>
+      <div class="card">
+        <div class="card__num">3</div>
+        <h3>Сообщество</h3>
+        <p>Форум, база кейсов, обучение операторов.</p>
+      </div>
+      <div class="card">
+        <div class="card__num">4</div>
+        <h3>Интеграции</h3>
+        <p>Связка с CRM/складом и менеджерским хабом АТРИС.</p>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <div class="highlight__cap">Контакты</div>
+      <div class="highlight__title">ООО «АТРИС»</div>
+      <div class="highlight__note">
+        +7 (938) 119-29-82 · privet@atris.su · www.atris.su · Ростов-на-Дону<br/>
+        Документ: ATRIS_Mobile_App_Concept_v1 · Concept UI, не коммерческое предложение на разработку.
+      </div>
+    </div>
+  </div>
+  <footer class="slide-footer">
+    <span>Простые решения. Реальный результат.</span>
+    <span>07 / 07</span>
+  </footer>
+</section>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('counter');
+  const dots = document.querySelectorAll('.nav-dots a');
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const num = entry.target.dataset.slide;
+          counter.textContent = num + ' / 08';
+          dots.forEach((d) => d.classList.remove('active'));
+          const idx = parseInt(num, 10) - 1;
+          if (dots[idx]) dots[idx].classList.add('active');
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  slides.forEach((s) => observer.observe(s));
+  dots[0]?.classList.add('active');
+
+  document.addEventListener('keydown', (e) => {
+    const current = [...slides].findIndex((s) => {
+      const r = s.getBoundingClientRect();
+      return r.top >= -window.innerHeight * 0.5 && r.top < window.innerHeight * 0.5;
+    });
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault();
+      if (current < slides.length - 1) slides[current + 1].scrollIntoView({ behavior: 'smooth' });
+    }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      e.preventDefault();
+      if (current > 0) slides[current - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+</script>
+
+</body>
+</html>

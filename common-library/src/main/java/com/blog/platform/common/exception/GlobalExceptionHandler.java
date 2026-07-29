@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpStatusCodeException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -49,6 +50,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ApiError("FORBIDDEN", ex.getMessage(), List.of(), Instant.now()));
+    }
+
+    @ExceptionHandler(HttpStatusCodeException.class)
+    public ResponseEntity<ApiError> handleDownstreamHttpStatus(HttpStatusCodeException ex) {
+        int statusCode = ex.getStatusCode().value();
+        HttpStatus status = HttpStatus.resolve(statusCode);
+        if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        var responseBody = ex.getResponseBodyAsString();
+        if (responseBody != null && responseBody.length() > 350) {
+            responseBody = responseBody.substring(0, 350) + "...";
+        }
+        String message = (responseBody == null || responseBody.isBlank()) ? status.getReasonPhrase() : responseBody;
+        return ResponseEntity.status(statusCode)
+                .body(new ApiError(status.name(), message, List.of(), Instant.now()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

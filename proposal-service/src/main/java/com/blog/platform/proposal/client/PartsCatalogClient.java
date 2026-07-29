@@ -3,6 +3,8 @@ package com.blog.platform.proposal.client;
 import com.blog.platform.common.api.ApiResponse;
 import com.blog.platform.common.security.InternalHeaders;
 import com.blog.platform.proposal.api.dto.KpDtos.CatalogItemDto;
+import com.blog.platform.proposal.api.dto.KpDtos.KitCatalogDetailDto;
+import com.blog.platform.proposal.api.dto.KpDtos.KitCatalogItemDto;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +51,24 @@ public class PartsCatalogClient {
                 .toList();
     }
 
+    public KitCatalogDetailDto getKitById(UUID id) {
+        ApiResponse<KitDetailRow> res = restClient.get()
+                .uri("/kits/by-id/{id}", id)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+        KitDetailRow kit = requireData(res);
+        return new KitCatalogDetailDto(
+                kit.id(),
+                kit.sku(),
+                kit.name(),
+                kit.price(),
+                kit.currency(),
+                kit.items() == null ? List.of() : kit.items().stream()
+                        .map(i -> new KitCatalogItemDto(i.partId(), i.partSku(), i.partName(), i.qty(), i.partPrice()))
+                        .toList()
+        );
+    }
+
     private <T> T requireData(ApiResponse<T> response) {
         if (response == null || response.data() == null) throw new IllegalStateException("Parts service empty response");
         return response.data();
@@ -57,6 +77,8 @@ public class PartsCatalogClient {
     public record PageResponse<T>(List<T> content, long totalElements, int totalPages, int number, int size) {}
     public record PartRow(UUID id, String name, String sku, BigDecimal price, String currency) {}
     public record KitRow(UUID id, String name, String sku, BigDecimal price, String currency) {}
+    public record KitItemRow(UUID partId, String partSku, String partName, Integer qty, BigDecimal partPrice) {}
+    public record KitDetailRow(UUID id, String name, String sku, BigDecimal price, String currency, List<KitItemRow> items) {}
 
     @org.springframework.context.annotation.Configuration
     static class ClientConfig {

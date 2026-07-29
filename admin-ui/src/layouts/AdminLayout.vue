@@ -5,7 +5,6 @@ import { useAuthStore } from '@/stores/auth'
 import { rolesLabel } from '@/utils/labels'
 
 const auth = useAuthStore()
-const toast = useToastStore()
 const router = useRouter()
 const navOpen = ref(false)
 
@@ -178,6 +177,17 @@ nav {
 
 .content {
   min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .shell {
+    grid-template-columns: 220px 1fr;
+    gap: 0.8rem;
+  }
+
+  .sidebar {
+    padding: 0.85rem 0.75rem;
+  }
 }
 
 @media (max-width: 960px) {
