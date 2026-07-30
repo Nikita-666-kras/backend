@@ -32,7 +32,8 @@ const router = createRouter({
         { path: 'kp/drone-models', name: 'kp-drone-models', component: () => import('@/views/kp/DroneModelsView.vue'), meta: { admin: true } },
         { path: 'kp/proposals', name: 'kp-proposals', component: () => import('@/views/kp/ProposalsView.vue'), meta: { admin: true } },
         { path: 'media', name: 'media', component: () => import('@/views/MediaLibraryView.vue'), meta: { media: true } },
-        { path: 'users', name: 'users', component: () => import('@/views/UsersView.vue'), meta: { admin: true } }
+        { path: 'users', name: 'users', component: () => import('@/views/UsersView.vue'), meta: { admin: true } },
+        { path: 'logs', name: 'logs', component: () => import('@/views/LogsView.vue'), meta: { admin: true } }
       ]
     }
   ]
@@ -132,3 +133,4 @@ router.beforeEach(async (to) => {
 })
 
 export default router
+

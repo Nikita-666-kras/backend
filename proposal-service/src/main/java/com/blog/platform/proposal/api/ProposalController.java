@@ -50,6 +50,13 @@ public class ProposalController {
         return ApiResponse.of(service.upsertModel(id, body));
     }
 
+    @DeleteMapping("/admin/kp/drone-models/{id}")
+    public ResponseEntity<Void> deleteModel(HttpServletRequest request, @PathVariable UUID id) {
+        guard.requireAdmin(request);
+        service.deleteModel(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/manager/kp/catalog/parts")
     public ApiResponse<List<KpDtos.CatalogItemDto>> managerParts(HttpServletRequest request, @RequestParam(required = false) String q,
                                                                   @RequestParam(defaultValue = "0") int page,

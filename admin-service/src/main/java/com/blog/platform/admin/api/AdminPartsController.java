@@ -16,9 +16,11 @@ import com.blog.platform.admin.client.PartsServiceClient;
 import com.blog.platform.admin.security.AdminAccessGuard;
 import com.blog.platform.admin.service.AdminPartsBulkService;
 import com.blog.platform.common.api.ApiResponse;
+import com.blog.platform.common.logging.AuditClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,7 @@ public class AdminPartsController {
     private final PartsServiceClient partsServiceClient;
     private final AdminPartsBulkService adminPartsBulkService;
     private final AdminAccessGuard accessGuard;
+    private final AuditClient auditClient;
 
     @GetMapping("/parts")
     public ResponseEntity<ApiResponse<PageResponse<PartResponse>>> listParts(
@@ -69,7 +72,9 @@ public class AdminPartsController {
             @Valid @RequestBody PartRequest body
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.createPart(body)));
+        PartResponse response = partsServiceClient.createPart(body);
+        logCatalog(request, "Part created", Map.of("partId", response.id().toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PutMapping("/parts/{id}")
@@ -79,25 +84,32 @@ public class AdminPartsController {
             @Valid @RequestBody PartRequest body
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updatePart(id, body)));
+        PartResponse response = partsServiceClient.updatePart(id, body);
+        logCatalog(request, "Part updated", Map.of("partId", id.toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PostMapping("/parts/{id}/publish")
     public ResponseEntity<ApiResponse<PartResponse>> publishPart(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updatePartStatus(id, "PUBLISHED")));
+        PartResponse response = partsServiceClient.updatePartStatus(id, "PUBLISHED");
+        logCatalog(request, "Part published", Map.of("partId", id.toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PostMapping("/parts/{id}/archive")
     public ResponseEntity<ApiResponse<PartResponse>> archivePart(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updatePartStatus(id, "ARCHIVED")));
+        PartResponse response = partsServiceClient.updatePartStatus(id, "ARCHIVED");
+        logCatalog(request, "Part archived", Map.of("partId", id.toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @DeleteMapping("/parts/{id}")
     public ResponseEntity<Void> deletePart(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireAdmin(request);
         partsServiceClient.deletePart(id);
+        logCatalog(request, "Part deleted", Map.of("partId", id.toString()));
         return ResponseEntity.noContent().build();
     }
 
@@ -112,7 +124,9 @@ public class AdminPartsController {
         } else {
             accessGuard.requireCatalogOrAdmin(request);
         }
-        return ResponseEntity.ok(ApiResponse.of(adminPartsBulkService.bulk(body)));
+        BulkResult result = adminPartsBulkService.bulk(body);
+        logCatalog(request, "Parts bulk action", Map.of("action", action, "success", result.success(), "failed", result.failed()));
+        return ResponseEntity.ok(ApiResponse.of(result));
     }
 
     @GetMapping("/kits")
@@ -140,7 +154,9 @@ public class AdminPartsController {
             @Valid @RequestBody KitRequest body
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.createKit(body)));
+        KitResponse response = partsServiceClient.createKit(body);
+        logCatalog(request, "Kit created", Map.of("kitId", response.id().toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PutMapping("/kits/{id}")
@@ -150,19 +166,24 @@ public class AdminPartsController {
             @Valid @RequestBody KitRequest body
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateKit(id, body)));
+        KitResponse response = partsServiceClient.updateKit(id, body);
+        logCatalog(request, "Kit updated", Map.of("kitId", id.toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PostMapping("/kits/{id}/publish")
     public ResponseEntity<ApiResponse<KitResponse>> publishKit(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateKitStatus(id, "PUBLISHED")));
+        KitResponse response = partsServiceClient.updateKitStatus(id, "PUBLISHED");
+        logCatalog(request, "Kit published", Map.of("kitId", id.toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @DeleteMapping("/kits/{id}")
     public ResponseEntity<Void> deleteKit(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireAdmin(request);
         partsServiceClient.deleteKit(id);
+        logCatalog(request, "Kit deleted", Map.of("kitId", id.toString()));
         return ResponseEntity.noContent().build();
     }
 
@@ -190,7 +211,9 @@ public class AdminPartsController {
             @Valid @RequestBody DroneRequest body
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.createDrone(body)));
+        DroneResponse response = partsServiceClient.createDrone(body);
+        logCatalog(request, "Drone created", Map.of("droneId", response.id().toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PutMapping("/drones/{id}")
@@ -200,19 +223,24 @@ public class AdminPartsController {
             @Valid @RequestBody DroneRequest body
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateDrone(id, body)));
+        DroneResponse response = partsServiceClient.updateDrone(id, body);
+        logCatalog(request, "Drone updated", Map.of("droneId", id.toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PostMapping("/drones/{id}/publish")
     public ResponseEntity<ApiResponse<DroneResponse>> publishDrone(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateDroneStatus(id, "PUBLISHED")));
+        DroneResponse response = partsServiceClient.updateDroneStatus(id, "PUBLISHED");
+        logCatalog(request, "Drone published", Map.of("droneId", id.toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @DeleteMapping("/drones/{id}")
     public ResponseEntity<Void> deleteDrone(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireAdmin(request);
         partsServiceClient.deleteDrone(id);
+        logCatalog(request, "Drone deleted", Map.of("droneId", id.toString()));
         return ResponseEntity.noContent().build();
     }
 
@@ -228,7 +256,9 @@ public class AdminPartsController {
             @Valid @RequestBody CategoryRequest body
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.createCategory(body)));
+        CategoryResponse response = partsServiceClient.createCategory(body);
+        logCatalog(request, "Category created", Map.of("categoryId", response.id().toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PutMapping("/part-categories/{id}")
@@ -238,13 +268,16 @@ public class AdminPartsController {
             @Valid @RequestBody CategoryRequest body
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.updateCategory(id, body)));
+        CategoryResponse response = partsServiceClient.updateCategory(id, body);
+        logCatalog(request, "Category updated", Map.of("categoryId", id.toString()));
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @DeleteMapping("/part-categories/{id}")
     public ResponseEntity<Void> deleteCategory(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireAdmin(request);
         partsServiceClient.deleteCategory(id);
+        logCatalog(request, "Category deleted", Map.of("categoryId", id.toString()));
         return ResponseEntity.noContent().build();
     }
 
@@ -277,6 +310,13 @@ public class AdminPartsController {
         PartsAdminDtos.ImportApplyRequest body = options == null
                 ? new PartsAdminDtos.ImportApplyRequest(null, true, true, true, "DRAFT")
                 : options;
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.applyImport(file, body)));
+        PartsAdminDtos.ImportApplyResponse response = partsServiceClient.applyImport(file, body);
+        logCatalog(request, "Parts import applied", Map.of("created", response.created(), "updated", response.updated(), "errors", response.errors() == null ? 0 : response.errors().size()));
+        return ResponseEntity.ok(ApiResponse.of(response));
+    }
+
+    private void logCatalog(HttpServletRequest request, String message, Map<String, Object> details) {
+        auditClient.audit("CATALOG", message, details, accessGuard.userId(request).toString(), null, null);
     }
 }
+

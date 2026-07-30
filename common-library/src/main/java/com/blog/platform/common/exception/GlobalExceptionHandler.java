@@ -1,12 +1,15 @@
 package com.blog.platform.common.exception;
 
 import com.blog.platform.common.api.ApiError;
+import com.blog.platform.common.logging.AuditClient;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -19,6 +22,9 @@ import org.springframework.web.client.HttpStatusCodeException;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @Autowired(required = false)
+    private AuditClient auditClient;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex) {
@@ -90,6 +96,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleFallback(Exception ex) {
         log.error("Unhandled error", ex);
+        if (auditClient != null) {
+            String truncated = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
+            if (truncated.length() > 400) {
+                truncated = truncated.substring(0, 400);
+            }
+            auditClient.error("ERROR", "Unhandled exception", Map.of(
+                    "exception", ex.getClass().getName(),
+                    "message", truncated
+            ), null, null, null);
+        }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiError("INTERNAL_ERROR", "Unexpected server error", List.of(), Instant.now()));
     }

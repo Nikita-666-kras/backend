@@ -18,6 +18,9 @@ parts-service:
 proposal-service:
   base-url: ${PROPOSAL_SERVICE_URL:http://proposal-service:9007}
 
+logging-service:
+  base-url: ${LOGGING_SERVICE_URL:http://logging-service:9008}
+
 security:
   jwt:
     secret: ${JWT_SECRET}
@@ -25,6 +28,13 @@ security:
     post: ${POST_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
     parts: ${PARTS_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
     proposal: ${PROPOSAL_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
+    logging: ${LOGGING_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
+
+logging:
+  audit:
+    enabled: ${LOGGING_AUDIT_ENABLED:false}
+    base-url: ${LOGGING_SERVICE_URL:http://logging-service:9008}
+    internal-api-key: ${LOGGING_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
 
 management:
   endpoints:

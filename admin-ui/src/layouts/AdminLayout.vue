@@ -122,6 +122,10 @@ async function logout() {
               <AppIcon name="settings" :size="16" />
               <span>Пользователи</span>
             </RouterLink>
+            <RouterLink class="nav-link icon-link" to="/logs">
+              <AppIcon name="settings" :size="16" />
+              <span>Логи</span>
+            </RouterLink>
             <a class="nav-link external icon-link" :href="managerHubUrl" target="_blank" rel="noopener">
               <AppIcon name="drone" :size="16" />
               <span>Менеджерский хаб</span>
@@ -314,3 +318,6 @@ nav {
   }
 }
 </style>
+
+
+

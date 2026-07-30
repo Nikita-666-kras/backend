@@ -1,5 +1,6 @@
 package com.blog.platform.sso.security;
 
+import com.blog.platform.common.exception.UnauthorizedException;
 import com.blog.platform.common.security.JwtClaims;
 import com.blog.platform.common.security.SecurityHeaders;
 import com.blog.platform.sso.domain.AuthUser;

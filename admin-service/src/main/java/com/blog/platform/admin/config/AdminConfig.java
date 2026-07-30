@@ -60,4 +60,15 @@ public class AdminConfig {
                 .defaultHeader(InternalHeaders.API_KEY, internalApiKey)
                 .build();
     }
+
+    @Bean
+    RestClient loggingServiceRestClient(
+            @Value("${logging-service.base-url}") String baseUrl,
+            @Value("${security.internal-api-keys.logging:${LOGGING_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}") String internalApiKey
+    ) {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader(InternalHeaders.API_KEY, internalApiKey)
+                .build();
+    }
 }

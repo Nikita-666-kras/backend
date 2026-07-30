@@ -23,6 +23,10 @@ public final class AuthDtos {
     public record RefreshRequest(@NotBlank String refreshToken) {
     }
 
+    /** refreshToken optional when Authorization Bearer access token is sent. */
+    public record LogoutRequest(String refreshToken) {
+    }
+
     public record CreateUserRequest(
             @NotBlank @Size(min = 3, max = 50) String username,
             @NotBlank @Email String email,

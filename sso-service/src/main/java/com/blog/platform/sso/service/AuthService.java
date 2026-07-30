@@ -1,7 +1,9 @@
 package com.blog.platform.sso.service;
 
 import com.blog.platform.common.exception.ForbiddenException;
+import com.blog.platform.common.exception.TooManyRequestsException;
 import com.blog.platform.common.exception.UnauthorizedException;
+import com.blog.platform.common.logging.AuditClient;
 import com.blog.platform.common.security.JwtClaims;
 import com.blog.platform.common.security.Role;
 import com.blog.platform.sso.api.dto.AuthDtos.AuthResponse;
@@ -37,19 +39,29 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final TokenHasher tokenHasher;
     private final LoginRateLimitService loginRateLimitService;
+    private final AuditClient auditClient;
 
     @Transactional
     public AuthResponse login(LoginRequest request, String ipAddress) {
-        AuthUser user = authUserRepository.findByUsername(request.username())
-                .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
-        loginRateLimitService.ensureLoginAllowed(user, ipAddress);
+        loginRateLimitService.ensureLoginAttemptAllowed(request.username(), ipAddress);
+        AuthUser user = authUserRepository.findByUsername(request.username()).orElse(null);
+        if (user == null) {
+            auditClient.warn("AUTH", "Login failed: unknown user", Map.of("username", request.username(), "ip", ipAddress), null, request.username(), null);
+            throw new UnauthorizedException("Invalid credentials");
+        }
+        try {
+            loginRateLimitService.ensureAccountNotLocked(user);
+        } catch (TooManyRequestsException ex) {
+            auditClient.security("SECURITY", "Blocked login for locked account", Map.of("username", request.username(), "ip", ipAddress), user.getId().toString(), user.getUsername(), null);
+            throw ex;
+        }
         if (!user.isEnabled() || !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             loginRateLimitService.onLoginFailure(user);
-            authUserRepository.save(user);
+            auditClient.warn("AUTH", "Login failed: invalid password", Map.of("username", request.username(), "ip", ipAddress), user.getId().toString(), user.getUsername(), null);
             throw new UnauthorizedException("Invalid credentials");
         }
         loginRateLimitService.onLoginSuccess(user);
-        authUserRepository.save(user);
+        auditClient.audit("AUTH", "Login successful", Map.of("ip", ipAddress), user.getId().toString(), user.getUsername(), null);
         return issueTokens(user);
     }
 
@@ -71,17 +83,37 @@ public class AuthService {
         }
         stored.setRevoked(true);
         refreshTokenRepository.save(stored);
+        auditClient.audit("AUTH", "Token refreshed", Map.of("ip", ipAddress), user.getId().toString(), user.getUsername(), null);
         return issueTokens(user);
     }
 
     @Transactional
-    public void logout(String refreshToken) {
-        String tokenHash = tokenHasher.hash(refreshToken);
-        refreshTokenRepository.findByTokenAndRevokedFalse(tokenHash).ifPresent(token -> {
-            token.setRevoked(true);
-            refreshTokenRepository.save(token);
-            authUserRepository.findById(token.getUserId()).ifPresent(this::invalidateAccessTokens);
-        });
+    public void logout(String refreshToken, String accessToken) {
+        UUID userId = null;
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            String tokenHash = tokenHasher.hash(refreshToken);
+            RefreshToken stored = refreshTokenRepository.findByTokenAndRevokedFalse(tokenHash).orElse(null);
+            if (stored != null) {
+                stored.setRevoked(true);
+                refreshTokenRepository.save(stored);
+                userId = stored.getUserId();
+            }
+        }
+        if (userId == null && accessToken != null && !accessToken.isBlank()) {
+            try {
+                Claims claims = jwtProvider.parse(accessToken);
+                userId = UUID.fromString(claims.get(JwtClaims.USER_ID, String.class));
+            } catch (Exception ignored) {
+                // ignore invalid access token on logout
+            }
+        }
+        if (userId != null) {
+            UUID finalUserId = userId;
+            authUserRepository.findById(userId).ifPresent(user -> {
+                invalidateAccessTokens(user);
+                auditClient.audit("AUTH", "Logout successful", Map.of(), finalUserId.toString(), user.getUsername(), null);
+            });
+        }
     }
 
     @Transactional(readOnly = true)
@@ -120,7 +152,9 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setEnabled(true);
         user.setRoles(new HashSet<>(request.roles()));
-        return toResponse(authUserRepository.save(user));
+        AuthUser saved = authUserRepository.save(user);
+        auditClient.audit("USERS", "User created", Map.of("roles", request.roles().toString()), saved.getId().toString(), saved.getUsername(), null);
+        return toResponse(saved);
     }
 
     @Transactional(readOnly = true)
@@ -133,18 +167,20 @@ public class AuthService {
     public UserResponse updateRoles(UUID id, Set<Role> roles, UUID actorId) {
         AuthUser user = requireUser(id);
         if (user.getId().equals(actorId) && !roles.contains(Role.ADMIN)) {
-            throw new ForbiddenException("Нельзя снять у себя роль ADMIN");
+            throw new ForbiddenException("������ ����� � ���� ���� ADMIN");
         }
         user.setRoles(new HashSet<>(roles));
         invalidateAccessTokens(user);
-        return toResponse(authUserRepository.save(user));
+        AuthUser saved = authUserRepository.save(user);
+        auditClient.audit("USERS", "Roles updated", Map.of("roles", roles.toString(), "actorId", actorId.toString()), saved.getId().toString(), saved.getUsername(), null);
+        return toResponse(saved);
     }
 
     @Transactional
     public UserResponse updateEnabled(UUID id, boolean enabled, UUID actorId) {
         AuthUser user = requireUser(id);
         if (user.getId().equals(actorId) && !enabled) {
-            throw new ForbiddenException("Нельзя отключить собственный аккаунт");
+            throw new ForbiddenException("������ ��������� ����������� �������");
         }
         user.setEnabled(enabled);
         if (!enabled) {
@@ -154,17 +190,20 @@ public class AuthService {
             }
             invalidateAccessTokens(user);
         }
-        return toResponse(authUserRepository.save(user));
+        AuthUser saved = authUserRepository.save(user);
+        auditClient.audit("USERS", enabled ? "User enabled" : "User disabled", Map.of("actorId", actorId.toString()), saved.getId().toString(), saved.getUsername(), null);
+        return toResponse(saved);
     }
 
     @Transactional
     public void deleteUser(UUID id, UUID actorId) {
         AuthUser user = requireUser(id);
         if (user.getId().equals(actorId)) {
-            throw new ForbiddenException("Нельзя удалить собственный аккаунт");
+            throw new ForbiddenException("������ ������� ����������� �������");
         }
         refreshTokenRepository.deleteAll(refreshTokenRepository.findByUserIdAndRevokedFalse(user.getId()));
         authUserRepository.delete(user);
+        auditClient.audit("USERS", "User deleted", Map.of("actorId", actorId.toString()), user.getId().toString(), user.getUsername(), null);
     }
 
     private AuthUser requireUser(UUID id) {

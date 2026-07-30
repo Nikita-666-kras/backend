@@ -105,12 +105,21 @@ services:
       SPRING_DATASOURCE_USERNAME: sso
       SPRING_DATASOURCE_PASSWORD: ${SSO_DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       SSO_INTERNAL_API_KEY: ${SSO_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
+      LOGIN_MAX_FAILURES: ${LOGIN_MAX_FAILURES:-5}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-15}
+      LOGIN_IP_LIMIT_PER_MINUTE: ${LOGIN_IP_LIMIT_PER_MINUTE:-20}
+      LOGIN_REFRESH_LIMIT_PER_MINUTE: ${LOGIN_REFRESH_LIMIT_PER_MINUTE:-30}
+      LOGIN_USERNAME_LIMIT_PER_MINUTE: ${LOGIN_USERNAME_LIMIT_PER_MINUTE:-10}
       APP_SEED_USERS: ${APP_SEED_USERS:-false}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       SEED_EDITOR_PASSWORD: ${SEED_EDITOR_PASSWORD:-}
       SEED_MANAGER_PASSWORD: ${SEED_MANAGER_PASSWORD:-}
       SEED_PURCHASER_PASSWORD: ${SEED_PURCHASER_PASSWORD:-}
+      LOGGING_AUDIT_ENABLED: ${LOGGING_AUDIT_ENABLED:-true}
+      LOGGING_SERVICE_URL: http://logging-service:9008
+      LOGGING_INTERNAL_API_KEY: ${LOGGING_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
     networks:
       - blog-net
     expose:
@@ -160,6 +169,25 @@ services:
     expose:
       - "9007"
 
+
+  logging-service:
+    build:
+      context: .
+      dockerfile: logging-service/Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:sqlite:/data/logs/logging.db
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      LOGGING_INTERNAL_API_KEY: ${LOGGING_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
+      LOG_DB_PATH: /data/logs/logging.db
+      LOG_RETENTION_DAYS: ${LOG_RETENTION_DAYS:-14}
+      LOG_MAX_ROWS: ${LOG_MAX_ROWS:-100000}
+      LOG_MAX_DB_MB: ${LOG_MAX_DB_MB:-256}
+    volumes:
+      - logs-data:/data/logs
+    networks:
+      - blog-net
+    expose:
+      - "9008"
   admin-service:
     build:
       context: .
@@ -168,6 +196,7 @@ services:
       - post-service
       - parts-service
       - proposal-service
+      - logging-service
     environment:
       POST_SERVICE_URL: http://post-service:9003
       PARTS_SERVICE_URL: http://parts-service:9006
@@ -177,6 +206,9 @@ services:
       PARTS_INTERNAL_API_KEY: ${PARTS_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
       PROPOSAL_INTERNAL_API_KEY: ${PROPOSAL_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
       JWT_SECRET: ${JWT_SECRET}
+      LOGGING_AUDIT_ENABLED: ${LOGGING_AUDIT_ENABLED:-true}
+      LOGGING_SERVICE_URL: http://logging-service:9008
+      LOGGING_INTERNAL_API_KEY: ${LOGGING_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
     networks:
       - blog-net
     expose:
@@ -192,6 +224,7 @@ services:
       - post-service
       - parts-service
       - proposal-service
+      - logging-service
     ports:
       - "8080:8080"
     environment:
@@ -201,6 +234,9 @@ services:
       PARTS_INTERNAL_API_KEY: ${PARTS_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
       PROPOSAL_INTERNAL_API_KEY: ${PROPOSAL_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
       SSO_INTERNAL_API_KEY: ${SSO_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
+      TOKEN_VERSION_REFRESH_MS: ${TOKEN_VERSION_REFRESH_MS:-1000}
+      RATE_LIMIT_API_PER_MINUTE: ${RATE_LIMIT_API_PER_MINUTE:-120}
+      RATE_LIMIT_AUTH_PER_MINUTE: ${RATE_LIMIT_AUTH_PER_MINUTE:-20}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:8088,http://127.0.0.1:8088}
       SSO_SERVICE_URL: http://sso-service:9001
       ADMIN_SERVICE_URL: http://admin-service:9005
@@ -256,3 +292,7 @@ volumes:
   proposal-db-data:
   media-data:
   kp-data:
+  logs-data:
+
+
+

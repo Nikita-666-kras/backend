@@ -1,3 +1,11 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = "blog-platform"
 
 include(
@@ -7,7 +15,8 @@ include(
     "sso-service",
     "api-gateway",
     "admin-service",
-    "proposal-service"
+    "proposal-service",
+    "logging-service"
 )
 
 project(":post-service").projectDir = file("article-service")

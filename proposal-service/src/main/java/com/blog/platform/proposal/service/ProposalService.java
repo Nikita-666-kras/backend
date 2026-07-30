@@ -55,6 +55,20 @@ public class ProposalService {
     }
 
     @Transactional
+    public void deleteModel(UUID id) {
+        Integer used = jdbc.queryForObject(
+                "select count(*) from kp_proposals where drone_model_id=?", Integer.class, id);
+        if (used != null && used > 0) {
+            throw new IllegalArgumentException(
+                    "Нельзя удалить модель: она используется в " + used + " КП. Снимите активность вместо удаления.");
+        }
+        int deleted = jdbc.update("delete from kp_drone_models where id=?", id);
+        if (deleted == 0) {
+            throw new IllegalArgumentException("Модель не найдена");
+        }
+    }
+
+    @Transactional
     public ProposalDto saveDraft(UUID managerId, String username, UUID proposalId, ProposalUpsertRequest req) {
         UUID id = proposalId == null ? UUID.randomUUID() : proposalId;
         var model = listModels(false).stream().filter(x -> x.id().equals(req.droneModelId())).findFirst()

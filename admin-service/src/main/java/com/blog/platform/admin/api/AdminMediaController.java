@@ -10,7 +10,9 @@ import com.blog.platform.admin.api.dto.AdminDtos.ProcessingSettingsResponse;
 import com.blog.platform.admin.client.PostServiceClient;
 import com.blog.platform.admin.security.AdminAccessGuard;
 import com.blog.platform.common.api.ApiResponse;
+import com.blog.platform.common.logging.AuditClient;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,7 @@ public class AdminMediaController {
 
     private final PostServiceClient postServiceClient;
     private final AdminAccessGuard accessGuard;
+    private final AuditClient auditClient;
 
     @PostMapping
     public ResponseEntity<ApiResponse<MediaResponse>> upload(
@@ -41,9 +44,9 @@ public class AdminMediaController {
     ) {
         String effectiveSection = section == null || section.isBlank() ? "OTHER" : section;
         accessGuard.requireMediaAccess(request, effectiveSection);
-        return ResponseEntity.ok(ApiResponse.of(
-                postServiceClient.uploadMedia(file, accessGuard.userId(request), effectiveSection)
-        ));
+        MediaResponse response = postServiceClient.uploadMedia(file, accessGuard.userId(request), effectiveSection);
+        auditClient.audit("MEDIA", "Media uploaded", Map.of("mediaId", response.id().toString(), "section", effectiveSection), accessGuard.userId(request).toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @GetMapping
@@ -83,7 +86,9 @@ public class AdminMediaController {
     ) {
         MediaResponse meta = postServiceClient.getMediaMeta(id);
         accessGuard.requireMediaAccess(request, meta.section());
-        return ResponseEntity.ok(ApiResponse.of(postServiceClient.processMedia(id, body)));
+        MediaResponse response = postServiceClient.processMedia(id, body);
+        auditClient.audit("MEDIA", "Media processed", Map.of("mediaId", id.toString(), "section", meta.section()), accessGuard.userId(request).toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PostMapping("/process-batch")
@@ -98,7 +103,9 @@ public class AdminMediaController {
                 accessGuard.requireMediaAccess(request, meta.section());
             }
         }
-        return ResponseEntity.ok(ApiResponse.of(postServiceClient.processMediaBatch(body)));
+        MediaBatchProcessResponse response = postServiceClient.processMediaBatch(body);
+        auditClient.audit("MEDIA", "Media batch processed", Map.of("ids", body.ids() == null ? 0 : body.ids().size()), accessGuard.userId(request).toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @PatchMapping("/{id}/section")
@@ -111,13 +118,16 @@ public class AdminMediaController {
         if (body.section() == null || body.section().isBlank()) {
             throw new IllegalArgumentException("Section is required");
         }
-        return ResponseEntity.ok(ApiResponse.of(postServiceClient.updateMediaSection(id, body.section())));
+        MediaResponse response = postServiceClient.updateMediaSection(id, body.section());
+        auditClient.audit("MEDIA", "Media section updated", Map.of("mediaId", id.toString(), "section", body.section()), accessGuard.userId(request).toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireAdmin(request);
         postServiceClient.deleteMedia(id);
+        auditClient.audit("MEDIA", "Media deleted", Map.of("mediaId", id.toString()), accessGuard.userId(request).toString(), null, null);
         return ResponseEntity.noContent().build();
     }
 }

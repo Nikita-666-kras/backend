@@ -1,0 +1,43 @@
+server:
+  port: 9008
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+  application:
+    name: logging-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlite:/data/logs/logging.db}
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+
+security:
+  internal-api-key: ${LOGGING_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
+
+logging-service:
+  ingest:
+    queue-capacity: ${LOG_QUEUE_CAPACITY:500}
+    flush-size: ${LOG_FLUSH_SIZE:200}
+    flush-ms: ${LOG_FLUSH_MS:500}
+  retention:
+    days: ${LOG_RETENTION_DAYS:14}
+    max-rows: ${LOG_MAX_ROWS:100000}
+    max-db-mb: ${LOG_MAX_DB_MB:256}
+  db-path: ${LOG_DB_PATH:/data/logs/logging.db}
+
+management:
+  endpoints:
+    web:
+      base-path: /application
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+

@@ -11,7 +11,8 @@ RUN yum install -y unzip tar gzip findutils \
 COPY settings.gradle.kts build.gradle.kts gradle.properties ./
 COPY common-library ./common-library
 COPY proposal-service ./proposal-service
-RUN gradle :proposal-service:bootJar --no-daemon -x test
+RUN --mount=type=cache,id=blog-platform-gradle,sharing=locked,target=/root/.gradle \
+    gradle :proposal-service:bootJar --no-daemon -x test
 
 FROM amazoncorretto:21
 WORKDIR /opt/app

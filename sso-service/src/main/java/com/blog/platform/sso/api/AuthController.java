@@ -8,6 +8,7 @@ import com.blog.platform.common.security.SecurityHeaders;
 import com.blog.platform.sso.api.dto.AuthDtos.AuthResponse;
 import com.blog.platform.sso.api.dto.AuthDtos.CreateUserRequest;
 import com.blog.platform.sso.api.dto.AuthDtos.LoginRequest;
+import com.blog.platform.sso.api.dto.AuthDtos.LogoutRequest;
 import com.blog.platform.sso.api.dto.AuthDtos.RefreshRequest;
 import com.blog.platform.sso.api.dto.AuthDtos.UpdateEnabledRequest;
 import com.blog.platform.sso.api.dto.AuthDtos.UpdateRolesRequest;
@@ -57,8 +58,13 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequest request) {
-        authService.logout(request.refreshToken());
+    public ResponseEntity<Void> logout(
+            HttpServletRequest httpRequest,
+            @RequestBody(required = false) LogoutRequest request
+    ) {
+        String refresh = request == null ? null : request.refreshToken();
+        String access = optionalBearer(httpRequest);
+        authService.logout(refresh, access);
         return ResponseEntity.noContent().build();
     }
 
@@ -142,6 +148,14 @@ public class AuthController {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header == null || !header.startsWith("Bearer ")) {
             throw new UnauthorizedException("Missing bearer token");
+        }
+        return header.substring(7);
+    }
+
+    private String optionalBearer(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Bearer ")) {
+            return null;
         }
         return header.substring(7);
     }

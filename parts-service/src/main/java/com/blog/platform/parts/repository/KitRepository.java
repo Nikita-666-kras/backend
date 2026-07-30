@@ -2,6 +2,7 @@ package com.blog.platform.parts.repository;
 
 import com.blog.platform.parts.domain.CatalogStatus;
 import com.blog.platform.parts.domain.Kit;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -42,4 +43,11 @@ public interface KitRepository extends JpaRepository<Kit, UUID> {
               AND (k.cover_media_id = :mediaId OR km.media_id = :mediaId)
             """, nativeQuery = true)
     boolean existsPublishedMediaReference(@Param("mediaId") UUID mediaId);
+
+    @Query("""
+            SELECT DISTINCT k FROM Kit k
+            JOIN k.items i
+            WHERE i.part.id = :partId
+            """)
+    List<Kit> findAllByPartId(@Param("partId") UUID partId);
 }

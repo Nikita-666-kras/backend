@@ -9,8 +9,10 @@ import com.blog.platform.admin.api.dto.AdminDtos.PostResponse;
 import com.blog.platform.admin.security.AdminAccessGuard;
 import com.blog.platform.admin.service.AdminPostService;
 import com.blog.platform.common.api.ApiResponse;
+import com.blog.platform.common.logging.AuditClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,7 @@ public class AdminController {
 
     private final AdminPostService adminPostService;
     private final AdminAccessGuard accessGuard;
+    private final AuditClient auditClient;
 
     @GetMapping("/dashboard")
     public ResponseEntity<ApiResponse<DashboardStats>> dashboard(HttpServletRequest request) {
@@ -63,7 +66,9 @@ public class AdminController {
     ) {
         accessGuard.requireEditorOrAdmin(request);
         UUID authorId = accessGuard.userId(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.create(body, authorId)));
+        PostResponse created = adminPostService.create(body, authorId);
+        auditClient.audit("CONTENT", "Post created", Map.of("postId", created.id().toString()), authorId.toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(created));
     }
 
     @PutMapping("/posts/{id}")
@@ -74,19 +79,27 @@ public class AdminController {
     ) {
         accessGuard.requireEditorOrAdmin(request);
         UUID authorId = accessGuard.userId(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.update(request, id, body, authorId)));
+        PostResponse updated = adminPostService.update(request, id, body, authorId);
+        auditClient.audit("CONTENT", "Post updated", Map.of("postId", id.toString()), authorId.toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(updated));
     }
 
     @PostMapping("/posts/{id}/publish")
     public ResponseEntity<ApiResponse<PostResponse>> publish(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.publish(request, id)));
+        UUID actor = accessGuard.userId(request);
+        PostResponse published = adminPostService.publish(request, id);
+        auditClient.audit("CONTENT", "Post published", Map.of("postId", id.toString()), actor.toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(published));
     }
 
     @PostMapping("/posts/{id}/archive")
     public ResponseEntity<ApiResponse<PostResponse>> archive(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireEditorOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.archive(request, id)));
+        UUID actor = accessGuard.userId(request);
+        PostResponse archived = adminPostService.archive(request, id);
+        auditClient.audit("CONTENT", "Post archived", Map.of("postId", id.toString()), actor.toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(archived));
     }
 
     @PostMapping("/posts/bulk")
@@ -100,13 +113,16 @@ public class AdminController {
         } else {
             accessGuard.requireEditorOrAdmin(request);
         }
-        return ResponseEntity.ok(ApiResponse.of(adminPostService.bulk(request, body)));
+        BulkResult result = adminPostService.bulk(request, body);
+        auditClient.audit("CONTENT", "Post bulk action", Map.of("action", action, "success", result.success(), "failed", result.failed()), accessGuard.userId(request).toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(result));
     }
 
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<Void> delete(HttpServletRequest request, @PathVariable UUID id) {
         accessGuard.requireAdmin(request);
         adminPostService.delete(id);
+        auditClient.audit("CONTENT", "Post deleted", Map.of("postId", id.toString()), accessGuard.userId(request).toString(), null, null);
         return ResponseEntity.noContent().build();
     }
 }

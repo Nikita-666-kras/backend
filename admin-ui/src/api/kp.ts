@@ -36,6 +36,10 @@ export async function updateDroneModel(id: string, payload: Omit<KpDroneModel, '
   return data.data as KpDroneModel
 }
 
+export async function deleteDroneModel(id: string) {
+  await api.delete(`/admin/kp/drone-models/${id}`)
+}
+
 export async function fetchAllProposals() {
   const { data } = await api.get('/admin/kp/proposals')
   return data.data as KpProposal[]

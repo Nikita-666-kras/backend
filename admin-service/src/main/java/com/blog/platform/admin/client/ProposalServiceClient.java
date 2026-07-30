@@ -45,6 +45,15 @@ public class ProposalServiceClient {
                 .body(new ParameterizedTypeReference<ApiResponse<DroneModelResponse>>() {}));
     }
 
+    public void deleteDroneModel(UUID id, UUID userId, Set<Role> roles) {
+        proposalServiceRestClient.delete()
+                .uri("/admin/kp/drone-models/{id}", id)
+                .header(SecurityHeaders.USER_ID, userId.toString())
+                .header(SecurityHeaders.USER_ROLES, rolesHeader(roles))
+                .retrieve()
+                .toBodilessEntity();
+    }
+
     public List<ProposalResponse> proposals(UUID userId, Set<Role> roles) {
         return requireData(proposalServiceRestClient.get()
                 .uri("/admin/kp/proposals")

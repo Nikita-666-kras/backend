@@ -5,8 +5,12 @@ import com.blog.platform.parts.api.dto.PartsDtos.PartRequest;
 import com.blog.platform.parts.api.dto.PartsDtos.PartResponse;
 import com.blog.platform.parts.domain.CatalogStatus;
 import com.blog.platform.parts.domain.ExternalSource;
+import com.blog.platform.parts.domain.Kit;
+import com.blog.platform.parts.domain.KitItem;
+import com.blog.platform.parts.domain.KitPriceMode;
 import com.blog.platform.parts.domain.Part;
 import com.blog.platform.parts.domain.PartCategory;
+import com.blog.platform.parts.repository.KitRepository;
 import com.blog.platform.parts.repository.PartCategoryRepository;
 import com.blog.platform.parts.repository.PartRepository;
 import java.math.BigDecimal;
@@ -26,6 +30,7 @@ public class PartService {
 
     private final PartRepository partRepository;
     private final PartCategoryRepository categoryRepository;
+    private final KitRepository kitRepository;
     private final DroneService droneService;
 
     @Transactional(readOnly = true)
@@ -83,7 +88,39 @@ public class PartService {
 
     @Transactional
     public void delete(UUID id) {
-        partRepository.delete(require(id));
+        Part part = require(id);
+        detachFromKits(id);
+        partRepository.delete(part);
+    }
+
+    /** kit_items.part_id is ON DELETE RESTRICT — remove refs before deleting the part. */
+    private void detachFromKits(UUID partId) {
+        List<Kit> kits = kitRepository.findAllByPartId(partId);
+        for (Kit kit : kits) {
+            if (kit.getItems() == null || kit.getItems().isEmpty()) {
+                continue;
+            }
+            kit.getItems().removeIf(item -> partId.equals(item.getPartId()));
+            if (kit.getPriceMode() == KitPriceMode.SUM) {
+                kit.setPrice(sumKitItems(kit.getItems()));
+            }
+            kitRepository.save(kit);
+        }
+    }
+
+    private BigDecimal sumKitItems(List<KitItem> items) {
+        BigDecimal sum = BigDecimal.ZERO;
+        if (items == null) {
+            return sum;
+        }
+        for (KitItem item : items) {
+            if (item.getPart() == null || item.getPart().getPrice() == null) {
+                continue;
+            }
+            int qty = item.getQty() == null ? 1 : item.getQty();
+            sum = sum.add(item.getPart().getPrice().multiply(BigDecimal.valueOf(qty)));
+        }
+        return sum;
     }
 
     Part require(UUID id) {

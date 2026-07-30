@@ -43,6 +43,15 @@ public class AdminKpController {
         return ApiResponse.of(proposalServiceClient.updateDroneModel(id, body, userId, roles));
     }
 
+    @DeleteMapping("/drone-models/{id}")
+    public ResponseEntity<Void> deleteModel(HttpServletRequest request, @PathVariable UUID id) {
+        accessGuard.requireAdmin(request);
+        var userId = accessGuard.userId(request);
+        var roles = accessGuard.roles(request);
+        proposalServiceClient.deleteDroneModel(id, userId, roles);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/proposals")
     public ApiResponse<?> proposals(HttpServletRequest request) {
         accessGuard.requireAdmin(request);

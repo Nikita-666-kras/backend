@@ -18,12 +18,19 @@ spring:
 security:
   jwt:
     secret: ${JWT_SECRET}
-  internal-api-key: ${SSO_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
+  internal-api-key: ${SSO_INTERNAL_API_KEY:${INTERNAL_API_KEY:local-dev-internal-key}}
   login:
     max-failures: ${LOGIN_MAX_FAILURES:5}
     lockout-minutes: ${LOGIN_LOCKOUT_MINUTES:15}
     ip-limit-per-minute: ${LOGIN_IP_LIMIT_PER_MINUTE:20}
     refresh-limit-per-minute: ${LOGIN_REFRESH_LIMIT_PER_MINUTE:30}
+    username-limit-per-minute: ${LOGIN_USERNAME_LIMIT_PER_MINUTE:10}
+
+logging:
+  audit:
+    enabled: ${LOGGING_AUDIT_ENABLED:false}
+    base-url: ${LOGGING_SERVICE_URL:http://logging-service:9008}
+    internal-api-key: ${LOGGING_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
 
 app:
   seed-users: ${APP_SEED_USERS:false}

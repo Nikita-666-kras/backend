@@ -2,7 +2,6 @@ FROM amazoncorretto:21 AS builder
 WORKDIR /app
 
 RUN yum install -y unzip tar gzip findutils \
-
     && curl -fsSL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip \
     && unzip -q /tmp/gradle.zip -d /opt \
     && ln -s /opt/gradle-8.9/bin/gradle /usr/local/bin/gradle \
@@ -11,7 +10,8 @@ RUN yum install -y unzip tar gzip findutils \
 
 COPY settings.gradle.kts build.gradle.kts gradle.properties ./
 COPY api-gateway ./api-gateway
-RUN gradle :api-gateway:bootJar --no-daemon -x test
+RUN --mount=type=cache,id=blog-platform-gradle,sharing=locked,target=/root/.gradle \
+    gradle :api-gateway:bootJar --no-daemon -x test
 
 FROM amazoncorretto:21
 WORKDIR /opt/app

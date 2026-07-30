@@ -1,35 +1,47 @@
 package com.blog.platform.gateway.filter;
 
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * Edge per-IP fixed-window limiter. Authoritative login/lockout lives in SSO (Postgres).
+ * This filter is process-local — fine for a single gateway replica.
+ */
 @Component
 public class RateLimiterFilter implements GlobalFilter, Ordered {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimiterFilter.class);
-    private static final int DEFAULT_LIMIT = 120;
-    private static final int AUTH_LIMIT = 20;
     private final Map<String, Counter> requestCounters = new ConcurrentHashMap<>();
+
+    @Value("${security.rate-limit.api-per-minute:120}")
+    private int defaultLimit;
+
+    @Value("${security.rate-limit.auth-per-minute:20}")
+    private int authLimit;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String ip = exchange.getRequest().getRemoteAddress() == null
-                ? "unknown"
-                : exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
+        String ip = clientIp(exchange.getRequest());
         String path = exchange.getRequest().getPath().value();
-        boolean authEndpoint = path.startsWith("/auth/login") || path.startsWith("/auth/refresh");
+        boolean authEndpoint = path.startsWith("/auth/login")
+                || path.startsWith("/auth/refresh")
+                || path.startsWith("/auth/logout");
         String bucketKey = ip + (authEndpoint ? ":auth" : ":api");
-        int limit = authEndpoint ? AUTH_LIMIT : DEFAULT_LIMIT;
+        int limit = authEndpoint ? authLimit : defaultLimit;
 
         Counter counter = requestCounters.computeIfAbsent(bucketKey, ignored -> new Counter());
         synchronized (counter) {
@@ -46,6 +58,39 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
         }
         log.debug("{} {}", exchange.getRequest().getMethod(), path);
         return chain.filter(exchange);
+    }
+
+    @Scheduled(fixedDelayString = "${security.rate-limit.cleanup-ms:60000}")
+    void cleanupStaleBuckets() {
+        long cutoff = Instant.now().getEpochSecond() - 120;
+        Iterator<Map.Entry<String, Counter>> it = requestCounters.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Counter> entry = it.next();
+            Counter counter = entry.getValue();
+            synchronized (counter) {
+                if (counter.windowStart < cutoff) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    private String clientIp(ServerHttpRequest request) {
+        String forwarded = request.getHeaders().getFirst("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            String first = forwarded.split(",")[0].trim();
+            if (!first.isEmpty()) {
+                return first;
+            }
+        }
+        String realIp = request.getHeaders().getFirst("X-Real-IP");
+        if (realIp != null && !realIp.isBlank()) {
+            return realIp.trim();
+        }
+        if (request.getRemoteAddress() == null || request.getRemoteAddress().getAddress() == null) {
+            return "unknown";
+        }
+        return request.getRemoteAddress().getAddress().getHostAddress();
     }
 
     @Override
