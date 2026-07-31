@@ -25,8 +25,12 @@ public interface KitRepository extends JpaRepository<Kit, UUID> {
               AND (:droneId IS NULL OR d.id = :droneId)
               AND (
                 :q IS NULL OR :q = '' OR
-                LOWER(k.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
-                LOWER(k.sku) LIKE LOWER(CONCAT('%', :q, '%'))
+                LOWER(CONCAT(
+                  COALESCE(k.name, ''), ' ',
+                  COALESCE(k.sku, ''), ' ',
+                  COALESCE(k.description, ''), ' ',
+                  COALESCE(d.name, '')
+                )) LIKE LOWER(CONCAT('%', :q, '%'))
               )
             """)
     Page<Kit> search(

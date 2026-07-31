@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import {
   createDroneModel,
   deleteDroneModel,
   fetchDroneModels,
-  fetchZipPackage,
-  saveZipPackage,
   updateDroneModel,
-  type KpDroneModel,
-  type KpZipItem,
-  type KpZipPackage
+  type KpDroneModel
 } from '@/api/kp'
 import { useToastStore } from '@/stores/toast'
 
@@ -17,16 +14,6 @@ const toast = useToastStore()
 const items = ref<KpDroneModel[]>([])
 const loading = ref(false)
 const form = ref({ code: '', name: '', defaultPrice: 0, sortOrder: 0, active: true })
-
-const zipOpenId = ref<string | null>(null)
-const zipLoading = ref(false)
-const zipSaving = ref(false)
-const zipForm = ref<{ name: string; price: number | null; useCustomPrice: boolean; items: KpZipItem[] }>({
-  name: 'ЗИП-пакет',
-  price: null,
-  useCustomPrice: false,
-  items: []
-})
 
 async function load() {
   loading.value = true
@@ -64,85 +51,10 @@ async function remove(item: KpDroneModel) {
   if (!confirm(`Удалить модель «${item.name}» (${item.code})?`)) return
   try {
     await deleteDroneModel(item.id)
-    if (zipOpenId.value === item.id) zipOpenId.value = null
     toast.ok('Удалено')
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.message || 'Не удалось удалить модель')
-  }
-}
-
-function emptyItem(): KpZipItem {
-  return { name: '', sku: '', qty: 1, unitPrice: 0 }
-}
-
-function applyZip(pkg: KpZipPackage) {
-  zipForm.value = {
-    name: pkg.name || 'ЗИП-пакет',
-    price: pkg.price,
-    useCustomPrice: pkg.price != null,
-    items: (pkg.items || []).map((i) => ({
-      name: i.name,
-      sku: i.sku || '',
-      qty: i.qty || 1,
-      unitPrice: Number(i.unitPrice || 0),
-      sortOrder: i.sortOrder
-    }))
-  }
-  if (!zipForm.value.items.length) zipForm.value.items = [emptyItem()]
-}
-
-async function openZip(item: KpDroneModel) {
-  if (zipOpenId.value === item.id) {
-    zipOpenId.value = null
-    return
-  }
-  zipOpenId.value = item.id
-  zipLoading.value = true
-  try {
-    applyZip(await fetchZipPackage(item.id))
-  } catch (e: any) {
-    toast.error(e?.response?.data?.message || 'Не удалось загрузить ЗИП-пакет')
-    zipOpenId.value = null
-  } finally {
-    zipLoading.value = false
-  }
-}
-
-function addZipRow() {
-  zipForm.value.items.push(emptyItem())
-}
-
-function removeZipRow(idx: number) {
-  zipForm.value.items.splice(idx, 1)
-  if (!zipForm.value.items.length) zipForm.value.items.push(emptyItem())
-}
-
-async function saveZip(modelId: string) {
-  const itemsPayload = zipForm.value.items
-    .filter((i) => i.name.trim())
-    .map((i, idx) => ({
-      name: i.name.trim(),
-      sku: i.sku?.trim() || null,
-      qty: Math.max(1, Number(i.qty) || 1),
-      unitPrice: Math.max(0, Number(i.unitPrice) || 0),
-      sortOrder: idx
-    }))
-
-  zipSaving.value = true
-  try {
-    const saved = await saveZipPackage(modelId, {
-      name: zipForm.value.name.trim() || 'ЗИП-пакет',
-      price: zipForm.value.useCustomPrice ? Number(zipForm.value.price || 0) : null,
-      items: itemsPayload
-    })
-    applyZip(saved)
-    toast.ok('ЗИП-пакет сохранён')
-    await load()
-  } catch (e: any) {
-    toast.error(e?.response?.data?.message || 'Не удалось сохранить ЗИП-пакет')
-  } finally {
-    zipSaving.value = false
   }
 }
 
@@ -155,8 +67,9 @@ onMounted(load)
       <div>
         <p class="eyebrow">Коммерческие предложения</p>
         <h1>КП · Модели дронов</h1>
-        <p class="muted">Код, цена по умолчанию, порядок и ЗИП-пакет для каждой модели</p>
+        <p class="muted">Код, цена по умолчанию и порядок в списке менеджера. ЗИП настраивается отдельно.</p>
       </div>
+      <RouterLink class="btn secondary" to="/kp/zip-packages">ЗИП-пакеты</RouterLink>
     </header>
 
     <form class="card form-card" @submit.prevent="submit">
@@ -185,116 +98,73 @@ onMounted(load)
 
     <p v-if="loading" class="muted">Загрузка…</p>
 
-    <div class="list">
-      <article v-for="item in items" :key="item.id" class="card model-wrap">
-        <div class="model-card">
-          <label class="field">
-            <span>Код</span>
-            <input v-model="item.code" />
-          </label>
-          <label class="field field--name">
-            <span>Название</span>
-            <input v-model="item.name" />
-          </label>
-          <label class="field">
-            <span>Цена по умолчанию</span>
-            <input v-model.number="item.defaultPrice" type="number" min="0" step="0.01" />
-          </label>
-          <label class="field field--order">
-            <span>Порядок</span>
-            <input v-model.number="item.sortOrder" type="number" />
-          </label>
-          <label class="check">
-            <input v-model="item.active" type="checkbox" />
-            <span>Активна</span>
-          </label>
-          <div class="actions">
-            <button class="btn secondary" type="button" @click="save(item)">Сохранить</button>
-            <button class="btn secondary" type="button" @click="openZip(item)">
-              {{ zipOpenId === item.id ? 'Скрыть ЗИП' : item.hasZipPackage ? 'ЗИП-пакет ✓' : 'ЗИП-пакет' }}
-            </button>
-            <button class="btn danger" type="button" @click="remove(item)">Удалить</button>
-          </div>
-        </div>
-
-        <div v-if="zipOpenId === item.id" class="zip-panel">
-          <p v-if="zipLoading" class="muted">Загрузка ЗИП…</p>
-          <template v-else>
-            <div class="zip-head">
-              <label class="field">
-                <span>Название пакета</span>
-                <input v-model="zipForm.name" placeholder="ЗИП-пакет" />
-              </label>
-              <label class="check">
-                <input v-model="zipForm.useCustomPrice" type="checkbox" />
-                <span>Своя цена пакета</span>
-              </label>
-              <label v-if="zipForm.useCustomPrice" class="field">
-                <span>Цена пакета</span>
-                <input v-model.number="zipForm.price" type="number" min="0" step="0.01" />
-              </label>
-              <p v-else class="muted zip-hint">Цена = сумма позиций</p>
-            </div>
-
-            <div class="zip-items">
-              <div v-for="(row, idx) in zipForm.items" :key="idx" class="zip-row">
-                <input v-model="row.name" placeholder="Наименование" required />
-                <input v-model="row.sku" placeholder="Артикул" />
-                <input v-model.number="row.qty" type="number" min="1" step="1" title="Кол-во" />
-                <input v-model.number="row.unitPrice" type="number" min="0" step="0.01" title="Цена" />
-                <button class="btn danger" type="button" @click="removeZipRow(idx)">×</button>
-              </div>
-            </div>
-
-            <div class="zip-actions">
-              <button class="btn secondary" type="button" @click="addZipRow">+ Позиция</button>
-              <button class="btn" type="button" :disabled="zipSaving" @click="saveZip(item.id)">
-                {{ zipSaving ? 'Сохранение…' : 'Сохранить ЗИП' }}
-              </button>
-            </div>
-          </template>
-        </div>
-      </article>
-      <p v-if="!loading && !items.length" class="muted">Пока нет моделей</p>
+    <div class="table-wrap card" v-if="!loading">
+      <table class="models-table">
+        <thead>
+          <tr>
+            <th>Код</th>
+            <th>Название</th>
+            <th>Цена</th>
+            <th>Порядок</th>
+            <th>Активна</th>
+            <th>ЗИП</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in items" :key="item.id">
+            <td><input v-model="item.code" class="cell-input" /></td>
+            <td><input v-model="item.name" class="cell-input" /></td>
+            <td>
+              <input v-model.number="item.defaultPrice" class="cell-input" type="number" min="0" step="0.01" />
+            </td>
+            <td>
+              <input v-model.number="item.sortOrder" class="cell-input cell-input--sm" type="number" />
+            </td>
+            <td class="center">
+              <input v-model="item.active" type="checkbox" />
+            </td>
+            <td>
+              <RouterLink
+                class="zip-link"
+                :class="{ filled: item.hasZipPackage }"
+                :to="{ name: 'kp-zip-packages', query: { modelId: item.id } }"
+              >
+                {{ item.hasZipPackage ? 'Заполнен →' : 'Добавить ЗИП →' }}
+              </RouterLink>
+            </td>
+            <td class="row-actions">
+              <button class="btn secondary tiny" type="button" @click="save(item)">Сохранить</button>
+              <button class="btn danger tiny" type="button" @click="remove(item)">Удалить</button>
+            </td>
+          </tr>
+          <tr v-if="!items.length">
+            <td colspan="7" class="muted">Пока нет моделей</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </template>
 
 <style scoped>
-.models-page {
-  min-width: 0;
+.models-page { min-width: 0; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.form-card,
-.model-card {
+.form-card {
   display: grid;
   grid-template-columns: 110px minmax(160px, 1.4fr) minmax(140px, 1fr) 88px auto auto;
   gap: 0.65rem 0.75rem;
   align-items: end;
   padding: 0.9rem 1rem;
-}
-
-.form-card {
   margin-bottom: 1rem;
-}
-
-.model-wrap {
-  padding: 0;
-  margin-bottom: 0.65rem;
-  overflow: hidden;
-}
-
-.model-wrap .model-card {
-  margin: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.list {
-  display: grid;
-  gap: 0.65rem;
-  min-width: 0;
 }
 
 .field {
@@ -305,14 +175,7 @@ onMounted(load)
   color: var(--muted);
 }
 
-.field span {
-  line-height: 1.1;
-}
-
-.field input {
-  width: 100%;
-  min-width: 0;
-}
+.field input { width: 100%; min-width: 0; }
 
 .check {
   display: inline-flex;
@@ -324,124 +187,77 @@ onMounted(load)
   font-size: 0.9rem;
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  justify-content: flex-end;
+.form-submit { min-height: 2.6rem; white-space: nowrap; }
+
+.table-wrap {
+  padding: 0;
+  overflow: auto;
 }
 
-.actions .btn,
-.form-submit {
-  min-height: 2.6rem;
+.models-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+}
+
+.models-table th,
+.models-table td {
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.models-table th {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 500;
   white-space: nowrap;
 }
 
-.zip-panel {
-  border-top: 1px solid var(--line);
-  padding: 0.85rem 1rem 1rem;
-  background: color-mix(in srgb, var(--glass) 80%, transparent);
-  display: grid;
-  gap: 0.75rem;
-}
-
-.zip-head {
-  display: grid;
-  grid-template-columns: minmax(180px, 1.2fr) auto minmax(140px, 0.8fr);
-  gap: 0.65rem 0.75rem;
-  align-items: end;
-}
-
-.zip-hint {
-  margin: 0;
-  align-self: center;
-  font-size: 0.85rem;
-}
-
-.zip-items {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.zip-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(90px, 0.7fr) 72px 110px 40px;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-.zip-row input {
+.cell-input {
+  width: 100%;
   min-width: 0;
-  min-height: 2.3rem;
+  min-height: 2.2rem;
 }
 
-.zip-actions {
+.cell-input--sm { max-width: 72px; }
+
+.center { text-align: center; }
+
+.zip-link {
+  display: inline-block;
+  font-size: 0.88rem;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.zip-link.filled { color: #8dc63f; }
+.zip-link:hover { color: var(--ink); }
+
+.row-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.35rem;
   justify-content: flex-end;
 }
 
+.tiny {
+  min-height: 2rem;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
 @media (max-width: 1100px) {
-  .form-card,
-  .model-card {
+  .form-card {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
-  }
-
-  .field--name {
-    grid-column: 1 / -1;
-  }
-
-  .check,
-  .actions,
-  .form-submit {
-    align-self: end;
-  }
-
-  .actions {
-    justify-content: stretch;
-  }
-
-  .actions .btn {
-    flex: 1;
-  }
-
-  .zip-head {
-    grid-template-columns: 1fr;
-  }
-
-  .zip-row {
-    grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .form-card,
-  .model-card {
-    grid-template-columns: 1fr;
-  }
-
-  .field--name,
-  .field--order {
-    grid-column: auto;
-  }
-
-  .check {
-    min-height: auto;
-  }
-
-  .actions {
-    width: 100%;
-  }
-
-  .actions .btn,
-  .form-submit {
-    width: 100%;
-  }
-
-  .zip-row {
-    grid-template-columns: 1fr;
-  }
+  .form-card { grid-template-columns: 1fr; }
 }
 </style>

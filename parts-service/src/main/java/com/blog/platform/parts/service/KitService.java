@@ -35,7 +35,7 @@ public class KitService {
     @Transactional(readOnly = true)
     public PageResponse<KitResponse> search(String q, CatalogStatus status, UUID droneId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, clamp(size), Sort.by(Sort.Direction.DESC, "updatedAt"));
-        Page<Kit> result = kitRepository.search(blankToNull(q), status, droneId, pageable);
+        Page<Kit> result = kitRepository.search(smartQuery(q), status, droneId, pageable);
         return toPage(result);
     }
 
@@ -207,5 +207,18 @@ public class KitService {
 
     private String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private String smartQuery(String value) {
+        if (value == null || value.isBlank()) return null;
+        String cleaned = value.trim()
+                .toLowerCase()
+                .replace('ё', 'е')
+                .replace("%", "")
+                .replace("_", " ")
+                .replaceAll("[^\\p{L}\\p{N}\\s+-]", " ")
+                .trim()
+                .replaceAll("\\s+", "%");
+        return cleaned.isBlank() ? null : cleaned;
     }
 }

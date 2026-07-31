@@ -117,6 +117,7 @@ async function logout() {
           <template v-if="auth.isAdmin">
             <p class="nav-group">Система</p>
             <RouterLink class="nav-link icon-link" to="/kp/drone-models">КП · Модели</RouterLink>
+            <RouterLink class="nav-link icon-link" to="/kp/zip-packages">КП · ЗИП-пакеты</RouterLink>
             <RouterLink class="nav-link icon-link" to="/kp/proposals">КП · Архив</RouterLink>
             <RouterLink class="nav-link icon-link" to="/users">
               <AppIcon name="settings" :size="16" />

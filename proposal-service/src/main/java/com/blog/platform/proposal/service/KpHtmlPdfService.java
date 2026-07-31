@@ -144,24 +144,31 @@ public class KpHtmlPdfService {
         return "mixed".equalsIgnoreCase(price.vatMode());
     }
 
+    private static final String ZIP_SKU_PREFIX = "ZIP-";
+
+    private boolean isZipPackageLine(ProposalLineDto line) {
+        return line.lineType() == LineType.KIT
+                && line.sku() != null
+                && line.sku().regionMatches(true, 0, ZIP_SKU_PREFIX, 0, ZIP_SKU_PREFIX.length());
+    }
+
+    /**
+     * Последняя страница PDF — только состав ЗИП-пакета, если он включён в КП.
+     * Базовый комплект и каталожные комплекты сюда не выводятся.
+     */
     private String buildKitDetailsSection(ProposalDto p) {
         var kitTables = new ArrayList<String>();
 
-        String baseTable = buildBaseKitTable(p);
-        if (!baseTable.isBlank()) {
-            kitTables.add(baseTable);
-        }
-
         for (ProposalLineDto kitLine : p.lines()) {
-            if (kitLine.lineType() != LineType.KIT) {
+            if (!isZipPackageLine(kitLine)) {
                 continue;
             }
             List<ProposalKitItemDto> items = resolveKitItems(kitLine);
             if (items.isEmpty()) {
                 continue;
             }
-            String header = (kitLine.sku() != null && !kitLine.sku().isBlank())
-                    ? kitLine.sku() + " · " + kitLine.name()
+            String header = (kitLine.name() == null || kitLine.name().isBlank())
+                    ? "ЗИП-пакет"
                     : kitLine.name();
             kitTables.add(kitItemsTable(header, items));
         }
@@ -183,8 +190,8 @@ public class KpHtmlPdfService {
                     </div>
                   </header>
                   <div class="kicker">Приложение</div>
-                  <div class="page-title">Состав комплекта</div>
-                  <p class="page-lead">Детализация комплектации коммерческого предложения.</p>
+                  <div class="page-title">Состав ЗИП-пакета</div>
+                  <p class="page-lead">Наполнение ЗИП-пакета из коммерческого предложения.</p>
                 """);
         for (String kitTable : kitTables) {
             html.append(kitTable);
@@ -197,41 +204,6 @@ public class KpHtmlPdfService {
                 </section>
                 """);
         return html.toString();
-    }
-
-    /** Дрон + все PART-позиции (калькулятор и доп. запчасти из каталога). */
-    private String buildBaseKitTable(ProposalDto p) {
-        int kitQty = p.kitQty() == null || p.kitQty() < 1 ? 1 : p.kitQty();
-        var items = new ArrayList<ProposalKitItemDto>();
-        items.add(new ProposalKitItemDto(
-                null,
-                "БАС",
-                "БАС " + displayDroneName(p.droneModelName()),
-                kitQty,
-                p.dronePrice()
-        ));
-
-        boolean hasParts = false;
-        for (ProposalLineDto line : p.lines()) {
-            if (line.lineType() != LineType.PART) {
-                continue;
-            }
-            hasParts = true;
-            String sku = line.sku() == null || line.sku().isBlank() ? "—" : line.sku();
-            items.add(new ProposalKitItemDto(
-                    line.refId(),
-                    sku,
-                    line.name(),
-                    line.qty(),
-                    line.unitPrice()
-            ));
-        }
-
-        if (!hasParts && items.size() == 1) {
-            // только дрон без комплектующих — всё равно показываем состав
-            return kitItemsTable("Базовый комплект · " + displayDroneName(p.droneModelName()), items);
-        }
-        return kitItemsTable("Базовый комплект · " + displayDroneName(p.droneModelName()), items);
     }
 
     private String kitItemsTable(String header, List<ProposalKitItemDto> items) {
@@ -256,11 +228,20 @@ public class KpHtmlPdfService {
             var price = item.partPrice() == null ? BigDecimal.ZERO : item.partPrice();
             int qty = item.qty() == null ? 0 : item.qty();
             var rowTotal = price.multiply(BigDecimal.valueOf(qty));
-            String sku = item.partSku() == null || item.partSku().isBlank() ? "—" : item.partSku();
+            String sku = item.partSku() == null || item.partSku().isBlank() ? "" : item.partSku();
+            String name = item.partName() == null ? "" : item.partName();
             table.append("<tr>")
                     .append("<td class=\"num\">").append(String.format("%02d", index++)).append("</td>")
-                    .append("<td><strong>").append(esc(sku)).append("</strong><br/>")
-                    .append("<span class=\"purpose\">").append(esc(item.partName())).append("</span></td>")
+                    .append("<td>");
+            if (!sku.isBlank()) {
+                table.append("<strong>").append(esc(sku)).append("</strong>");
+                if (!name.isBlank()) {
+                    table.append("<br/><span class=\"purpose\">").append(esc(name)).append("</span>");
+                }
+            } else {
+                table.append("<strong>").append(esc(name)).append("</strong>");
+            }
+            table.append("</td>")
                     .append("<td>").append(qtyLabel(qty)).append("</td>")
                     .append("<td>").append(money(price)).append("</td>")
                     .append("<td><strong>").append(money(rowTotal)).append("</strong></td>")
@@ -356,8 +337,11 @@ public class KpHtmlPdfService {
         if (n.contains("пульт") || n.contains("wb37")) {
             return "Питание пульта управления";
         }
+        if (isZipPackageLine(line)) {
+            return "Состав ЗИП-пакета — в приложении на последней странице";
+        }
         if (line.lineType() == LineType.KIT) {
-            return "Состав комплекта — в приложении на последней странице";
+            return "Комплект поставки";
         }
         return "Комплектация и сопровождение";
     }

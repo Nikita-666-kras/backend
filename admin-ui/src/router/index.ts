@@ -30,6 +30,7 @@ const router = createRouter({
         { path: 'categories', name: 'categories', component: () => import('@/views/parts/CategoriesView.vue'), meta: { catalog: true } },
         { path: 'parts-import', name: 'parts-import', component: () => import('@/views/parts/ImportView.vue'), meta: { catalog: true } },
         { path: 'kp/drone-models', name: 'kp-drone-models', component: () => import('@/views/kp/DroneModelsView.vue'), meta: { admin: true } },
+        { path: 'kp/zip-packages', name: 'kp-zip-packages', component: () => import('@/views/kp/ZipPackagesView.vue'), meta: { admin: true } },
         { path: 'kp/proposals', name: 'kp-proposals', component: () => import('@/views/kp/ProposalsView.vue'), meta: { admin: true } },
         { path: 'media', name: 'media', component: () => import('@/views/MediaLibraryView.vue'), meta: { media: true } },
         { path: 'users', name: 'users', component: () => import('@/views/UsersView.vue'), meta: { admin: true } },

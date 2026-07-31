@@ -43,7 +43,7 @@ public class PartService {
             int size
     ) {
         PageRequest pageable = PageRequest.of(page, clamp(size), Sort.by(Sort.Direction.DESC, "updatedAt"));
-        Page<Part> result = partRepository.search(blankToNull(q), status, droneId, categoryId, pageable);
+        Page<Part> result = partRepository.search(smartQuery(q), status, droneId, categoryId, pageable);
         return toPage(result);
     }
 
@@ -216,5 +216,19 @@ public class PartService {
 
     private String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    /** Мультисловный LIKE: «акб пульт» → акб%пульт (порядок слов сохраняется). */
+    private String smartQuery(String value) {
+        if (value == null || value.isBlank()) return null;
+        String cleaned = value.trim()
+                .toLowerCase()
+                .replace('ё', 'е')
+                .replace("%", "")
+                .replace("_", " ")
+                .replaceAll("[^\\p{L}\\p{N}\\s+-]", " ")
+                .trim()
+                .replaceAll("\\s+", "%");
+        return cleaned.isBlank() ? null : cleaned;
     }
 }

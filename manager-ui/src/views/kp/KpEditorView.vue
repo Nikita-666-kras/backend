@@ -10,6 +10,7 @@ const route = useRoute()
 const router = useRouter()
 const editor = useKpEditorStore()
 const catalogRef = ref<InstanceType<typeof KpCatalogSearch> | null>(null)
+const catalogOpen = ref(false)
 
 useUnsavedGuard(editor.dirty)
 
@@ -17,7 +18,17 @@ function money(v: number) {
   return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Number(v || 0))
 }
 
+async function openCatalog() {
+  catalogOpen.value = true
+  await catalogRef.value?.lookup()
+}
+
+function closeCatalog() {
+  catalogOpen.value = false
+}
+
 async function initializeEditor(id?: string) {
+  catalogOpen.value = false
   editor.reset()
   await editor.loadModels()
 
@@ -49,8 +60,6 @@ async function initializeEditor(id?: string) {
       await editor.applyModel(editor.models[0].id)
     }
   }
-
-  await catalogRef.value?.lookup()
 }
 
 watch(
@@ -153,8 +162,20 @@ function onAddLines(lines: ProposalLine[]) {
       </div>
 
       <div class="block">
-        <p class="block-title">Дополнительно из каталога</p>
-        <KpCatalogSearch ref="catalogRef" @add-lines="onAddLines" />
+        <div class="block-head">
+          <p class="block-title">Дополнительно</p>
+          <button
+            v-if="!catalogOpen"
+            class="btn secondary add-parts"
+            type="button"
+            @click="openCatalog"
+          >
+            Добавить запчасти
+          </button>
+          <button v-else class="link" type="button" @click="closeCatalog">Скрыть каталог</button>
+        </div>
+
+        <KpCatalogSearch v-show="catalogOpen" ref="catalogRef" @add-lines="onAddLines" />
 
         <ul v-if="editor.catalogExtras.length" class="extras">
           <li v-for="(line, idx) in editor.catalogExtras" :key="`${line.refId}-${idx}`">
@@ -174,6 +195,7 @@ function onAddLines(lines: ProposalLine[]) {
             <button class="link danger" type="button" @click="editor.removeExtra(idx)">Убрать</button>
           </li>
         </ul>
+        <p v-else-if="!catalogOpen" class="muted tiny">Запчасти и комплекты из каталога — по кнопке выше. ЗИП отдельно.</p>
       </div>
 
       <div v-if="!editor.calcError" class="sum">
@@ -264,6 +286,25 @@ function onAddLines(lines: ProposalLine[]) {
   margin: 0;
   font-size: 0.9rem;
   font-weight: 600;
+}
+
+.block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.add-parts {
+  min-height: 2.2rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.tiny {
+  margin: 0;
+  font-size: 0.8rem;
 }
 
 .extras {

@@ -28,8 +28,13 @@ public interface PartRepository extends JpaRepository<Part, UUID> {
               AND (:categoryId IS NULL OR c.id = :categoryId)
               AND (
                 :q IS NULL OR :q = '' OR
-                LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
-                LOWER(p.sku) LIKE LOWER(CONCAT('%', :q, '%'))
+                LOWER(CONCAT(
+                  COALESCE(p.name, ''), ' ',
+                  COALESCE(p.sku, ''), ' ',
+                  COALESCE(p.description, ''), ' ',
+                  COALESCE(d.name, ''), ' ',
+                  COALESCE(c.name, '')
+                )) LIKE LOWER(CONCAT('%', :q, '%'))
               )
             """)
     Page<Part> search(
