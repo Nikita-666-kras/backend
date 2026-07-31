@@ -184,8 +184,8 @@ public class KpHtmlPdfService {
     }
 
     /**
-     * Последняя страница PDF — только состав ЗИП-пакета, если он включён в КП.
-     * Базовый комплект и каталожные комплекты сюда не выводятся.
+     * Состав ЗИП встраивается на страницу 3 (без отдельной страницы-приложения).
+     * Пустая строка, если ЗИП в КП нет.
      */
     private String buildKitDetailsSection(ProposalDto p) {
         var kitTables = new ArrayList<String>();
@@ -210,57 +210,29 @@ public class KpHtmlPdfService {
 
         var html = new StringBuilder();
         html.append("""
-                <section class="page">
-                  <header>
-                    <img class="logo" src="static/LOGO_ATRIS.svg" alt="АТРИС"/>
-                    <div class="contacts">
-                      <strong>+7 (938) 119-29-82</strong><br/>
-                      privet@atris.su<br/>
-                      www.atris.su<br/>
-                      Ростов-на-Дону
-                    </div>
-                  </header>
-                  <div class="kicker">Приложение</div>
-                  <div class="page-title">Состав ЗИП-пакета</div>
-                  <p class="page-lead">Наполнение ЗИП-пакета из коммерческого предложения.</p>
+                <div class="zip-block">
+                  <div class="section-label">— Состав ЗИП-комплекта</div>
                 """);
         for (String kitTable : kitTables) {
             html.append(kitTable);
         }
-        html.append("""
-                  <footer>
-                    <table class="footer-inner"><tr>
-                      <td class="footer-copy">
-                        <div class="footer-title">АТРИС — технологии, которые работают в поле.</div>
-                        <div class="footer-sub">Инженерные решения для современного сельского хозяйства.</div>
-                        <div class="footer-legal">ООО «АТРИС»</div>
-                      </td>
-                      <td class="footer-qr">
-                        <div class="footer-qr-frame">
-                          <img src="static/qr-atris.png" alt="QR atris.su"/>
-                        </div>
-                        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии<br/>агродронов</div>
-                      </td>
-                    </tr></table>
-                  </footer>
-                </section>
-                """);
+        html.append("</div>");
         return html.toString();
     }
 
     private String kitItemsTable(String header, List<ProposalKitItemDto> items) {
         var table = new StringBuilder();
-        table.append("<div class=\"section-label\">— ").append(esc(header)).append("</div>");
+        table.append("<p class=\"zip-kit-name\">").append(esc(header)).append("</p>");
         table.append("""
-                <div class="panel">
+                <div class="panel zip-panel">
                   <table>
                     <thead>
                       <tr>
                         <th style="width:28px">№</th>
                         <th>Запчасть</th>
-                        <th style="width:62px">Кол-во</th>
-                        <th style="width:92px">Цена, ₽</th>
-                        <th style="width:92px">Сумма, ₽</th>
+                        <th class="col-qty" style="width:54px">Кол-во</th>
+                        <th class="col-sum" style="width:78px">Цена, ₽</th>
+                        <th class="col-sum" style="width:78px">Сумма, ₽</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -380,7 +352,7 @@ public class KpHtmlPdfService {
             return "Питание пульта управления";
         }
         if (isZipPackageLine(line)) {
-            return "Состав ЗИП-пакета — в приложении на последней странице";
+            return "Состав ЗИП — на стр. 3";
         }
         if (line.lineType() == LineType.KIT) {
             return "Комплект поставки";

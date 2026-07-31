@@ -208,39 +208,127 @@
     margin: 4px 0 0 30px;
     line-height: 1.4;
   }
-  .cards { width: 100%; margin-top: 6px; }
-  .cards td { width: 50%; vertical-align: top; padding: 0 5px 8px 0; border: none; }
+  .cards { width: 100%; margin-top: 4px; }
+  .cards td { width: 50%; vertical-align: top; padding: 0 5px 6px 0; border: none; }
   .card {
     background: #0A2E5C;
     border-width: 1px;
     border-style: solid;
     border-color: #1E3F6E;
-    border-radius: 12px;
-    padding: 10px 11px;
-    min-height: 86px;
+    border-radius: 10px;
+    padding: 8px 9px;
+    min-height: 64px;
   }
   .card .icon {
     display: inline-block;
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
     background: #8DC63F;
     color: #062554;
-    font-size: 9px;
+    font-size: 8.5px;
     font-weight: 800;
     text-align: center;
-    line-height: 22px;
-    margin-bottom: 5px;
+    line-height: 20px;
+    margin-bottom: 3px;
   }
   .card h3 {
-    font-size: 10px;
+    font-size: 9.5px;
     letter-spacing: .06em;
     text-transform: uppercase;
     color: #FFFFFF;
     font-weight: 800;
+    margin-bottom: 3px;
+  }
+  .card p { font-size: 9.5px; color: #B8C4D9; line-height: 1.3; }
+  .zip-block { margin-top: 10px; }
+  .zip-kit-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0 0 5px;
+  }
+  .zip-panel { margin-bottom: 0; }
+  .zip-panel table { font-size: 9px; }
+  .zip-panel thead th { padding: 4px 6px; font-size: 7.5px; }
+  .zip-panel tbody td { padding: 3px 6px; }
+  .upsell {
+    margin-top: 14px;
+  }
+  .upsell-label {
+    font-size: 9.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #8DC63F;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .upsell-lead {
+    font-size: 11px;
+    color: #D8E0EC;
+    margin-bottom: 8px;
+    line-height: 1.35;
+  }
+  .upsell-grid { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .upsell-grid td {
+    width: 33.33%;
+    vertical-align: top;
+    border: none;
+    padding: 0 5px 0 0;
+  }
+  .upsell-grid td:last-child { padding-right: 0; }
+  .upsell-tile {
+    background: #0A2E5C;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #1E3F6E;
+    border-radius: 12px;
+    padding: 11px 10px;
+    min-height: 88px;
+  }
+  .upsell-head {
+    width: 100%;
+    border-collapse: collapse;
     margin-bottom: 4px;
   }
-  .card p { font-size: 10px; color: #B8C4D9; line-height: 1.35; }
+  .upsell-head td {
+    border: none;
+    padding: 0;
+    vertical-align: middle;
+  }
+  .upsell-tile h3 {
+    font-size: 12px;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .upsell-tile .tag {
+    display: inline-block;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #062554;
+    background: #8DC63F;
+    border-radius: 4px;
+    padding: 2px 5px;
+    margin: 0;
+    border: none;
+    white-space: nowrap;
+  }
+  .upsell-tile .tag-cell {
+    width: 1%;
+    text-align: right;
+    white-space: nowrap;
+    padding-left: 6px !important;
+  }
+  .upsell-tile p {
+    font-size: 9.5px;
+    color: #B8C4D9;
+    line-height: 1.35;
+  }
   .closing { width: 100%; margin-top: 8px; }
   .closing td { vertical-align: bottom; border: none; padding: 0; }
   .closing-text h2 { font-size: 14px; color: #FFFFFF; font-weight: 800; margin-bottom: 3px; }
@@ -328,11 +416,41 @@
     letter-spacing: 0;
     text-transform: none;
   }
+
+  /* Первая страница — крупнее текст и блоки, меньше пустоты у футера */
+  .page-cover { padding-top: 12mm; padding-bottom: 40mm; }
+  .page-cover header { margin-bottom: 16px; padding-bottom: 12px; }
+  .page-cover .logo { height: 56px; }
+  .page-cover .contacts { font-size: 11.5px; line-height: 1.5; }
+  .page-cover .kicker { font-size: 11px; margin: 6px 0 8px; letter-spacing: .14em; }
+  .page-cover h1 { font-size: 32px; margin-bottom: 8px; line-height: 1.08; }
+  .page-cover .subtitle { font-size: 13.5px; line-height: 1.45; margin-bottom: 8px; }
+  .page-cover .meta { font-size: 12.5px; margin-bottom: 14px; }
+  .page-cover .tags { margin-bottom: 14px; }
+  .page-cover .tag { font-size: 10.5px; padding: 6px 11px; margin: 0 6px 6px 0; }
+  .page-cover .section-label { font-size: 11px; margin: 8px 0 8px; }
+  .page-cover .panel { margin-bottom: 12px; border-radius: 14px; }
+  .page-cover table { font-size: 11.5px; }
+  .page-cover thead th { padding: 9px 10px; font-size: 9px; }
+  .page-cover tbody td { padding: 9px 10px; }
+  .page-cover .purpose { font-size: 10.5px; line-height: 1.4; }
+  .page-cover .unit-hint { font-size: 10px; margin-top: 3px; }
+  .page-cover .included { padding: 14px 14px; }
+  .page-cover .included h2 { font-size: 11px; margin-bottom: 10px; }
+  .page-cover .included li { font-size: 12px; margin: 0 0 7px 14px; line-height: 1.4; }
+  .page-cover .bottom-row { margin-top: 12px; }
+  .page-cover .about { font-size: 12px; line-height: 1.5; }
+  .page-cover .about strong { margin-top: 6px; }
+  .page-cover .total-box { padding: 14px 16px; border-radius: 14px; }
+  .page-cover .total-box .cap { font-size: 10px; }
+  .page-cover .total-box .amt { font-size: 26px; margin: 4px 0; }
+  .page-cover .total-box .note { font-size: 11px; }
+  .page-cover .total-box .sub { font-size: 10px; margin-top: 4px; }
 </style>
 </head>
 <body>
 
-<section class="page">
+<section class="page page-cover">
   <header>
     <img class="logo" src="static/LOGO_ATRIS.svg" alt="АТРИС"/>
     <div class="contacts">
@@ -462,6 +580,34 @@
   <div class="term"><span class="num-badge">9</span><h3>Регистрация БВС</h3>
     <p>Регистрация в реестре ФАВТ входит в стоимость комплекта. До передачи клиенту дрон регистрируется на компанию АТРИС. После подписания акта приёма-передачи осуществляется смена собственника в упрощённом порядке.</p></div>
 
+  <div class="upsell">
+    <div class="upsell-label">— Дополнительно к поставке</div>
+    <p class="upsell-lead">Вы также можете приобрести у АТРИС сопутствующие решения для запуска и эксплуатации:</p>
+    <table class="upsell-grid"><tr>
+      <td><div class="upsell-tile">
+        <table class="upsell-head"><tr>
+          <td><h3>Прицеп</h3></td>
+          <td class="tag-cell"><span class="tag">опция</span></td>
+        </tr></table>
+        <p>Транспортировка и мобильное размещение комплекса в полевых условиях.</p>
+      </div></td>
+      <td><div class="upsell-tile">
+        <table class="upsell-head"><tr>
+          <td><h3>Обучение</h3></td>
+          <td class="tag-cell"><span class="tag">опция</span></td>
+        </tr></table>
+        <p>Подготовка операторов и команды хозяйства к безопасной работе с БАС.</p>
+      </div></td>
+      <td><div class="upsell-tile">
+        <table class="upsell-head"><tr>
+          <td><h3>Комплект ЗИП</h3></td>
+          <td class="tag-cell"><span class="tag">опция</span></td>
+        </tr></table>
+        <p>Запасные части и расходники для сезона без простоев техники.</p>
+      </div></td>
+    </tr></table>
+  </div>
+
   <footer>
     <table class="footer-inner"><tr>
       <td class="footer-copy">
@@ -511,6 +657,8 @@
       <p>Помощь в повышении эффективности обработки и оптимизации агропроцессов.</p></div></td>
   </tr></table>
 
+  {{KIT_DETAILS_SECTION}}
+
   <footer>
     <table class="footer-inner"><tr>
       <td class="footer-copy">
@@ -527,8 +675,6 @@
     </tr></table>
   </footer>
 </section>
-
-{{KIT_DETAILS_SECTION}}
 
 </body>
 </html>
