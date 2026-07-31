@@ -212,16 +212,40 @@
     margin: 4px 0 0 30px;
     line-height: 1.4;
   }
-  .cards { width: 100%; margin-top: 10px; }
-  .cards td { width: 50%; vertical-align: top; padding: 0 7px 12px 0; border: none; }
+  .cards {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: separate;
+    border-spacing: 8px 10px;
+  }
+  .cards td {
+    width: 50%;
+    vertical-align: top;
+    padding: 0;
+    border: none;
+  }
   .card {
     background: #0A2E5C;
     border-width: 1px;
     border-style: solid;
     border-color: #1E3F6E;
     border-radius: 14px;
-    padding: 14px 13px;
-    min-height: 108px;
+    padding: 12px 12px;
+    height: 118px;
+  }
+  .card-head {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 6px;
+  }
+  .card-head td {
+    border: none;
+    padding: 0;
+    vertical-align: middle;
+  }
+  .card-head .icon-cell {
+    width: 30px;
+    padding-right: 8px !important;
   }
   .card .icon {
     display: inline-block;
@@ -234,17 +258,18 @@
     font-weight: 800;
     text-align: center;
     line-height: 26px;
-    margin-bottom: 7px;
+    margin: 0;
   }
   .card h3 {
-    font-size: 12px;
-    letter-spacing: .06em;
+    font-size: 11.5px;
+    letter-spacing: .05em;
     text-transform: uppercase;
     color: #FFFFFF;
     font-weight: 800;
-    margin-bottom: 6px;
+    margin: 0;
+    line-height: 1.25;
   }
-  .card p { font-size: 11.5px; color: #B8C4D9; line-height: 1.45; }
+  .card p { font-size: 11px; color: #B8C4D9; line-height: 1.4; margin: 0; }
   .zip-kit-name {
     font-size: 13px;
     font-weight: 700;
@@ -753,20 +778,50 @@
   <p class="page-lead">Инженерный подход к агроприменению и сопровождению технологии агродронов</p>
 
   <table class="cards"><tr>
-    <td><div class="card"><div class="icon">01</div><h3>Практический опыт</h3>
-      <p>Команда АТРИС работает с технологиями агроприменения в реальных условиях сельхозпредприятий.</p></div></td>
-    <td><div class="card"><div class="icon">02</div><h3>Лидеры производства в Китае</h3>
-      <p>Поставка техники DJI Agriculture и Vector AGR. Подбор решений под задачи хозяйства.</p></div></td>
+    <td><div class="card">
+      <table class="card-head"><tr>
+        <td class="icon-cell"><div class="icon">01</div></td>
+        <td><h3>Практический опыт</h3></td>
+      </tr></table>
+      <p>Команда АТРИС работает с технологиями агроприменения в реальных условиях сельхозпредприятий.</p>
+    </div></td>
+    <td><div class="card">
+      <table class="card-head"><tr>
+        <td class="icon-cell"><div class="icon">02</div></td>
+        <td><h3>Лидеры производства в Китае</h3></td>
+      </tr></table>
+      <p>Поставка техники DJI Agriculture и Vector AGR. Подбор решений под задачи хозяйства.</p>
+    </div></td>
   </tr><tr>
-    <td><div class="card"><div class="icon">03</div><h3>Сервис и сопровождение</h3>
-      <p>Техническая поддержка, консультации и сопровождение эксплуатации. Склад запчастей в Ростове-на-Дону.</p></div></td>
-    <td><div class="card"><div class="icon">04</div><h3>Работа в поле</h3>
-      <p>Понимание сезонности, условий эксплуатации и задач агробизнеса. Наш опыт усиливает вашу работу.</p></div></td>
+    <td><div class="card">
+      <table class="card-head"><tr>
+        <td class="icon-cell"><div class="icon">03</div></td>
+        <td><h3>Сервис и сопровождение</h3></td>
+      </tr></table>
+      <p>Техническая поддержка, консультации и сопровождение эксплуатации. Склад запчастей в Ростове-на-Дону.</p>
+    </div></td>
+    <td><div class="card">
+      <table class="card-head"><tr>
+        <td class="icon-cell"><div class="icon">04</div></td>
+        <td><h3>Работа в поле</h3></td>
+      </tr></table>
+      <p>Понимание сезонности, условий эксплуатации и задач агробизнеса. Наш опыт усиливает вашу работу.</p>
+    </div></td>
   </tr><tr>
-    <td><div class="card"><div class="icon">05</div><h3>Техническая экспертиза</h3>
-      <p>Инженерный подход к настройке, запуску и внедрению оборудования.</p></div></td>
-    <td><div class="card"><div class="icon">06</div><h3>Результат для хозяйства</h3>
-      <p>Помощь в повышении эффективности обработки и оптимизации агропроцессов.</p></div></td>
+    <td><div class="card">
+      <table class="card-head"><tr>
+        <td class="icon-cell"><div class="icon">05</div></td>
+        <td><h3>Техническая экспертиза</h3></td>
+      </tr></table>
+      <p>Инженерный подход к настройке, запуску и внедрению оборудования.</p>
+    </div></td>
+    <td><div class="card">
+      <table class="card-head"><tr>
+        <td class="icon-cell"><div class="icon">06</div></td>
+        <td><h3>Результат для хозяйства</h3></td>
+      </tr></table>
+      <p>Помощь в повышении эффективности обработки и оптимизации агропроцессов.</p>
+    </div></td>
   </tr></table>
 
   <div class="section-label" style="margin-top:12px;">— Как мы работаем дальше</div>
