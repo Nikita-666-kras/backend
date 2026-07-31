@@ -1,0 +1,256 @@
+package com.blog.platform.proposal.service;
+
+import com.blog.platform.proposal.api.dto.KpDtos.LineType;
+import com.blog.platform.proposal.api.dto.KpDtos.ProposalLineRequest;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+
+/**
+ * Логика как в PC-калькуляторе Agro-Tech (руководство + main.py):
+ * менеджер двигает цену продажи — система режет/поднимает только дрон;
+ * комплектующие фиксированы; кол-ва на комплект берутся из price_list.json.
+ */
+@Service
+@RequiredArgsConstructor
+public class KpPcCalculatorService {
+
+    private static final Set<String> META_KEYS = Set.of("config_version", "last_kp_number");
+
+    private final ObjectMapper objectMapper;
+    private final Map<String, ModelPrice> prices = new LinkedHashMap<>();
+
+    public record Component(String name, BigDecimal unitPrice, int qtyPerKit) {}
+
+    public record ModelPrice(
+            String key,
+            String vatMode,
+            BigDecimal startPrice,
+            BigDecimal dronePrice,
+            List<Component> components
+    ) {}
+
+    public record CalcResult(
+            String priceKey,
+            String vatMode,
+            int kitQty,
+            BigDecimal unitKitPrice,
+            BigDecimal startPrice,
+            BigDecimal priceDiff,
+            BigDecimal unitDronePrice,
+            BigDecimal baseDronePrice,
+            BigDecimal droneTotal,
+            BigDecimal grandTotal,
+            BigDecimal ndsTotal,
+            List<ProposalLineRequest> lines
+    ) {}
+
+    @PostConstruct
+    void load() {
+        try (InputStream in = new ClassPathResource("kp/price_list.json").getInputStream()) {
+            JsonNode root = objectMapper.readTree(in);
+            Iterator<Map.Entry<String, JsonNode>> fields = root.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> e = fields.next();
+                if (META_KEYS.contains(e.getKey()) || !e.getValue().isObject()) {
+                    continue;
+                }
+                JsonNode n = e.getValue();
+                List<Component> components = new ArrayList<>();
+                addComponent(components, n, "akb_price", "akb_name", "АКБ", "akb_qty_per_kit", 3);
+                addComponent(components, n, "zaryad_price", "zaryad_name", "Зарядное устройство", "zaryad_qty_per_kit", 1);
+                addComponent(components, n, "WB37_hub_price", "WB37_hub_name", "Зарядная станция WB37", "WB37_hub_qty_per_kit", 1);
+                addComponent(components, n, "WB37_price", "WB37_name", "WB37", "WB37_qty_per_kit", 2);
+                prices.put(e.getKey(), new ModelPrice(
+                        e.getKey(),
+                        text(n, "vat_mode", "mixed"),
+                        money(n, "start_price"),
+                        money(n, "drone_price"),
+                        List.copyOf(components)
+                ));
+            }
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to load kp/price_list.json", ex);
+        }
+    }
+
+    public List<String> priceKeys() {
+        return List.copyOf(prices.keySet());
+    }
+
+    public ModelPrice requirePrice(String modelCodeOrName) {
+        ModelPrice price = findPrice(modelCodeOrName);
+        if (price == null) {
+            throw new IllegalArgumentException("Нет прайса калькулятора для модели: " + modelCodeOrName);
+        }
+        return price;
+    }
+
+    public ModelPrice findPrice(String modelCodeOrName) {
+        if (modelCodeOrName == null || modelCodeOrName.isBlank()) {
+            return null;
+        }
+        if (prices.containsKey(modelCodeOrName)) {
+            return prices.get(modelCodeOrName);
+        }
+        return prices.get(resolveKey(modelCodeOrName));
+    }
+
+    public CalcResult calculate(String modelCodeOrName, int kitQty, BigDecimal unitKitPrice) {
+        if (kitQty < 1) {
+            throw new IllegalArgumentException("Количество комплектов должно быть целым числом >= 1");
+        }
+        if (unitKitPrice == null) {
+            throw new IllegalArgumentException("Укажите цену одного комплекта числом");
+        }
+        if (unitKitPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Цена комплекта должна быть >= 0");
+        }
+
+        ModelPrice data = requirePrice(modelCodeOrName);
+        BigDecimal target = unitKitPrice.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal diff = data.startPrice().subtract(target).setScale(2, RoundingMode.HALF_UP);
+
+        // Ключевая бизнес-логика руководства: скидка/наценка только на дрон
+        BigDecimal unitDrone = data.dronePrice().subtract(diff).setScale(2, RoundingMode.HALF_UP);
+        if (unitDrone.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException(
+                    "Цена комплекта слишком низкая: после скидки цена дрона уходит в минус. "
+                            + "Минимум ≈ " + moneyFmt(data.startPrice().subtract(data.dronePrice())) + " ₽");
+        }
+
+        List<ProposalLineRequest> lines = new ArrayList<>();
+        for (Component c : data.components()) {
+            int qty = Math.multiplyExact(c.qtyPerKit(), kitQty);
+            lines.add(part(c.name(), qty, c.unitPrice()));
+        }
+
+        BigDecimal droneTotal = unitDrone.multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal grand = target.multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal ndsBase = "all_vat".equalsIgnoreCase(data.vatMode())
+                ? grand
+                : grand.subtract(droneTotal).max(BigDecimal.ZERO);
+        BigDecimal nds = ndsBase.multiply(BigDecimal.valueOf(22))
+                .divide(BigDecimal.valueOf(122), 2, RoundingMode.HALF_UP);
+
+        return new CalcResult(
+                data.key(),
+                data.vatMode(),
+                kitQty,
+                target,
+                data.startPrice(),
+                diff,
+                unitDrone,
+                data.dronePrice(),
+                droneTotal,
+                grand,
+                nds,
+                List.copyOf(lines)
+        );
+    }
+
+    private void addComponent(
+            List<Component> components,
+            JsonNode n,
+            String priceField,
+            String nameField,
+            String defaultName,
+            String qtyField,
+            int defaultQty
+    ) {
+        BigDecimal price = optionalMoney(n, priceField);
+        if (price == null) {
+            return;
+        }
+        int qty = intOr(n, qtyField, defaultQty);
+        if (qty < 1) {
+            throw new IllegalStateException(priceField + ": qty_per_kit must be >= 1");
+        }
+        components.add(new Component(text(n, nameField, defaultName), price, qty));
+    }
+
+    private String resolveKey(String value) {
+        String upper = value.toUpperCase(Locale.ROOT)
+                .replace("VECTOR AGR ", "")
+                .replace("DJI AGRAS ", "")
+                .trim();
+        if (upper.contains("HD580")) return "HD580";
+        if (upper.contains("HD540")) return "HD540";
+        if (upper.contains("HD525")) return "HD525";
+        if (upper.contains("T50") || upper.contains("DJI T50")) return "DJI T50";
+        if (upper.contains("T30") || upper.contains("DJI T30")) return "DJI T30";
+        if (upper.contains("T10") || upper.contains("DJI T10")) return "DJI T10";
+        if (upper.contains("M3M")) return "DJI M3M";
+        if (upper.contains("MIXER") || upper.contains("РАСТВОРНИК") || upper.contains("1000Л") || upper.contains("1000L")) {
+            return "Растворник на 1000л";
+        }
+        if (upper.contains("TRAILER_TENT") || upper.contains("ТЕНТ")) return "Прицеп ТЕНТ";
+        if (upper.contains("TRAILER_1") || upper.contains("1 ДРОН") || upper.contains("1_ДРОН")) {
+            return "Прицеп 1 дрон";
+        }
+        if (upper.contains("TRAILER_BAS") || (upper.contains("ПРИЦЕП") && upper.contains("БАС"))) {
+            return "Прицеп БАС";
+        }
+        if (upper.equals("T50")) return "DJI T50";
+        if (upper.equals("T30")) return "DJI T30";
+        if (upper.equals("T10")) return "DJI T10";
+        return value;
+    }
+
+    private static ProposalLineRequest part(String name, int qty, BigDecimal unitPrice) {
+        return new ProposalLineRequest(LineType.PART, null, null, name, qty, unitPrice, 0, List.of());
+    }
+
+    private static BigDecimal money(JsonNode n, String field) {
+        JsonNode v = n.get(field);
+        if (v == null || v.isNull() || !v.isNumber()) {
+            throw new IllegalStateException("price_list missing required number field: " + field);
+        }
+        return v.decimalValue().setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private static BigDecimal optionalMoney(JsonNode n, String field) {
+        JsonNode v = n.get(field);
+        if (v == null || v.isNull()) {
+            return null;
+        }
+        if (!v.isNumber()) {
+            throw new IllegalStateException("price_list field must be number: " + field);
+        }
+        return v.decimalValue().setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private static int intOr(JsonNode n, String field, int fallback) {
+        JsonNode v = n.get(field);
+        if (v == null || v.isNull()) {
+            return fallback;
+        }
+        return v.asInt(fallback);
+    }
+
+    private static String text(JsonNode n, String field, String fallback) {
+        JsonNode v = n.get(field);
+        if (v == null || v.isNull() || v.asText().isBlank()) {
+            return fallback;
+        }
+        return v.asText();
+    }
+
+    private static String moneyFmt(BigDecimal value) {
+        return String.format(Locale.ROOT, "%,.0f", value).replace(',', ' ');
+    }
+}

@@ -2,6 +2,7 @@ package com.blog.platform.admin.api;
 
 import com.blog.platform.admin.client.ProposalServiceClient;
 import com.blog.platform.admin.client.ProposalServiceClient.DroneModelRequest;
+import com.blog.platform.admin.client.ProposalServiceClient.ZipPackageRequest;
 import com.blog.platform.admin.security.AdminAccessGuard;
 import com.blog.platform.common.api.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +51,23 @@ public class AdminKpController {
         var roles = accessGuard.roles(request);
         proposalServiceClient.deleteDroneModel(id, userId, roles);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/drone-models/{id}/zip-package")
+    public ApiResponse<?> getZipPackage(HttpServletRequest request, @PathVariable UUID id) {
+        accessGuard.requireAdmin(request);
+        var userId = accessGuard.userId(request);
+        var roles = accessGuard.roles(request);
+        return ApiResponse.of(proposalServiceClient.getZipPackage(id, userId, roles));
+    }
+
+    @PutMapping("/drone-models/{id}/zip-package")
+    public ApiResponse<?> saveZipPackage(HttpServletRequest request, @PathVariable UUID id,
+                                         @RequestBody ZipPackageRequest body) {
+        accessGuard.requireAdmin(request);
+        var userId = accessGuard.userId(request);
+        var roles = accessGuard.roles(request);
+        return ApiResponse.of(proposalServiceClient.saveZipPackage(id, body, userId, roles));
     }
 
     @GetMapping("/proposals")

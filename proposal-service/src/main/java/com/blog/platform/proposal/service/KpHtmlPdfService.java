@@ -18,10 +18,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -32,11 +31,11 @@ import org.springframework.stereotype.Service;
 public class KpHtmlPdfService {
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("dd.MM.yy");
-    private static final Set<String> VAT0_CODES = Set.of("HD525", "HD540", "HD580", "T40", "T50");
 
     @Value("${storage.kp-dir:/data/kp}")
     private String kpDir;
     private final PartsCatalogClient partsCatalogClient;
+    private final KpPcCalculatorService calculator;
 
     public String generate(ProposalDto proposal) {
         try {
@@ -84,11 +83,14 @@ public class KpHtmlPdfService {
 
         String code = modelCode(p.droneModelName());
         String droneFullName = displayDroneName(p.droneModelName());
-        boolean vat0 = VAT0_CODES.contains(code);
+        int kitQty = p.kitQty() == null || p.kitQty() < 1 ? 1 : p.kitQty();
+        boolean mixedVat = isMixedVat(code, p.droneModelName());
 
-        BigDecimal accessoriesTotal = p.grandTotal().subtract(p.dronePrice()).max(BigDecimal.ZERO);
-        BigDecimal taxable = vat0 ? accessoriesTotal : p.grandTotal();
-        BigDecimal ndsDeductible = taxable.multiply(BigDecimal.valueOf(22))
+        BigDecimal droneTotal = p.dronePrice().multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal ndsDeductible = p.ndsTotal() != null
+                ? p.ndsTotal()
+                : (mixedVat ? p.grandTotal().subtract(droneTotal).max(BigDecimal.ZERO) : p.grandTotal())
+                .multiply(BigDecimal.valueOf(22))
                 .divide(BigDecimal.valueOf(122), 2, RoundingMode.HALF_UP);
 
         StringBuilder lines = new StringBuilder();
@@ -103,12 +105,12 @@ public class KpHtmlPdfService {
                     .append("</tr>");
         }
 
-        String kitDetailsSection = buildKitDetailsSection(p.lines());
+        String kitDetailsSection = buildKitDetailsSection(p);
 
-        String dronePurpose = vat0
+        String dronePurpose = mixedVat
                 ? "Основное воздушное судно *НДС 0% — подробнее стр. 2"
                 : "Основное воздушное судно";
-        String taxText = vat0
+        String taxText = mixedVat
                 ? "«БАС " + droneFullName + "» поставляется со ставкой НДС 0% согласно ст. 164 НК РФ. "
                 + "Остальные позиции облагаются НДС 22%. Общая сумма к вычету: " + moneyDecimals(ndsDeductible) + " ₽."
                 : "Все позиции комплекта облагаются НДС 22%. Общая сумма к вычету: "
@@ -119,8 +121,9 @@ public class KpHtmlPdfService {
                 .replace("{{RECIPIENT}}", esc(p.recipient()))
                 .replace("{{DATE}}", LocalDate.now().format(DF))
                 .replace("{{DRONE_FULL_NAME}}", esc(droneFullName))
+                .replace("{{DRONE_QTY}}", qtyLabel(kitQty))
                 .replace("{{DRONE_PRICE}}", money(p.dronePrice()))
-                .replace("{{DRONE_VAT_MARK}}", vat0 ? "*" : "")
+                .replace("{{DRONE_VAT_MARK}}", mixedVat ? "*" : "")
                 .replace("{{DRONE_PURPOSE}}", esc(dronePurpose))
                 .replace("{{GRAND_TOTAL}}", money(p.grandTotal()))
                 .replace("{{NDS_DEDUCTIBLE}}", moneyDecimals(ndsDeductible))
@@ -130,59 +133,42 @@ public class KpHtmlPdfService {
                 .replace("{{KIT_DETAILS_SECTION}}", kitDetailsSection);
     }
 
-    private String buildKitDetailsSection(List<ProposalLineDto> proposalLines) {
-        var kitLines = proposalLines.stream()
-                .filter(line -> line.lineType() == LineType.KIT)
-                .toList();
-        if (kitLines.isEmpty()) return "";
+    private boolean isMixedVat(String code, String modelName) {
+        var price = calculator.findPrice(code != null ? code : "");
+        if (price == null) {
+            price = calculator.findPrice(modelName);
+        }
+        if (price == null) {
+            return false;
+        }
+        return "mixed".equalsIgnoreCase(price.vatMode());
+    }
 
+    private String buildKitDetailsSection(ProposalDto p) {
         var kitTables = new ArrayList<String>();
-        for (ProposalLineDto kitLine : kitLines) {
-            List<ProposalKitItemDto> items = resolveKitItems(kitLine);
-            if (items.isEmpty()) continue;
 
-            var table = new StringBuilder();
+        String baseTable = buildBaseKitTable(p);
+        if (!baseTable.isBlank()) {
+            kitTables.add(baseTable);
+        }
+
+        for (ProposalLineDto kitLine : p.lines()) {
+            if (kitLine.lineType() != LineType.KIT) {
+                continue;
+            }
+            List<ProposalKitItemDto> items = resolveKitItems(kitLine);
+            if (items.isEmpty()) {
+                continue;
+            }
             String header = (kitLine.sku() != null && !kitLine.sku().isBlank())
                     ? kitLine.sku() + " · " + kitLine.name()
                     : kitLine.name();
-            table.append("<div class=\"section-label\">— ").append(esc(header)).append("</div>");
-            table.append("""
-                    <div class="panel">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th style="width:28px">№</th>
-                            <th>Запчасть</th>
-                            <th style="width:62px">Кол-во</th>
-                            <th style="width:92px">Цена, ₽</th>
-                            <th style="width:92px">Сумма, ₽</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                    """);
-            int index = 1;
-            for (ProposalKitItemDto item : items) {
-                var price = item.partPrice() == null ? BigDecimal.ZERO : item.partPrice();
-                int qty = item.qty() == null ? 0 : item.qty();
-                var rowTotal = price.multiply(BigDecimal.valueOf(qty));
-                table.append("<tr>")
-                        .append("<td class=\"num\">").append(String.format("%02d", index++)).append("</td>")
-                        .append("<td><strong>").append(esc(item.partSku())).append("</strong><br/>")
-                        .append("<span class=\"purpose\">").append(esc(item.partName())).append("</span></td>")
-                        .append("<td>").append(qtyLabel(qty)).append("</td>")
-                        .append("<td>").append(money(price)).append("</td>")
-                        .append("<td><strong>").append(money(rowTotal)).append("</strong></td>")
-                        .append("</tr>");
-            }
-            table.append("""
-                        </tbody>
-                      </table>
-                    </div>
-                    """);
-            kitTables.add(table.toString());
+            kitTables.add(kitItemsTable(header, items));
         }
 
-        if (kitTables.isEmpty()) return "";
+        if (kitTables.isEmpty()) {
+            return "";
+        }
 
         var html = new StringBuilder();
         html.append("""
@@ -198,7 +184,7 @@ public class KpHtmlPdfService {
                   </header>
                   <div class="kicker">Приложение</div>
                   <div class="page-title">Состав комплекта</div>
-                  <p class="page-lead">Детализация комплектов, указанных в коммерческом предложении.</p>
+                  <p class="page-lead">Детализация комплектации коммерческого предложения.</p>
                 """);
         for (String kitTable : kitTables) {
             html.append(kitTable);
@@ -211,6 +197,81 @@ public class KpHtmlPdfService {
                 </section>
                 """);
         return html.toString();
+    }
+
+    /** Дрон + все PART-позиции (калькулятор и доп. запчасти из каталога). */
+    private String buildBaseKitTable(ProposalDto p) {
+        int kitQty = p.kitQty() == null || p.kitQty() < 1 ? 1 : p.kitQty();
+        var items = new ArrayList<ProposalKitItemDto>();
+        items.add(new ProposalKitItemDto(
+                null,
+                "БАС",
+                "БАС " + displayDroneName(p.droneModelName()),
+                kitQty,
+                p.dronePrice()
+        ));
+
+        boolean hasParts = false;
+        for (ProposalLineDto line : p.lines()) {
+            if (line.lineType() != LineType.PART) {
+                continue;
+            }
+            hasParts = true;
+            String sku = line.sku() == null || line.sku().isBlank() ? "—" : line.sku();
+            items.add(new ProposalKitItemDto(
+                    line.refId(),
+                    sku,
+                    line.name(),
+                    line.qty(),
+                    line.unitPrice()
+            ));
+        }
+
+        if (!hasParts && items.size() == 1) {
+            // только дрон без комплектующих — всё равно показываем состав
+            return kitItemsTable("Базовый комплект · " + displayDroneName(p.droneModelName()), items);
+        }
+        return kitItemsTable("Базовый комплект · " + displayDroneName(p.droneModelName()), items);
+    }
+
+    private String kitItemsTable(String header, List<ProposalKitItemDto> items) {
+        var table = new StringBuilder();
+        table.append("<div class=\"section-label\">— ").append(esc(header)).append("</div>");
+        table.append("""
+                <div class="panel">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style="width:28px">№</th>
+                        <th>Запчасть</th>
+                        <th style="width:62px">Кол-во</th>
+                        <th style="width:92px">Цена, ₽</th>
+                        <th style="width:92px">Сумма, ₽</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                """);
+        int index = 1;
+        for (ProposalKitItemDto item : items) {
+            var price = item.partPrice() == null ? BigDecimal.ZERO : item.partPrice();
+            int qty = item.qty() == null ? 0 : item.qty();
+            var rowTotal = price.multiply(BigDecimal.valueOf(qty));
+            String sku = item.partSku() == null || item.partSku().isBlank() ? "—" : item.partSku();
+            table.append("<tr>")
+                    .append("<td class=\"num\">").append(String.format("%02d", index++)).append("</td>")
+                    .append("<td><strong>").append(esc(sku)).append("</strong><br/>")
+                    .append("<span class=\"purpose\">").append(esc(item.partName())).append("</span></td>")
+                    .append("<td>").append(qtyLabel(qty)).append("</td>")
+                    .append("<td>").append(money(price)).append("</td>")
+                    .append("<td><strong>").append(money(rowTotal)).append("</strong></td>")
+                    .append("</tr>");
+        }
+        table.append("""
+                    </tbody>
+                  </table>
+                </div>
+                """);
+        return table.toString();
     }
 
     private List<ProposalKitItemDto> resolveKitItems(ProposalLineDto kitLine) {

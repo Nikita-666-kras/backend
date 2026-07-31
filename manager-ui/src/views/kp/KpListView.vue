@@ -46,80 +46,132 @@ async function onPdf(p: Proposal) {
 async function cloneAsNew(p: Proposal) {
   try {
     const full = await getProposal(p.id)
-    sessionStorage.setItem('manager_kp_clone', JSON.stringify({
-      recipient: `${full.recipient} (копия)`,
-      droneModelId: full.droneModelId,
-      dronePrice: full.dronePrice,
-      lines: full.lines.map((l) => ({
-        lineType: l.lineType === 'DRONE' ? 'PART' : l.lineType,
-        refId: l.refId || '',
-        sku: l.sku || '',
-        name: l.name,
-        qty: l.qty,
-        unitPrice: Number(l.unitPrice),
-        discountPct: l.discountPct || 0
-      }))
-    }))
-    toast.ok('Копия подготовлена. Откройте «Новый КП»')
+    sessionStorage.setItem(
+      'manager_kp_clone',
+      JSON.stringify({
+        recipient: full.recipient,
+        droneModelId: full.droneModelId,
+        kitQty: full.kitQty || 1,
+        unitKitPrice: Number(full.unitKitPrice ?? full.grandTotal),
+        extraLines: (full.lines || [])
+          .filter((l) => l.refId)
+          .map((l) => ({
+            lineType: l.lineType === 'DRONE' ? 'PART' : l.lineType,
+            refId: l.refId || '',
+            sku: l.sku || '',
+            name: l.name,
+            qty: l.qty,
+            unitPrice: Number(l.unitPrice),
+            discountPct: l.discountPct || 0,
+            kitItems: l.kitItems
+          }))
+      })
+    )
+    toast.ok('Откройте «Новый КП» — данные подставятся')
   } catch {
-    toast.error('Не удалось подготовить копию КП')
+    toast.error('Не удалось скопировать КП')
   }
 }
 </script>
 
 <template>
-  <div>
-    <header class="page-header">
-      <div>
-        <p class="eyebrow">КП</p>
-        <h1>Мои коммерческие предложения</h1>
-        <p class="subtitle">Открывайте черновики, копируйте прошлые КП и выгружайте PDF в один клик.</p>
-      </div>
+  <div class="list-page">
+    <header class="head">
+      <h1>Мои КП</h1>
       <RouterLink class="btn" to="/kp/new">Новый КП</RouterLink>
     </header>
 
-    <div class="toolbar card">
-      <label class="muted">Статус:</label>
-      <select v-model="filter">
+    <div class="filters">
+      <select v-model="filter" aria-label="Фильтр">
         <option value="ALL">Все</option>
         <option value="DRAFT">Черновики</option>
-        <option value="FINAL">Финальные</option>
+        <option value="FINAL">Готовые</option>
       </select>
-      <button class="btn secondary" type="button" @click="load">Обновить</button>
     </div>
 
-    <section class="card surface-light section-pad table-wrap">
-      <p v-if="loading" class="muted">Загрузка…</p>
-      <p v-else-if="!rows.length" class="empty">КП не найдены</p>
-      <table v-else class="data-table">
-        <thead>
-          <tr>
-            <th>№</th><th>Получатель</th><th>Модель</th><th>Сумма</th><th>Обновлено</th><th>Статус</th><th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="p in rows" :key="p.id">
-            <td>{{ p.number }}</td>
-            <td>{{ p.recipient }}</td>
-            <td>{{ p.droneModelName }}</td>
-            <td>{{ formatMoney(Number(p.grandTotal)) }}</td>
-            <td>{{ formatDate(p.updatedAt) }}</td>
-            <td><span class="badge" :class="p.status">{{ p.status === 'DRAFT' ? 'Черновик' : 'Финал' }}</span></td>
-            <td class="actions">
-              <div class="actions-row">
-                <RouterLink v-if="p.status === 'DRAFT'" class="btn secondary compact" :to="`/kp/${p.id}`">Открыть</RouterLink>
-                <button class="btn secondary compact" type="button" @click="onPdf(p)">PDF</button>
-                <button class="btn secondary compact" type="button" @click="cloneAsNew(p)">Копировать</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <p v-if="loading" class="muted">Загрузка…</p>
+    <p v-else-if="!rows.length" class="muted">Пока нет КП</p>
+
+    <ul v-else class="items">
+      <li v-for="p in rows" :key="p.id" class="item">
+        <div class="meta">
+          <strong>№{{ p.number }} · {{ p.droneModelName }}</strong>
+          <span class="muted">{{ p.recipient }}</span>
+          <span class="muted">{{ formatMoney(Number(p.grandTotal)) }} · {{ formatDate(p.updatedAt) }}</span>
+        </div>
+        <div class="actions">
+          <RouterLink v-if="p.status === 'DRAFT'" class="btn secondary compact" :to="`/kp/${p.id}`">Открыть</RouterLink>
+          <button class="btn secondary compact" type="button" @click="onPdf(p)">PDF</button>
+          <button class="btn secondary compact" type="button" @click="cloneAsNew(p)">Копия</button>
+        </div>
+      </li>
+    </ul>
   </div>
 </template>
 
 <style scoped>
-.table-wrap { padding-top: 0.9rem; padding-bottom: 0.9rem; }
-.actions { text-align: right; white-space: nowrap; }
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.head h1 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+.filters {
+  margin-bottom: 0.85rem;
+}
+.filters select {
+  min-height: 2.4rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  padding: 0.4rem 0.7rem;
+}
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+.item {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--glass);
+}
+.meta {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.meta strong,
+.meta span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+@media (max-width: 720px) {
+  .item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .actions .btn {
+    flex: 1;
+  }
+}
 </style>

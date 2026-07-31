@@ -1,11 +1,13 @@
 import api from '@/api/http'
 import type {
+  CalcPreview,
   CatalogItem,
   DroneModel,
   KitCatalogDetail,
   KitPreset,
   Proposal,
-  ProposalUpsertRequest
+  ProposalUpsertRequest,
+  ZipPackage
 } from '@/types/kp'
 
 export async function listModels(): Promise<DroneModel[]> {
@@ -13,8 +15,22 @@ export async function listModels(): Promise<DroneModel[]> {
   return data.data
 }
 
+export async function fetchZipPackage(modelId: string): Promise<ZipPackage> {
+  const { data } = await api.get(`/manager/kp/drone-models/${modelId}/zip-package`)
+  return data.data
+}
+
 export async function kitPreset(modelId: string): Promise<KitPreset> {
   const { data } = await api.get('/manager/kp/kit-preset', { params: { modelId } })
+  return data.data
+}
+
+export async function calculateKp(payload: {
+  droneModelId: string
+  kitQty: number
+  unitKitPrice: number
+}): Promise<CalcPreview> {
+  const { data } = await api.post('/manager/kp/calculate', payload)
   return data.data
 }
 

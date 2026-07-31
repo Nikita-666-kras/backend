@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import {
-  createFromPreset,
+  calculateKp,
   createProposal,
   downloadPdf,
+  fetchZipPackage,
   finalizeProposal as finalizeApi,
   getProposal,
   kitPreset,
@@ -11,35 +12,46 @@ import {
   updateProposal
 } from '@/api/kp'
 import { useToastStore } from '@/stores/toast'
-import type { DroneModel, Proposal, ProposalLine } from '@/types/kp'
+import type { CalcPreview, DroneModel, Proposal, ProposalLine, ZipPackage } from '@/types/kp'
+
+const DEFAULT_RECIPIENT = 'Уважаемый клиент'
+const ZIP_SKU_PREFIX = 'ZIP-'
+
+function isZipLine(line: ProposalLine) {
+  return line.lineType === 'KIT' && (line.sku || '').startsWith(ZIP_SKU_PREFIX)
+}
 
 export const useKpEditorStore = defineStore('kpEditor', () => {
   const toast = useToastStore()
 
   const draftId = ref<string | null>(null)
-  const recipient = ref('')
+  const recipient = ref(DEFAULT_RECIPIENT)
   const modelId = ref('')
-  const dronePrice = ref(0)
-  const lines = ref<ProposalLine[]>([])
+  const kitQty = ref(1)
+  const unitKitPrice = ref(0)
+  const extraLines = ref<ProposalLine[]>([])
+  const zipPackage = ref<ZipPackage | null>(null)
+  const zipTipOpen = ref(false)
+  const preview = ref<CalcPreview | null>(null)
   const models = ref<DroneModel[]>([])
   const dirty = ref(false)
   const loading = ref(false)
   const status = ref<'DRAFT' | 'FINAL' | null>(null)
+  const calcError = ref('')
 
-  const linesSubtotal = computed(() =>
-    lines.value.reduce((sum, l) => {
-      const mult = l.lineType === 'KIT' ? (100 - l.discountPct) / 100 : 1
-      return sum + l.unitPrice * l.qty * mult
+  const catalogExtras = computed(() => extraLines.value.filter((l) => !isZipLine(l)))
+  const zipIncluded = computed(() => extraLines.value.some(isZipLine))
+  const zipAvailable = computed(() => (zipPackage.value?.items?.length || 0) > 0)
+
+  const extrasTotal = computed(() =>
+    extraLines.value.reduce((sum, l) => {
+      const mult = l.lineType === 'KIT' ? (100 - (l.discountPct || 0)) / 100 : 1
+      return sum + Number(l.unitPrice || 0) * Number(l.qty || 0) * mult
     }, 0)
   )
-  const discountTotal = computed(() =>
-    lines.value.reduce((sum, l) => {
-      if (l.lineType !== 'KIT' || !l.discountPct) return sum
-      return sum + l.unitPrice * l.qty * (l.discountPct / 100)
-    }, 0)
-  )
-  const grandTotal = computed(() => dronePrice.value + linesSubtotal.value)
-  const ndsTotal = computed(() => (grandTotal.value * 22) / 122)
+
+  const grandTotal = computed(() => Number(preview.value?.grandTotal || 0) + extrasTotal.value)
+  const startPrice = computed(() => Number(preview.value?.startPrice || 0))
 
   function markDirty() {
     dirty.value = true
@@ -47,11 +59,16 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
 
   function reset() {
     draftId.value = null
-    recipient.value = ''
+    recipient.value = DEFAULT_RECIPIENT
     modelId.value = models.value[0]?.id || ''
-    dronePrice.value = Number(models.value[0]?.defaultPrice || 0)
-    lines.value = []
+    kitQty.value = 1
+    unitKitPrice.value = Number(models.value[0]?.defaultPrice || 0)
+    extraLines.value = []
+    zipPackage.value = null
+    zipTipOpen.value = false
+    preview.value = null
     status.value = null
+    calcError.value = ''
     dirty.value = false
   }
 
@@ -59,34 +76,98 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
     draftId.value = p.id
     recipient.value = p.recipient
     modelId.value = p.droneModelId
-    dronePrice.value = Number(p.dronePrice)
+    kitQty.value = p.kitQty || 1
+    unitKitPrice.value = Number(p.unitKitPrice ?? p.grandTotal)
     status.value = p.status
-    lines.value = p.lines.map((l) => ({
-      lineType: l.lineType === 'DRONE' ? 'PART' : l.lineType,
-      refId: l.refId || '',
-      sku: l.sku || '',
-      name: l.name,
-      qty: l.qty,
-      unitPrice: Number(l.unitPrice),
-      discountPct: l.discountPct || 0,
-      kitItems: l.kitItems?.length
-        ? l.kitItems.map((i) => ({
-            partId: i.partId || '',
-            partSku: i.partSku || '',
-            partName: i.partName,
-            qty: i.qty,
-            partPrice: Number(i.partPrice || 0)
-          }))
-        : undefined
-    }))
+    // строки калькулятора без refId; каталог / ЗИП — с refId
+    extraLines.value = (p.lines || [])
+      .filter((l) => l.refId)
+      .map((l) => ({
+        lineType: l.lineType === 'DRONE' ? 'PART' : l.lineType,
+        refId: l.refId || '',
+        sku: l.sku || '',
+        name: l.name,
+        qty: l.qty,
+        unitPrice: Number(l.unitPrice),
+        discountPct: l.discountPct || 0,
+        kitItems: l.kitItems?.map((i) => ({
+          partId: i.partId || '',
+          partSku: i.partSku || '',
+          partName: i.partName,
+          qty: i.qty,
+          partPrice: Number(i.partPrice || 0)
+        }))
+      }))
     dirty.value = false
+  }
+
+  function validateInputs(): string | null {
+    if (!recipient.value.trim()) return 'Укажите, для кого КП'
+    if (!modelId.value) return 'Выберите модель'
+    if (!Number.isInteger(kitQty.value) || kitQty.value < 1) {
+      return 'Количество комплектов должно быть целым числом >= 1'
+    }
+    if (!Number.isFinite(unitKitPrice.value) || unitKitPrice.value < 0) {
+      return 'Цена одного комплекта должна быть числом >= 0'
+    }
+    return null
+  }
+
+  async function loadZipForModel(id: string) {
+    zipTipOpen.value = false
+    if (!id) {
+      zipPackage.value = null
+      return
+    }
+    try {
+      const pkg = await fetchZipPackage(id)
+      zipPackage.value = (pkg.items || []).length ? pkg : null
+    } catch {
+      zipPackage.value = null
+    }
+  }
+
+  function stripZipLines() {
+    extraLines.value = extraLines.value.filter((l) => !isZipLine(l))
+  }
+
+  function buildZipLine(pkg: ZipPackage, model: DroneModel | undefined): ProposalLine {
+    return {
+      lineType: 'KIT',
+      refId: pkg.droneModelId,
+      sku: `${ZIP_SKU_PREFIX}${model?.code || 'PKG'}`,
+      name: pkg.name || 'ЗИП-пакет',
+      qty: 1,
+      unitPrice: Number(pkg.price || 0),
+      discountPct: 0,
+      kitItems: (pkg.items || []).map((i) => ({
+        partId: i.id || '',
+        partSku: i.sku || '',
+        partName: i.name,
+        qty: i.qty || 1,
+        partPrice: Number(i.unitPrice || 0)
+      }))
+    }
+  }
+
+  function setZipIncluded(include: boolean) {
+    stripZipLines()
+    if (include && zipPackage.value) {
+      const model = models.value.find((m) => m.id === modelId.value)
+      extraLines.value.push(buildZipLine(zipPackage.value, model))
+    }
+    markDirty()
+  }
+
+  function toggleZipTip() {
+    zipTipOpen.value = !zipTipOpen.value
   }
 
   async function loadModels() {
     models.value = await listModels()
     if (!modelId.value && models.value.length) {
       modelId.value = models.value[0].id
-      dronePrice.value = Number(models.value[0].defaultPrice)
+      unitKitPrice.value = Number(models.value[0].defaultPrice)
     }
   }
 
@@ -98,48 +179,86 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
         toast.info('Финальное КП открыто в режиме просмотра')
       }
       snapshotFromProposal(p)
+      await loadZipForModel(modelId.value)
+      await refreshPreview()
     } finally {
       loading.value = false
     }
   }
 
-  async function applyModelPreset(id: string) {
+  async function applyModel(id: string) {
+    const keepZip = zipIncluded.value
     modelId.value = id
+    stripZipLines()
+    await loadZipForModel(id)
     try {
       const preset = await kitPreset(id)
-      dronePrice.value = Number(preset.dronePrice)
-      lines.value = preset.lines.map((l) => ({
-        lineType: l.lineType === 'DRONE' ? 'PART' : l.lineType,
-        refId: l.refId || '',
-        sku: l.sku || '',
-        name: l.name,
-        qty: l.qty,
-        unitPrice: Number(l.unitPrice),
-        discountPct: l.discountPct || 0
-      }))
+      unitKitPrice.value = Number(preset.startPrice)
       markDirty()
-      toast.ok('Шаблон комплекта загружен')
-    } catch {
+      await refreshPreview()
+    } catch (e: unknown) {
       const m = models.value.find((x) => x.id === id)
-      dronePrice.value = Number(m?.defaultPrice || 0)
-      toast.info('Для этой модели нет шаблона — указана базовая цена')
+      unitKitPrice.value = Number(m?.defaultPrice || 0)
+      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || 'Для этой модели нет прайса калькулятора')
+      await refreshPreview()
+    }
+    if (keepZip && zipAvailable.value) {
+      setZipIncluded(true)
     }
   }
 
-  function addLine(line: ProposalLine) {
-    lines.value.push({ ...line })
+  async function refreshPreview() {
+    calcError.value = ''
+    if (!modelId.value) {
+      preview.value = null
+      return
+    }
+    if (!Number.isInteger(kitQty.value) || kitQty.value < 1) {
+      preview.value = null
+      calcError.value = 'Количество комплектов должно быть целым числом >= 1'
+      return
+    }
+    if (!Number.isFinite(unitKitPrice.value) || unitKitPrice.value < 0) {
+      preview.value = null
+      calcError.value = 'Цена одного комплекта должна быть числом >= 0'
+      return
+    }
+    try {
+      preview.value = await calculateKp({
+        droneModelId: modelId.value,
+        kitQty: kitQty.value,
+        unitKitPrice: Number(unitKitPrice.value || 0)
+      })
+    } catch (e: unknown) {
+      preview.value = null
+      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+      calcError.value = msg || 'Не удалось посчитать КП'
+    }
+  }
+
+  function addLines(lines: ProposalLine[]) {
+    for (const line of lines) {
+      extraLines.value.push({ ...line, qty: line.qty || 1, discountPct: line.discountPct || 0 })
+    }
     markDirty()
   }
 
-  function removeLine(index: number) {
-    lines.value.splice(index, 1)
+  function removeExtra(index: number) {
+    const target = catalogExtras.value[index]
+    if (!target) return
+    const realIdx = extraLines.value.indexOf(target)
+    if (realIdx >= 0) extraLines.value.splice(realIdx, 1)
     markDirty()
   }
 
   function buildPayload() {
-    const payloadLines = lines.value
-      .filter((l) => l.name.trim())
-      .map((line) => ({
+    return {
+      recipient: recipient.value.trim(),
+      droneModelId: modelId.value,
+      kitQty: kitQty.value,
+      unitKitPrice: Number(unitKitPrice.value || 0),
+      extraLines: extraLines.value.map((line) => ({
         lineType: line.lineType,
         refId: line.refId || null,
         sku: line.sku || '',
@@ -158,22 +277,17 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
               }))
             : []
       }))
-
-    return {
-      recipient: recipient.value.trim(),
-      droneModelId: modelId.value,
-      dronePrice: dronePrice.value,
-      lines: payloadLines
     }
   }
 
   async function saveDraft() {
-    if (!recipient.value.trim()) {
-      toast.error('Укажите получателя')
+    const err = validateInputs()
+    if (err) {
+      toast.error(err)
       return null
     }
-    if (!modelId.value) {
-      toast.error('Выберите модель дрона')
+    if (calcError.value) {
+      toast.error(calcError.value)
       return null
     }
 
@@ -182,6 +296,8 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
       const payload = buildPayload()
       const proposal = draftId.value ? await updateProposal(draftId.value, payload) : await createProposal(payload)
       snapshotFromProposal(proposal)
+      await loadZipForModel(modelId.value)
+      await refreshPreview()
       toast.ok('Черновик сохранён')
       return proposal
     } catch (e: unknown) {
@@ -202,7 +318,7 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
       const finalized = await finalizeApi(saved.id)
       await downloadPdf(finalized.id, `KP_${finalized.number}.pdf`)
       snapshotFromProposal(finalized)
-      toast.ok(`PDF КП №${finalized.number} готов`)
+      toast.ok(`КП №${finalized.number} готово`)
       return finalized
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
@@ -213,52 +329,40 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
     }
   }
 
-  async function quickPresetPdf() {
-    if (!recipient.value.trim()) {
-      toast.error('Укажите получателя')
-      return null
-    }
-
-    loading.value = true
-    try {
-      const proposal = await createFromPreset(recipient.value.trim(), modelId.value)
-      const finalized = await finalizeApi(proposal.id)
-      await downloadPdf(finalized.id, `KP_${finalized.number}.pdf`)
-      toast.ok(`PDF КП №${finalized.number} сформирован`) 
-      return finalized
-    } catch (e: unknown) {
-      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
-      toast.error(msg || 'Не удалось сформировать КП из шаблона')
-      return null
-    } finally {
-      loading.value = false
-    }
-  }
-
   return {
     draftId,
     recipient,
     modelId,
-    dronePrice,
-    lines,
+    kitQty,
+    unitKitPrice,
+    extraLines,
+    catalogExtras,
+    zipPackage,
+    zipAvailable,
+    zipIncluded,
+    zipTipOpen,
+    preview,
     models,
     dirty,
     loading,
     status,
-    linesSubtotal,
-    discountTotal,
+    calcError,
+    extrasTotal,
     grandTotal,
-    ndsTotal,
+    startPrice,
     markDirty,
     reset,
     snapshotFromProposal,
     loadModels,
     loadDraft,
-    applyModelPreset,
-    addLine,
-    removeLine,
+    applyModel,
+    refreshPreview,
+    addLines,
+    removeExtra,
+    setZipIncluded,
+    toggleZipTip,
+    loadZipForModel,
     saveDraft,
-    finalizeAndDownload,
-    quickPresetPdf
+    finalizeAndDownload
   }
 })

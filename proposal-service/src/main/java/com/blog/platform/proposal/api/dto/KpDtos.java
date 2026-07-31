@@ -22,8 +22,47 @@ public final class KpDtos {
             String name,
             BigDecimal defaultPrice,
             Integer sortOrder,
-            boolean active
+            boolean active,
+            boolean hasZipPackage
     ) {}
+
+    public record ZipItemDto(
+            UUID id,
+            String name,
+            String sku,
+            Integer qty,
+            BigDecimal unitPrice,
+            Integer sortOrder
+    ) {}
+
+    public record ZipItemUpsert(
+            @NotBlank String name,
+            String sku,
+            @NotNull @Min(1) Integer qty,
+            @NotNull @DecimalMin("0.00") BigDecimal unitPrice,
+            Integer sortOrder
+    ) {}
+
+    public record ZipPackageDto(
+            UUID droneModelId,
+            String name,
+            BigDecimal price,
+            List<ZipItemDto> items
+    ) {
+        public ZipPackageDto {
+            if (items == null) items = List.of();
+        }
+    }
+
+    public record ZipPackageUpsertRequest(
+            String name,
+            BigDecimal price,
+            @Valid List<ZipItemUpsert> items
+    ) {
+        public ZipPackageUpsertRequest {
+            if (items == null) items = List.of();
+        }
+    }
 
     public record CatalogItemDto(
             UUID id,
@@ -78,9 +117,16 @@ public final class KpDtos {
     public record ProposalUpsertRequest(
             @NotBlank String recipient,
             @NotNull UUID droneModelId,
-            @NotNull @DecimalMin("0.00") BigDecimal dronePrice,
-            @NotNull @Valid List<ProposalLineRequest> lines
-    ) {}
+            @NotNull @Min(1) Integer kitQty,
+            @NotNull @DecimalMin("0.00") BigDecimal unitKitPrice,
+            @Valid List<ProposalLineRequest> extraLines
+    ) {
+        public ProposalUpsertRequest {
+            if (extraLines == null) {
+                extraLines = List.of();
+            }
+        }
+    }
 
     public record ProposalLineDto(
             UUID id,
@@ -110,6 +156,8 @@ public final class KpDtos {
             UUID droneModelId,
             String droneModelName,
             BigDecimal dronePrice,
+            Integer kitQty,
+            BigDecimal unitKitPrice,
             String status,
             BigDecimal subtotal,
             BigDecimal discountTotal,
@@ -142,11 +190,34 @@ public final class KpDtos {
     public record KitPresetDto(
             String code,
             BigDecimal dronePrice,
+            BigDecimal startPrice,
+            String vatMode,
+            List<KitPresetLineDto> lines
+    ) {}
+
+    public record CalcPreviewDto(
+            String priceKey,
+            String vatMode,
+            Integer kitQty,
+            BigDecimal startPrice,
+            BigDecimal unitKitPrice,
+            BigDecimal priceDiff,
+            BigDecimal baseDronePrice,
+            BigDecimal unitDronePrice,
+            BigDecimal droneTotal,
+            BigDecimal grandTotal,
+            BigDecimal ndsTotal,
             List<KitPresetLineDto> lines
     ) {}
 
     public record CreateFromPresetRequest(
             @NotBlank String recipient,
             @NotNull UUID droneModelId
+    ) {}
+
+    public record CalculatorRequest(
+            @NotNull UUID droneModelId,
+            @NotNull @Min(1) Integer kitQty,
+            @NotNull @DecimalMin("0.00") BigDecimal unitKitPrice
     ) {}
 }

@@ -8,6 +8,23 @@ export interface DroneModel {
   defaultPrice: number
   sortOrder: number
   active: boolean
+  hasZipPackage?: boolean
+}
+
+export interface ZipPackageItem {
+  id: string
+  name: string
+  sku?: string | null
+  qty: number
+  unitPrice: number
+  sortOrder?: number
+}
+
+export interface ZipPackage {
+  droneModelId: string
+  name: string
+  price: number
+  items: ZipPackageItem[]
 }
 
 export interface CatalogItem {
@@ -55,14 +72,14 @@ export interface ProposalLine {
 export interface ProposalLineDto extends ProposalLine {
   id: string
   lineTotal: number
-  kitItems?: ProposalLine['kitItems']
 }
 
 export interface ProposalUpsertRequest {
   recipient: string
   droneModelId: string
-  dronePrice: number
-  lines: ProposalLine[]
+  kitQty: number
+  unitKitPrice: number
+  extraLines: ProposalLine[]
 }
 
 export interface Proposal {
@@ -74,6 +91,8 @@ export interface Proposal {
   droneModelId: string
   droneModelName: string
   dronePrice: number
+  kitQty: number
+  unitKitPrice: number
   status: ProposalStatus
   subtotal: number
   discountTotal: number
@@ -85,16 +104,30 @@ export interface Proposal {
   updatedAt: string
 }
 
-export interface KitPreset {
-  code: string
-  dronePrice: number
+export interface CalcPreview {
+  priceKey: string
+  vatMode: string
+  kitQty: number
+  startPrice: number
+  unitKitPrice: number
+  priceDiff: number
+  baseDronePrice: number
+  unitDronePrice: number
+  droneTotal: number
+  grandTotal: number
+  ndsTotal: number
   lines: Array<{
     lineType: LineType
-    refId: string | null
-    sku: string | null
     name: string
     qty: number
     unitPrice: number
-    discountPct: number
   }>
+}
+
+export interface KitPreset {
+  code: string
+  dronePrice: number
+  startPrice: number
+  vatMode: string
+  lines: CalcPreview['lines']
 }

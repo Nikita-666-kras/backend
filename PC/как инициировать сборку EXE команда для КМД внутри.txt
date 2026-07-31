@@ -1,0 +1,30 @@
+ну открываешь КМД, переходишь в эту директорию по cd, потом:
+
+
+
+pyinstaller --onefile --noconsole ^
+--add-data "price_list.json;." ^
+--add-data "DJI_T50.pdf;." ^
+--add-data "HD525.pdf;." ^
+--add-data "HD540.pdf;." ^
+--add-data "HD580.pdf;." ^
+--add-data "DJI_T30.pdf;." ^
+--add-data "DJI_T10.pdf;." ^
+--add-data "Прицеп_БАС.pdf;." ^
+--add-data "Прицеп_ТЕНТ.pdf;." ^
+--add-data "Прицеп_1_дрон.pdf;." ^
+--add-data "Растворник_на_1000л.pdf;." ^
+--add-data "DJI_M3M.pdf;." ^
+--add-data "Manrope-Bold.ttf;." ^
+--add-data "Manrope-ExtraBold.ttf;." ^
+--add-data "Manrope-ExtraLight.ttf;." ^
+--add-data "Manrope-Light.ttf;." ^
+--add-data "Manrope-Medium.ttf;." ^
+--add-data "Manrope-Regular.ttf;." ^
+--add-data "Manrope-SemiBold.ttf;." ^
+main.py
+
+
+*В price.json после каждого изменения меняй версию
+В DIST удаляй старую версию exe
+Пересобирай командой. 

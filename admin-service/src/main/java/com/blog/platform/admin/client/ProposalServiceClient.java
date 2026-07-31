@@ -54,6 +54,24 @@ public class ProposalServiceClient {
                 .toBodilessEntity();
     }
 
+    public ZipPackageResponse getZipPackage(UUID droneModelId, UUID userId, Set<Role> roles) {
+        return requireData(proposalServiceRestClient.get()
+                .uri("/admin/kp/drone-models/{id}/zip-package", droneModelId)
+                .header(SecurityHeaders.USER_ID, userId.toString())
+                .header(SecurityHeaders.USER_ROLES, rolesHeader(roles))
+                .retrieve()
+                .body(new ParameterizedTypeReference<ApiResponse<ZipPackageResponse>>() {}));
+    }
+
+    public ZipPackageResponse saveZipPackage(UUID droneModelId, ZipPackageRequest req, UUID userId, Set<Role> roles) {
+        return requireData(proposalServiceRestClient.put()
+                .uri("/admin/kp/drone-models/{id}/zip-package", droneModelId)
+                .header(SecurityHeaders.USER_ID, userId.toString())
+                .header(SecurityHeaders.USER_ROLES, rolesHeader(roles))
+                .body(req).retrieve()
+                .body(new ParameterizedTypeReference<ApiResponse<ZipPackageResponse>>() {}));
+    }
+
     public List<ProposalResponse> proposals(UUID userId, Set<Role> roles) {
         return requireData(proposalServiceRestClient.get()
                 .uri("/admin/kp/proposals")
@@ -81,7 +99,12 @@ public class ProposalServiceClient {
     }
 
     public record DroneModelRequest(String code, String name, BigDecimal defaultPrice, Integer sortOrder, Boolean active) {}
-    public record DroneModelResponse(UUID id, String code, String name, BigDecimal defaultPrice, Integer sortOrder, boolean active) {}
+    public record DroneModelResponse(UUID id, String code, String name, BigDecimal defaultPrice, Integer sortOrder,
+                                     boolean active, boolean hasZipPackage) {}
+    public record ZipItemRequest(String name, String sku, Integer qty, BigDecimal unitPrice, Integer sortOrder) {}
+    public record ZipPackageRequest(String name, BigDecimal price, List<ZipItemRequest> items) {}
+    public record ZipItemResponse(UUID id, String name, String sku, Integer qty, BigDecimal unitPrice, Integer sortOrder) {}
+    public record ZipPackageResponse(UUID droneModelId, String name, BigDecimal price, List<ZipItemResponse> items) {}
     public record ProposalResponse(UUID id, Integer number, String managerUsername, String recipient, String droneModelName,
                                    String status, BigDecimal grandTotal, BigDecimal ndsTotal, String pdfPath) {}
 }

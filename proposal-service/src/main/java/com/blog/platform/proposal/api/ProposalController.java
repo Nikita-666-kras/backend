@@ -57,6 +57,25 @@ public class ProposalController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/admin/kp/drone-models/{id}/zip-package")
+    public ApiResponse<KpDtos.ZipPackageDto> adminZipPackage(HttpServletRequest request, @PathVariable UUID id) {
+        guard.requireAdmin(request);
+        return ApiResponse.of(service.getZipPackage(id));
+    }
+
+    @PutMapping("/admin/kp/drone-models/{id}/zip-package")
+    public ApiResponse<KpDtos.ZipPackageDto> saveZipPackage(HttpServletRequest request, @PathVariable UUID id,
+                                                            @RequestBody @Valid KpDtos.ZipPackageUpsertRequest body) {
+        guard.requireAdmin(request);
+        return ApiResponse.of(service.saveZipPackage(id, body));
+    }
+
+    @GetMapping("/manager/kp/drone-models/{id}/zip-package")
+    public ApiResponse<KpDtos.ZipPackageDto> managerZipPackage(HttpServletRequest request, @PathVariable UUID id) {
+        guard.requireManagerOrAdmin(request);
+        return ApiResponse.of(service.getZipPackage(id));
+    }
+
     @GetMapping("/manager/kp/catalog/parts")
     public ApiResponse<List<KpDtos.CatalogItemDto>> managerParts(HttpServletRequest request, @RequestParam(required = false) String q,
                                                                   @RequestParam(defaultValue = "0") int page,
@@ -86,7 +105,22 @@ public class ProposalController {
                 .filter(m -> m.id().equals(modelId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Drone model not found"));
-        return ApiResponse.of(kitPresetService.presetFor(model.code()));
+        return ApiResponse.of(kitPresetService.presetFor(model.code() + " " + model.name()));
+    }
+
+    @PostMapping("/manager/kp/calculate")
+    public ApiResponse<KpDtos.CalcPreviewDto> calculate(HttpServletRequest request,
+                                                        @RequestBody @Valid KpDtos.CalculatorRequest body) {
+        guard.requireManagerOrAdmin(request);
+        var calc = service.preview(body.droneModelId(), body.kitQty(), body.unitKitPrice());
+        var lines = calc.lines().stream()
+                .map(l -> new KpDtos.KitPresetLineDto(
+                        l.lineType(), l.refId(), l.sku(), l.name(), l.qty(), l.unitPrice(), l.discountPct()))
+                .toList();
+        return ApiResponse.of(new KpDtos.CalcPreviewDto(
+                calc.priceKey(), calc.vatMode(), calc.kitQty(), calc.startPrice(), calc.unitKitPrice(),
+                calc.priceDiff(), calc.baseDronePrice(), calc.unitDronePrice(), calc.droneTotal(),
+                calc.grandTotal(), calc.ndsTotal(), lines));
     }
 
     @PostMapping("/manager/kp/proposals")
@@ -103,12 +137,8 @@ public class ProposalController {
                 .filter(m -> m.id().equals(body.droneModelId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Drone model not found"));
-        var preset = kitPresetService.presetFor(model.code());
-        var lines = preset.lines().stream()
-                .map(l -> new KpDtos.ProposalLineRequest(
-                        l.lineType(), l.refId(), l.sku(), l.name(), l.qty(), l.unitPrice(), l.discountPct(), List.of()))
-                .toList();
-        var upsert = new KpDtos.ProposalUpsertRequest(body.recipient(), body.droneModelId(), preset.dronePrice(), lines);
+        var preset = kitPresetService.presetFor(model.code() + " " + model.name());
+        var upsert = new KpDtos.ProposalUpsertRequest(body.recipient(), body.droneModelId(), 1, preset.startPrice(), List.of());
         return ApiResponse.of(service.saveDraft(guard.userId(request), guard.username(request), null, upsert));
     }
 

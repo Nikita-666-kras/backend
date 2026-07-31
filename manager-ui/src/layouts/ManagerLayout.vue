@@ -4,20 +4,18 @@ import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { hubGroupLabels, hubModules } from '@/config/modules'
 import { useAuthStore } from '@/stores/auth'
 import { rolesLabel } from '@/utils/labels'
-import { adminUiUrl } from '@/utils/roles'
 
 const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const navOpen = ref(false)
-const adminUiLink = adminUiUrl()
 
 const groups = computed(() => {
-  const order: Array<'main' | 'kp' | 'soon'> = ['main', 'kp', 'soon']
+  const order: Array<'main' | 'kp'> = ['main', 'kp']
   return order.map((group) => ({
     group,
     label: hubGroupLabels[group],
-    items: hubModules.filter((m) => m.group === group)
+    items: hubModules.filter((m) => m.group === group && m.enabled)
   }))
 })
 
@@ -54,16 +52,13 @@ function closeNav() {
       <nav @click="closeNav">
         <template v-for="section in groups" :key="section.group">
           <p class="nav-group">{{ section.label }}</p>
-          <template v-for="item in section.items" :key="item.id">
-            <RouterLink v-if="item.enabled" class="nav-link" :class="{ active: isActive(item.route) }" :to="item.route">{{ item.title }}</RouterLink>
-            <span v-else class="nav-link disabled">{{ item.title }} <span v-if="item.badge" class="nav-badge">{{ item.badge }}</span></span>
-          </template>
-        </template>
-
-        <template v-if="auth.canUseAdminUi || auth.isManagerOnly">
-          <p class="nav-group">Админка</p>
-          <a class="nav-link external" :href="`${adminUiLink}/media?section=OTHER`" target="_blank" rel="noopener">Медиа · Другое</a>
-          <a v-if="auth.canUseAdminUi" class="nav-link external" :href="adminUiLink" target="_blank" rel="noopener">Посты и каталог</a>
+          <RouterLink
+            v-for="item in section.items"
+            :key="item.id"
+            class="nav-link"
+            :class="{ active: isActive(item.route) }"
+            :to="item.route"
+          >{{ item.title }}</RouterLink>
         </template>
       </nav>
 

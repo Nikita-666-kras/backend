@@ -2,22 +2,20 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import KpCatalogSearch from '@/components/kp/KpCatalogSearch.vue'
-import KpLinesTable from '@/components/kp/KpLinesTable.vue'
-import KpModelPicker from '@/components/kp/KpModelPicker.vue'
-import KpStepHeader from '@/components/kp/KpStepHeader.vue'
-import KpSummaryBar from '@/components/kp/KpSummaryBar.vue'
 import { useUnsavedGuard } from '@/composables/useUnsavedGuard'
 import { useKpEditorStore } from '@/stores/kpEditor'
-import { useToastStore } from '@/stores/toast'
 import type { ProposalLine } from '@/types/kp'
 
 const route = useRoute()
 const router = useRouter()
 const editor = useKpEditorStore()
-const toast = useToastStore()
 const catalogRef = ref<InstanceType<typeof KpCatalogSearch> | null>(null)
 
 useUnsavedGuard(editor.dirty)
+
+function money(v: number) {
+  return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Number(v || 0))
+}
 
 async function initializeEditor(id?: string) {
   editor.reset()
@@ -32,22 +30,23 @@ async function initializeEditor(id?: string) {
         const snapshot = JSON.parse(clone) as {
           recipient: string
           droneModelId: string
-          dronePrice: number
-          lines: ProposalLine[]
+          kitQty: number
+          unitKitPrice: number
+          extraLines?: ProposalLine[]
         }
         editor.recipient = snapshot.recipient
         editor.modelId = snapshot.droneModelId
-        editor.dronePrice = Number(snapshot.dronePrice)
-        editor.lines = snapshot.lines
+        editor.kitQty = snapshot.kitQty || 1
+        editor.unitKitPrice = Number(snapshot.unitKitPrice)
+        if (snapshot.extraLines?.length) editor.extraLines = snapshot.extraLines
         editor.markDirty()
-        toast.ok('Копия КП загружена в редактор')
-      } catch {
-        toast.error('Черновик копии КП поврежден и был сброшен')
+        await editor.loadZipForModel(editor.modelId)
+        await editor.refreshPreview()
       } finally {
         sessionStorage.removeItem('manager_kp_clone')
       }
-    } else if (editor.models.length && !editor.modelId) {
-      await editor.applyModelPreset(editor.models[0].id)
+    } else if (editor.models.length) {
+      await editor.applyModel(editor.models[0].id)
     }
   }
 
@@ -57,99 +56,365 @@ async function initializeEditor(id?: string) {
 watch(
   () => route.params.id,
   async (nextId) => {
-    const id = typeof nextId === 'string' ? nextId : undefined
-    await initializeEditor(id)
+    await initializeEditor(typeof nextId === 'string' ? nextId : undefined)
   },
   { immediate: true }
 )
 
-function addLines(lines: ProposalLine[]) {
-  for (const line of lines) editor.addLine(line)
-}
-
-async function onSave() {
-  const saved = await editor.saveDraft()
-  if (saved?.id && route.name !== 'kp-edit') {
-    router.replace(`/kp/${saved.id}`)
+watch(
+  () => [editor.kitQty, editor.unitKitPrice] as const,
+  async () => {
+    if (!editor.modelId) return
+    editor.markDirty()
+    await editor.refreshPreview()
   }
-}
+)
 
-async function onFinalize() {
+async function onGenerate() {
   const finalized = await editor.finalizeAndDownload()
-  if (finalized?.id) {
-    router.replace(`/kp/${finalized.id}`)
-  }
+  if (finalized?.id) router.replace(`/kp/${finalized.id}`)
 }
 
-async function onPresetPdf() {
-  await editor.quickPresetPdf()
+async function onModelChange() {
+  await editor.applyModel(editor.modelId)
 }
 
-function onReset() {
-  if (editor.dirty && !window.confirm('Сбросить все изменения?')) return
-  editor.reset()
-  if (editor.models.length) {
-    editor.applyModelPreset(editor.models[0].id)
-  }
+function onAddLines(lines: ProposalLine[]) {
+  editor.addLines(lines)
 }
 </script>
 
 <template>
-  <div>
-    <header class="page-header">
-      <div>
-        <p class="eyebrow">КП</p>
-        <h1>{{ route.name === 'kp-edit' ? 'Редактирование КП' : 'Новый КП' }}</h1>
-        <p class="subtitle">Редактируйте состав: удаляйте лишние позиции, меняйте количество и стоимость.</p>
-      </div>
-      <div class="row-actions actions-row">
-        <button class="btn secondary" type="button" @click="onReset">Сброс</button>
-        <button class="btn secondary" type="button" @click="router.push('/kp')">К списку</button>
-      </div>
+  <div class="calc">
+    <header class="head">
+      <h1>{{ route.name === 'kp-edit' ? 'КП' : 'Новый КП' }}</h1>
+      <button class="link" type="button" @click="router.push('/kp')">Мои КП</button>
     </header>
 
-    <KpStepHeader :step="3" />
+    <form class="panel" @submit.prevent="onGenerate">
+      <label class="field">
+        <span>Модель</span>
+        <select v-model="editor.modelId" required @change="onModelChange">
+          <option v-for="m in editor.models" :key="m.id" :value="m.id">{{ m.name }}</option>
+        </select>
+      </label>
 
-    <div class="editor-grid">
-      <section class="card side-panel section-pad">
-        <div class="field">
-          <label>Получатель</label>
-          <input v-model="editor.recipient" placeholder="ООО АгроТех" @input="editor.markDirty" />
+      <label class="field">
+        <span>Для кого</span>
+        <input v-model="editor.recipient" required placeholder="Уважаемый клиент" @input="editor.markDirty" />
+      </label>
+
+      <div class="row2">
+        <label class="field">
+          <span>Количество</span>
+          <input v-model.number="editor.kitQty" type="number" min="1" step="1" required />
+        </label>
+        <label class="field">
+          <span>Цена комплекта, ₽</span>
+          <input v-model.number="editor.unitKitPrice" type="number" min="0" step="1" required />
+        </label>
+      </div>
+
+      <p v-if="editor.calcError" class="error">{{ editor.calcError }}</p>
+
+      <div v-if="editor.zipAvailable && editor.zipPackage" class="block">
+        <p class="block-title">Комплектация</p>
+        <div class="zip-card" :class="{ on: editor.zipIncluded }">
+          <button
+            class="zip-tip"
+            type="button"
+            title="Состав ЗИП-пакета"
+            aria-label="Состав ЗИП-пакета"
+            @click="editor.toggleZipTip()"
+          >
+            ?
+          </button>
+          <label class="zip-main">
+            <input
+              type="checkbox"
+              :checked="editor.zipIncluded"
+              @change="editor.setZipIncluded(($event.target as HTMLInputElement).checked)"
+            />
+            <span class="zip-text">
+              <strong>{{ editor.zipPackage.name }}</strong>
+              <em>{{ money(Number(editor.zipPackage.price)) }} ₽</em>
+            </span>
+          </label>
+          <div v-if="editor.zipTipOpen" class="zip-popover">
+            <p class="zip-popover-title">Состав</p>
+            <ul>
+              <li v-for="item in editor.zipPackage.items" :key="item.id">
+                <span>{{ item.name }}</span>
+                <em>×{{ item.qty }}</em>
+              </li>
+            </ul>
+          </div>
         </div>
+      </div>
 
-        <div class="field">
-          <label>Базовая цена дрона</label>
-          <input v-model.number="editor.dronePrice" type="number" min="0" step="0.01" @input="editor.markDirty" />
-        </div>
+      <div class="block">
+        <p class="block-title">Дополнительно из каталога</p>
+        <KpCatalogSearch ref="catalogRef" @add-lines="onAddLines" />
 
-        <KpModelPicker :models="editor.models" :model-id="editor.modelId" @pick="editor.applyModelPreset" />
-        <KpCatalogSearch ref="catalogRef" @add-lines="addLines" />
-      </section>
+        <ul v-if="editor.catalogExtras.length" class="extras">
+          <li v-for="(line, idx) in editor.catalogExtras" :key="`${line.refId}-${idx}`">
+            <div class="extra-main">
+              <strong>{{ line.name }}</strong>
+              <span class="muted">{{ line.lineType === 'KIT' ? 'комплект' : 'запчасть' }}</span>
+            </div>
+            <input
+              v-model.number="line.qty"
+              class="qty"
+              type="number"
+              min="1"
+              step="1"
+              @input="editor.markDirty"
+            />
+            <span class="price">{{ money(line.unitPrice * line.qty) }} ₽</span>
+            <button class="link danger" type="button" @click="editor.removeExtra(idx)">Убрать</button>
+          </li>
+        </ul>
+      </div>
 
-      <section class="card main-panel section-pad">
-        <KpLinesTable :lines="editor.lines" @remove="editor.removeLine" @dirty="editor.markDirty" />
-      </section>
-    </div>
+      <div v-if="!editor.calcError" class="sum">
+        <span>Итого</span>
+        <strong>{{ money(editor.grandTotal) }} ₽</strong>
+      </div>
+      <p v-if="editor.extrasTotal > 0 && !editor.calcError" class="muted hint">
+        Базовый комплект {{ money(Number(editor.preview?.grandTotal || 0)) }} ₽
+        + доп. {{ money(editor.extrasTotal) }} ₽
+      </p>
 
-    <KpSummaryBar
-      :subtotal="editor.linesSubtotal"
-      :discount="editor.discountTotal"
-      :total="editor.grandTotal"
-      :nds="editor.ndsTotal"
-      :loading="editor.loading"
-      @save="onSave"
-      @finalize="onFinalize"
-      @preset="onPresetPdf"
-    />
+      <button class="btn generate" type="submit" :disabled="editor.loading || !!editor.calcError">
+        {{ editor.loading ? 'Формируем…' : 'Сгенерировать КП' }}
+      </button>
+    </form>
   </div>
 </template>
 
 <style scoped>
-.editor-grid { display: grid; grid-template-columns: 1fr; gap: 0.9rem; }
-.side-panel, .main-panel { display: grid; gap: 0.8rem; align-content: start; }
-.side-panel { position: static; max-height: none; overflow: visible; }
-@media (max-width: 768px) {
-  .row-actions { width: 100%; display: grid; grid-template-columns: 1fr; }
-  .row-actions .btn { width: 100%; }
+.calc {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.head h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.link {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.link:hover { color: var(--ink); }
+.link.danger { color: #ffb4b4; }
+
+.panel {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--glass);
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.field { display: grid; gap: 0.35rem; }
+.field span { font-size: 0.82rem; color: var(--muted); }
+.field input,
+.field select {
+  width: 100%;
+  min-height: 2.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  padding: 0.55rem 0.75rem;
+}
+
+.block {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--line);
+}
+
+.block-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.extras {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.extras li {
+  display: grid;
+  grid-template-columns: 1fr 70px auto auto;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.extra-main { display: grid; gap: 0.1rem; min-width: 0; }
+.extra-main strong {
+  font-size: 0.88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.extra-main span { font-size: 0.75rem; }
+
+.qty {
+  min-height: 2.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  padding: 0.3rem 0.45rem;
+}
+
+.price { font-size: 0.85rem; white-space: nowrap; }
+
+.sum {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--line);
+}
+
+.sum span { color: var(--muted); }
+.sum strong { font-size: 1.25rem; }
+
+.hint { margin: -0.35rem 0 0; font-size: 0.8rem; }
+.error { margin: 0; color: #ffb4b4; font-size: 0.88rem; }
+.generate { width: 100%; min-height: 2.75rem; }
+
+.zip-card {
+  position: relative;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--input-bg);
+}
+
+.zip-card.on {
+  border-color: color-mix(in srgb, var(--accent, #6ea8fe) 55%, var(--line));
+}
+
+.zip-tip {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--glass);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zip-tip:hover {
+  color: var(--ink);
+}
+
+.zip-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding-right: 1.75rem;
+  cursor: pointer;
+}
+
+.zip-main input {
+  margin-top: 0.2rem;
+}
+
+.zip-text {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.zip-text strong {
+  font-size: 0.95rem;
+}
+
+.zip-text em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.zip-popover {
+  margin-top: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--glass);
+}
+
+.zip-popover-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.zip-popover ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.zip-popover li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.zip-popover em {
+  font-style: normal;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .calc { max-width: none; }
+  .row2, .extras li { grid-template-columns: 1fr; }
 }
 </style>

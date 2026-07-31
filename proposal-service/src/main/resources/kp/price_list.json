@@ -1,0 +1,112 @@
+{
+  "config_version": 10,
+  "HD540": {
+    "vat_mode": "mixed",
+    "start_price": 2459000,
+    "drone_price": 1609000,
+    "akb_price": 215000,
+    "akb_name": "АККУМУЛЯТОР ЛИТИЙ-ИОННЫЙ ZAB1830",
+    "akb_qty_per_kit": 3,
+    "zaryad_price": 205000,
+    "zaryad_name": "УСТРОЙСТВО ЗАРЯДНОЕ HE202 ДЛЯ АКБ ДРОНА",
+    "zaryad_qty_per_kit": 1
+  },
+  "HD580": {
+    "vat_mode": "mixed",
+    "start_price": 3259000,
+    "drone_price": 2364000,
+    "akb_price": 230000,
+    "akb_name": "АККУМУЛЯТОР ЛИТИЙ-ИОННЫЙ HE102 (30Ah)",
+    "akb_qty_per_kit": 3,
+    "zaryad_price": 205000,
+    "zaryad_name": "УСТРОЙСТВО ЗАРЯДНОЕ HE202 ДЛЯ АКБ ДРОНА",
+    "zaryad_qty_per_kit": 1
+  },
+  "DJI T50": {
+    "vat_mode": "mixed",
+    "start_price": 3485000,
+    "drone_price": 2180000,
+    "akb_price": 255000,
+    "akb_name": "ИНТЕЛЛЕКТУАЛЬНАЯ БАТАРЕЯ DB1560",
+    "akb_qty_per_kit": 3,
+    "zaryad_price": 494500,
+    "zaryad_name": "ГЕНЕРАТОР DJI D12500iE",
+    "zaryad_qty_per_kit": 1,
+    "WB37_hub_price": 16500,
+    "WB37_hub_name": "ЗАРЯДНАЯ СТАНЦИЯ ДЛЯ WB37",
+    "WB37_hub_qty_per_kit": 1,
+    "WB37_price": 14500,
+    "WB37_name": "WB37 INTELLIGENT BATTERY",
+    "WB37_qty_per_kit": 2
+  },
+  "HD525": {
+    "vat_mode": "mixed",
+    "start_price": 1800000,
+    "drone_price": 905000,
+    "akb_price": 230000,
+    "akb_name": "АККУМУЛЯТОР ЛИТИЙ-ИОННЫЙ HE102 (30Ah)",
+    "akb_qty_per_kit": 3,
+    "zaryad_price": 205000,
+    "zaryad_name": "УСТРОЙСТВО ЗАРЯДНОЕ HE202 ДЛЯ АКБ ДРОНА",
+    "zaryad_qty_per_kit": 1
+  },
+  "DJI T30": {
+    "vat_mode": "all_vat",
+    "start_price": 2200000,
+    "drone_price": 1347000,
+    "akb_price": 205000,
+    "akb_name": "ИНТЕЛЛЕКТУАЛЬНАЯ БАТАРЕЯ ДРОНА",
+    "akb_qty_per_kit": 3,
+    "zaryad_price": 220000,
+    "zaryad_name": "ЗАРЯДНАЯ СТАНЦИЯ ДЛЯ АКБ ДРОНА",
+    "zaryad_qty_per_kit": 1,
+    "WB37_hub_price": 18000,
+    "WB37_hub_name": "WB37 INTELLIGENT BATTERY",
+    "WB37_hub_qty_per_kit": 1
+  },
+  "DJI T10": {
+    "vat_mode": "mixed",
+    "start_price": 1400000,
+    "drone_price": 872000,
+    "akb_price": 130000,
+    "akb_name": "ИНТЕЛЛЕКТУАЛЬНАЯ БАТАРЕЯ ДРОНА",
+    "akb_qty_per_kit": 3,
+    "zaryad_price": 120000,
+    "zaryad_name": "ЗАРЯДНАЯ СТАНЦИЯ ДЛЯ АКБ ДРОНА",
+    "zaryad_qty_per_kit": 1,
+    "WB37_hub_price": 18000,
+    "WB37_hub_name": "WB37 INTELLIGENT BATTERY",
+    "WB37_hub_qty_per_kit": 1
+  },
+  "Прицеп БАС": {
+    "vat_mode": "all_vat",
+    "start_price": 1900000,
+    "drone_price": 1900000
+  },
+  "Прицеп ТЕНТ": {
+    "vat_mode": "all_vat",
+    "start_price": 1500000,
+    "drone_price": 1500000
+  },
+  "Прицеп 1 дрон": {
+    "vat_mode": "all_vat",
+    "start_price": 1400000,
+    "drone_price": 1400000
+  },
+  "Растворник на 1000л": {
+    "vat_mode": "all_vat",
+    "start_price": 200000,
+    "drone_price": 200000
+  },
+  "DJI M3M": {
+    "vat_mode": "all_vat",
+    "start_price": 800000,
+    "drone_price": 698000,
+    "zaryad_price": 25000,
+    "zaryad_name": "ЗАРЯДНАЯ СТАНЦИЯ",
+    "zaryad_qty_per_kit": 1,
+    "WB37_price": 38500,
+    "WB37_name": "АКБ / WB37",
+    "WB37_qty_per_kit": 2
+  }
+}
