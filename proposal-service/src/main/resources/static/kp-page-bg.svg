@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="794" height="1123" viewBox="0 0 794 1123" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="pageGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#021228"/>
+      <stop offset="48%" stop-color="#041d48"/>
+      <stop offset="100%" stop-color="#03173b"/>
+    </linearGradient>
+    <radialGradient id="greenGlow" cx="50%" cy="6%" r="58%">
+      <stop offset="0%" stop-color="#8DC63F" stop-opacity="0.11"/>
+      <stop offset="55%" stop-color="#8DC63F" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#8DC63F" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bottomGlow" cx="80%" cy="92%" r="42%">
+      <stop offset="0%" stop-color="#0A3A7A" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#03173b" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="engGrid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#FFFFFF" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+    <pattern id="engGridMajor" width="160" height="160" patternUnits="userSpaceOnUse">
+      <path d="M 160 0 L 0 0 0 160" fill="none" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="1.25"/>
+    </pattern>
+  </defs>
+  <rect width="794" height="1123" fill="url(#pageGrad)"/>
+  <rect width="794" height="1123" fill="url(#greenGlow)"/>
+  <rect width="794" height="1123" fill="url(#bottomGlow)"/>
+  <rect width="794" height="1123" fill="url(#engGrid)"/>
+  <rect width="794" height="1123" fill="url(#engGridMajor)"/>
+</svg>

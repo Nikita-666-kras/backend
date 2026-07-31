@@ -126,22 +126,22 @@ public class KpHtmlPdfService {
         String kitDetailsSection = buildKitDetailsSection(p);
 
         String dronePurpose = mixedVat
-                ? "Основное воздушное судно *НДС 0% — подробнее стр. 2"
+                ? "Основное воздушное судно *0% НДС — подробнее стр. 2"
                 : "Основное воздушное судно · НДС 22% — регистрация стр. 2";
         String taxText = mixedVat
-                ? "«БАС " + droneFullName + "» поставляется со ставкой НДС 0% согласно ст. 164 НК РФ. "
+                ? "«БАС " + droneFullName + "» поставляется со ставкой 0% НДС согласно ст. 164 НК РФ. "
                 + "Остальные позиции облагаются НДС 22%. Общая сумма к вычету: " + moneyDecimals(ndsDeductible) + " ₽."
                 : "БАС и остальные позиции облагаются НДС 22%. Общая сумма к вычету: "
                 + moneyDecimals(ndsDeductible) + " ₽.";
         String costText = mixedVat
-                ? money(p.grandTotal()) + " ₽. В итоговую сумму входит БАС без НДС и позиции с НДС 22%."
+                ? money(p.grandTotal()) + " ₽. В итоговую сумму входит БАС с 0% НДС и позиции с НДС 22%."
                 : money(p.grandTotal()) + " ₽, с учётом НДС 22%.";
         String totalHint = mixedVat
-                ? "БАС: НДС 0% · остальное: НДС 22%"
+                ? "БАС: 0% НДС · остальное: НДС 22%"
                 : "НДС 22% на все позиции, включая БАС";
         String droneUnitHint = kitQty > 1
                 ? money(droneUnit) + " ₽ / шт."
-                : (mixedVat ? "НДС 0%" : "НДС 22%");
+                : (mixedVat ? "0% НДС" : "НДС 22%");
         String registrationText = mixedVat
                 ? "Регистрация в реестре ФАВТ входит в стоимость комплекта. До передачи клиенту дрон регистрируется на компанию АТРИС. После подписания акта приёма-передачи осуществляется смена собственника в упрощённом порядке."
                 : "На момент поставки БАС не зарегистрирован в Росавиации. Мы привозим дрон без регистрации и помогаем клиенту самостоятельно зарегистрировать его на себя.";
@@ -191,8 +191,7 @@ public class KpHtmlPdfService {
     }
 
     /**
-     * Состав ЗИП встраивается на страницу 3 (без отдельной страницы-приложения).
-     * Пустая строка, если ЗИП в КП нет.
+     * Отдельная страница PDF — состав ЗИП-пакета, если он включён в КП.
      */
     private String buildKitDetailsSection(ProposalDto p) {
         var kitTables = new ArrayList<String>();
@@ -217,13 +216,41 @@ public class KpHtmlPdfService {
 
         var html = new StringBuilder();
         html.append("""
-                <div class="zip-block">
-                  <div class="section-label">— Состав ЗИП-комплекта</div>
+                <section class="page">
+                  <header>
+                    <img class="logo" src="static/LOGO_ATRIS.svg" alt="АТРИС"/>
+                    <div class="contacts">
+                      <strong>+7 (938) 119-29-82</strong><br/>
+                      privet@atris.su<br/>
+                      www.atris.su<br/>
+                      Ростов-на-Дону
+                    </div>
+                  </header>
+                  <div class="kicker">Приложение</div>
+                  <div class="page-title">— Состав ЗИП-комплекта</div>
+                  <p class="page-lead">Наполнение ЗИП-пакета из коммерческого предложения. Позиции ниже входят в выбранный комплект.</p>
                 """);
         for (String kitTable : kitTables) {
             html.append(kitTable);
         }
-        html.append("</div>");
+        html.append("""
+                  <footer>
+                    <table class="footer-inner"><tr>
+                      <td class="footer-copy">
+                        <div class="footer-title">АТРИС — технологии, которые работают в поле.</div>
+                        <div class="footer-sub">Инженерные решения для современного сельского хозяйства.</div>
+                        <div class="footer-legal">ООО «АТРИС»</div>
+                      </td>
+                      <td class="footer-qr">
+                        <div class="footer-qr-frame">
+                          <img src="static/qr-atris.png" alt="QR atris.su"/>
+                        </div>
+                        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии агродронов</div>
+                      </td>
+                    </tr></table>
+                  </footer>
+                </section>
+                """);
         return html.toString();
     }
 
@@ -360,7 +387,7 @@ public class KpHtmlPdfService {
             return "Питание пульта управления";
         }
         if (isZipPackageLine(line)) {
-            return "Состав ЗИП — на стр. 3";
+            return "Состав ЗИП — в приложении";
         }
         if (line.lineType() == LineType.KIT) {
             return "Комплект поставки";

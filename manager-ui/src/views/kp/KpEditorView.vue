@@ -260,7 +260,7 @@ function onAddLines(lines: ProposalLine[]) {
       </div>
       <p v-if="!editor.calcError" class="muted hint">
         НДС к возмещению {{ money(editor.ndsTotal) }} ₽
-        <template v-if="editor.droneVatPct === 0"> · БАС без НДС</template>
+        <template v-if="editor.droneVatPct === 0"> · БАС с 0% НДС</template>
         <template v-else> · БАС с НДС 22%</template>
       </p>
       <p v-if="editor.extrasTotal > 0 && !editor.calcError" class="muted hint">

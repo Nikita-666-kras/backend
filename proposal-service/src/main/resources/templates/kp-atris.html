@@ -8,7 +8,7 @@
   body {
     font-family: "Arial", sans-serif;
     color: #F7F9FC;
-    background: #021331;
+    background: #021228;
     -fs-pdf-font-embed: embed;
   }
   .page {
@@ -18,7 +18,11 @@
     padding: 11mm 13mm 38mm;
     position: relative;
     page-break-after: always;
-    background-color: #062554;
+    background-color: #03173b;
+    background-image: url("static/kp-page-bg.svg");
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: 100% 100%;
   }
   .page:last-child { page-break-after: auto; }
   header {
@@ -208,50 +212,158 @@
     margin: 4px 0 0 30px;
     line-height: 1.4;
   }
-  .cards { width: 100%; margin-top: 4px; }
-  .cards td { width: 50%; vertical-align: top; padding: 0 5px 6px 0; border: none; }
+  .cards { width: 100%; margin-top: 10px; }
+  .cards td { width: 50%; vertical-align: top; padding: 0 7px 12px 0; border: none; }
   .card {
     background: #0A2E5C;
     border-width: 1px;
     border-style: solid;
     border-color: #1E3F6E;
-    border-radius: 10px;
-    padding: 8px 9px;
-    min-height: 64px;
+    border-radius: 14px;
+    padding: 14px 13px;
+    min-height: 108px;
   }
   .card .icon {
     display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius: 5px;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
     background: #8DC63F;
     color: #062554;
-    font-size: 8.5px;
+    font-size: 11px;
     font-weight: 800;
     text-align: center;
-    line-height: 20px;
-    margin-bottom: 3px;
+    line-height: 26px;
+    margin-bottom: 7px;
   }
   .card h3 {
-    font-size: 9.5px;
+    font-size: 12px;
     letter-spacing: .06em;
     text-transform: uppercase;
     color: #FFFFFF;
     font-weight: 800;
-    margin-bottom: 3px;
+    margin-bottom: 6px;
   }
-  .card p { font-size: 9.5px; color: #B8C4D9; line-height: 1.3; }
-  .zip-block { margin-top: 10px; }
+  .card p { font-size: 11.5px; color: #B8C4D9; line-height: 1.45; }
   .zip-kit-name {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     color: #FFFFFF;
-    margin: 0 0 5px;
+    margin: 0 0 8px;
   }
-  .zip-panel { margin-bottom: 0; }
-  .zip-panel table { font-size: 9px; }
-  .zip-panel thead th { padding: 4px 6px; font-size: 7.5px; }
-  .zip-panel tbody td { padding: 3px 6px; }
+  .zip-panel { margin-bottom: 10px; }
+  .zip-panel table { font-size: 10.5px; }
+  .zip-panel thead th { padding: 7px 8px; font-size: 8.5px; }
+  .zip-panel tbody td { padding: 6px 8px; }
+  .value-strip {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .value-grid { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .value-grid td {
+    width: 25%;
+    vertical-align: top;
+    border: none;
+    padding: 0 6px 0 0;
+  }
+  .value-grid td:last-child { padding-right: 0; }
+  .value-tile {
+    background: #0A2E5C;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #1E3F6E;
+    border-radius: 12px;
+    padding: 12px 10px;
+    min-height: 78px;
+    text-align: left;
+  }
+  .value-tile .v {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #8DC63F;
+    margin-bottom: 5px;
+  }
+  .value-tile p {
+    font-size: 10.5px;
+    color: #D8E0EC;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+  .next-steps {
+    margin-top: 14px;
+  }
+  .next-steps-grid { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .next-steps-grid td {
+    width: 33.33%;
+    vertical-align: top;
+    border: none;
+    padding: 0 7px 0 0;
+  }
+  .next-steps-grid td:last-child { padding-right: 0; }
+  .next-tile {
+    background: #0A2E5C;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #1E3F6E;
+    border-radius: 14px;
+    padding: 14px 12px;
+    min-height: 112px;
+  }
+  .next-tile .n {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #062554;
+    background: #8DC63F;
+    border-radius: 5px;
+    padding: 4px 8px;
+    margin-bottom: 9px;
+  }
+  .next-tile h3 {
+    font-size: 13px;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-bottom: 6px;
+  }
+  .next-tile p {
+    font-size: 11px;
+    color: #B8C4D9;
+    line-height: 1.45;
+  }
+  .cta-box {
+    margin-top: 14px;
+    background: #0A2E5C;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #8DC63F;
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .cta-box h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-bottom: 6px;
+  }
+  .cta-box p {
+    font-size: 12px;
+    color: #B8C4D9;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .cta-box .contacts-inline {
+    font-size: 13px;
+    color: #FFFFFF;
+    font-weight: 700;
+  }
+  .cta-box .contacts-inline span {
+    color: #8DC63F;
+    margin: 0 6px;
+  }
   .upsell {
     margin-top: 14px;
   }
@@ -540,7 +652,7 @@
         <div class="footer-qr-frame">
           <img src="static/qr-atris.png" alt="QR atris.su"/>
         </div>
-        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии<br/>агродронов</div>
+        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии агродронов</div>
       </td>
     </tr></table>
   </footer>
@@ -619,7 +731,7 @@
         <div class="footer-qr-frame">
           <img src="static/qr-atris.png" alt="QR atris.su"/>
         </div>
-        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии<br/>агродронов</div>
+        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии агродронов</div>
       </td>
     </tr></table>
   </footer>
@@ -657,7 +769,32 @@
       <p>Помощь в повышении эффективности обработки и оптимизации агропроцессов.</p></div></td>
   </tr></table>
 
-  {{KIT_DETAILS_SECTION}}
+  <div class="section-label" style="margin-top:12px;">— Как мы работаем дальше</div>
+  <div class="next-steps">
+    <table class="next-steps-grid"><tr>
+      <td><div class="next-tile">
+        <div class="n">Шаг 01</div>
+        <h3>Согласование КП</h3>
+        <p>Уточняем комплектацию, сроки и условия под задачи хозяйства.</p>
+      </div></td>
+      <td><div class="next-tile">
+        <div class="n">Шаг 02</div>
+        <h3>Поставка и запуск</h3>
+        <p>Организуем поставку, помогаем с вводом в эксплуатацию и обучением.</p>
+      </div></td>
+      <td><div class="next-tile">
+        <div class="n">Шаг 03</div>
+        <h3>Сопровождение сезона</h3>
+        <p>Остаёмся на связи: консультации, сервис и запчасти в сезон.</p>
+      </div></td>
+    </tr></table>
+  </div>
+
+  <div class="cta-box">
+    <h2>Готовы обсудить внедрение под ваши задачи?</h2>
+    <p>Подскажем конфигурацию, посчитаем экономику и поможем запустить технологию без лишней бюрократии. Свяжитесь с нами — ответим и предложим следующий шаг.</p>
+    <div class="contacts-inline">+7 (938) 119-29-82 <span>·</span> privet@atris.su <span>·</span> www.atris.su</div>
+  </div>
 
   <footer>
     <table class="footer-inner"><tr>
@@ -670,11 +807,13 @@
         <div class="footer-qr-frame">
           <img src="static/qr-atris.png" alt="QR atris.su"/>
         </div>
-        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии<br/>агродронов</div>
+        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии агродронов</div>
       </td>
     </tr></table>
   </footer>
 </section>
+
+{{KIT_DETAILS_SECTION}}
 
 </body>
 </html>
