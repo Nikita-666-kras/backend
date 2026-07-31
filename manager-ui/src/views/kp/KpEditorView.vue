@@ -59,7 +59,9 @@ async function initializeEditor(id?: string) {
           const preset = await kitPreset(editor.modelId)
           editor.listKitPrice = Number(preset.startPrice)
           editor.listDronePrice = Number(preset.dronePrice)
-          editor.proposalDronePrice = Number(snapshot.dronePrice ?? preset.dronePrice)
+          if (!editor.unitKitPrice) {
+            editor.unitKitPrice = Number(preset.startPrice)
+          }
           editor.droneVatPct =
             snapshot.droneVatPct === 22 || snapshot.droneVatPct === 0
               ? snapshot.droneVatPct
@@ -67,7 +69,6 @@ async function initializeEditor(id?: string) {
                 ? 22
                 : 0
         } catch {
-          editor.proposalDronePrice = Number(snapshot.dronePrice || 0)
           editor.droneVatPct = snapshot.droneVatPct === 22 ? 22 : 0
         }
         await editor.refreshPreview()
@@ -106,8 +107,8 @@ async function onModelChange() {
   await editor.applyModel(editor.modelId)
 }
 
-async function onDronePriceInput() {
-  await editor.setProposalDronePrice(Number(editor.proposalDronePrice || 0))
+async function onKitPriceInput() {
+  await editor.setProposalKitPrice(Number(editor.unitKitPrice || 0))
 }
 
 async function onVatChange(value: 0 | 22) {
@@ -135,18 +136,25 @@ function onAddLines(lines: ProposalLine[]) {
       </label>
 
       <label class="field">
-        <span>Цена в предложении, ₽</span>
+        <span>Цена комплекта в предложении, ₽</span>
         <input
-          v-model.number="editor.proposalDronePrice"
+          v-model.number="editor.unitKitPrice"
           type="number"
           min="0"
           step="1"
           required
-          @change="onDronePriceInput"
+          @change="onKitPriceInput"
         />
       </label>
-      <p v-if="editor.listDronePrice > 0" class="muted price-hint">
-        Прайс БАС {{ money(editor.listDronePrice) }} ₽ · меняется только цена дрона
+      <p v-if="editor.listKitPrice > 0" class="muted price-hint">
+        Прайс комплекта {{ money(editor.listKitPrice) }} ₽
+        <template v-if="editor.preview">
+          · разница {{ money(Number(editor.preview.priceDiff || 0)) }} ₽ уходит в цену БАС
+          → БАС в КП {{ money(editor.proposalDronePrice) }} ₽
+        </template>
+        <template v-else-if="editor.listDronePrice > 0">
+          · прайс БАС {{ money(editor.listDronePrice) }} ₽
+        </template>
       </p>
 
       <div class="vat-block">

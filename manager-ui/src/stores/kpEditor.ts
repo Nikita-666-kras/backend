@@ -29,11 +29,11 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
   const recipient = ref(DEFAULT_RECIPIENT)
   const modelId = ref('')
   const kitQty = ref(1)
-  /** Цена комплекта для API калькулятора (выводится из цены БАС в предложении). */
+  /** Цена комплекта в КП — то, что редактирует менеджер. */
   const unitKitPrice = ref(0)
-  /** Цена БАС в КП — то, что редактирует менеджер. */
+  /** Цена БАС после пересчёта (прайс комплекта − новая цена → разница с дрона). */
   const proposalDronePrice = ref(0)
-  /** Прайс БАС и комплекта из калькулятора (для пересчёта). */
+  /** Прайс БАС и комплекта из калькулятора. */
   const listDronePrice = ref(0)
   const listKitPrice = ref(0)
   /** НДС на дрон: 0% или 22%. На комплектующие не влияет (они всегда в базе 22%). */
@@ -70,14 +70,6 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
 
   function markDirty() {
     dirty.value = true
-  }
-
-  function syncUnitKitFromDronePrice() {
-    const kit = Number(listKitPrice.value || 0)
-    const listDrone = Number(listDronePrice.value || 0)
-    if (kit <= 0 && listDrone <= 0) return
-    const drone = Number(proposalDronePrice.value || 0)
-    unitKitPrice.value = Number((kit - listDrone + drone).toFixed(2))
   }
 
   function vatFromPresetMode(vatMode?: string): 0 | 22 {
@@ -140,12 +132,8 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
     if (!Number.isInteger(kitQty.value) || kitQty.value < 1) {
       return 'Количество комплектов должно быть целым числом >= 1'
     }
-    if (!Number.isFinite(proposalDronePrice.value) || proposalDronePrice.value < 0) {
-      return 'Цена в предложении должна быть числом >= 0'
-    }
-    syncUnitKitFromDronePrice()
     if (!Number.isFinite(unitKitPrice.value) || unitKitPrice.value < 0) {
-      return 'Итоговая цена комплекта получилась отрицательной — проверьте цену БАС'
+      return 'Цена в предложении должна быть числом >= 0'
     }
     return null
   }
@@ -221,7 +209,6 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
         const preset = await kitPreset(modelId.value)
         listKitPrice.value = Number(preset.startPrice)
         listDronePrice.value = Number(preset.dronePrice)
-        proposalDronePrice.value = Number(p.dronePrice || preset.dronePrice)
       } catch {
         // прайс недоступен — считаем по сохранённой цене комплекта
       }
@@ -240,18 +227,18 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
       const preset = await kitPreset(id)
       listKitPrice.value = Number(preset.startPrice)
       listDronePrice.value = Number(preset.dronePrice)
+      unitKitPrice.value = Number(preset.startPrice)
       proposalDronePrice.value = Number(preset.dronePrice)
       droneVatPct.value = vatFromPresetMode(preset.vatMode)
-      syncUnitKitFromDronePrice()
       markDirty()
       await refreshPreview()
     } catch (e: unknown) {
       const m = models.value.find((x) => x.id === id)
       listKitPrice.value = Number(m?.defaultPrice || 0)
       listDronePrice.value = Number(m?.defaultPrice || 0)
+      unitKitPrice.value = Number(m?.defaultPrice || 0)
       proposalDronePrice.value = Number(m?.defaultPrice || 0)
       droneVatPct.value = 0
-      syncUnitKitFromDronePrice()
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
       toast.error(msg || 'Для этой модели нет прайса калькулятора')
       await refreshPreview()
@@ -261,9 +248,8 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
     }
   }
 
-  async function setProposalDronePrice(value: number) {
-    proposalDronePrice.value = value
-    syncUnitKitFromDronePrice()
+  async function setProposalKitPrice(value: number) {
+    unitKitPrice.value = value
     markDirty()
     await refreshPreview()
   }
@@ -285,15 +271,9 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
       calcError.value = 'Количество комплектов должно быть целым числом >= 1'
       return
     }
-    syncUnitKitFromDronePrice()
-    if (!Number.isFinite(proposalDronePrice.value) || proposalDronePrice.value < 0) {
-      preview.value = null
-      calcError.value = 'Цена в предложении должна быть числом >= 0'
-      return
-    }
     if (!Number.isFinite(unitKitPrice.value) || unitKitPrice.value < 0) {
       preview.value = null
-      calcError.value = 'Итоговая цена комплекта получилась отрицательной'
+      calcError.value = 'Цена в предложении должна быть числом >= 0'
       return
     }
     try {
@@ -306,6 +286,7 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
       if (preview.value) {
         listDronePrice.value = Number(preview.value.baseDronePrice || listDronePrice.value)
         listKitPrice.value = Number(preview.value.startPrice || listKitPrice.value)
+        proposalDronePrice.value = Number(preview.value.unitDronePrice || 0)
       }
     } catch (e: unknown) {
       preview.value = null
@@ -439,7 +420,7 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
     loadModels,
     loadDraft,
     applyModel,
-    setProposalDronePrice,
+    setProposalKitPrice,
     setDroneVatPct,
     refreshPreview,
     addLines,
