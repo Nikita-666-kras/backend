@@ -119,11 +119,18 @@ public final class KpDtos {
             @NotNull UUID droneModelId,
             @NotNull @Min(1) Integer kitQty,
             @NotNull @DecimalMin("0.00") BigDecimal unitKitPrice,
+            Integer droneVatPct,
             @Valid List<ProposalLineRequest> extraLines
     ) {
         public ProposalUpsertRequest {
             if (extraLines == null) {
                 extraLines = List.of();
+            }
+            if (droneVatPct == null) {
+                droneVatPct = 0;
+            }
+            if (droneVatPct != 0 && droneVatPct != 22) {
+                throw new IllegalArgumentException("НДС на дрон: допустимы только 0% или 22%");
             }
         }
     }
@@ -158,6 +165,7 @@ public final class KpDtos {
             BigDecimal dronePrice,
             Integer kitQty,
             BigDecimal unitKitPrice,
+            Integer droneVatPct,
             String status,
             BigDecimal subtotal,
             BigDecimal discountTotal,
@@ -207,6 +215,7 @@ public final class KpDtos {
             BigDecimal droneTotal,
             BigDecimal grandTotal,
             BigDecimal ndsTotal,
+            Integer droneVatPct,
             List<KitPresetLineDto> lines
     ) {}
 
@@ -218,6 +227,7 @@ public final class KpDtos {
     public record CalculatorRequest(
             @NotNull UUID droneModelId,
             @NotNull @Min(1) Integer kitQty,
-            @NotNull @DecimalMin("0.00") BigDecimal unitKitPrice
+            @NotNull @DecimalMin("0.00") BigDecimal unitKitPrice,
+            Integer droneVatPct
     ) {}
 }

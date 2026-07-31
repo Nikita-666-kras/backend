@@ -84,9 +84,12 @@ public class KpHtmlPdfService {
         String code = modelCode(p.droneModelName());
         String droneFullName = displayDroneName(p.droneModelName());
         int kitQty = p.kitQty() == null || p.kitQty() < 1 ? 1 : p.kitQty();
-        boolean mixedVat = isMixedVat(code, p.droneModelName());
+        boolean mixedVat = p.droneVatPct() != null
+                ? p.droneVatPct() == 0
+                : isMixedVat(code, p.droneModelName());
 
-        BigDecimal droneTotal = p.dronePrice().multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal droneUnit = p.dronePrice() == null ? BigDecimal.ZERO : p.dronePrice();
+        BigDecimal droneTotal = droneUnit.multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
         BigDecimal ndsDeductible = p.ndsTotal() != null
                 ? p.ndsTotal()
                 : (mixedVat ? p.grandTotal().subtract(droneTotal).max(BigDecimal.ZERO) : p.grandTotal())
@@ -96,11 +99,27 @@ public class KpHtmlPdfService {
         StringBuilder lines = new StringBuilder();
         int idx = 2;
         for (ProposalLineDto line : p.lines()) {
+            BigDecimal unit = line.unitPrice() == null ? BigDecimal.ZERO : line.unitPrice();
+            BigDecimal lineTotal = line.lineTotal() != null
+                    ? line.lineTotal()
+                    : unit.multiply(BigDecimal.valueOf(line.qty() == null ? 0 : line.qty()));
+            boolean free = lineTotal.compareTo(BigDecimal.ZERO) == 0 || unit.compareTo(BigDecimal.ZERO) == 0;
+            String sumCell = free ? "В цене" : money(lineTotal);
+            String unitHint = (!free && line.qty() != null && line.qty() > 1)
+                    ? "<span class=\"unit-hint\">" + money(unit) + " ₽ / шт.</span>"
+                    : "";
+            String typeHint = line.lineType() == LineType.KIT
+                    ? (isZipPackageLine(line) ? "ЗИП-пакет" : "комплект")
+                    : "";
             lines.append("<tr>")
                     .append("<td class=\"num\">").append(String.format("%02d", idx++)).append("</td>")
-                    .append("<td><strong>").append(esc(line.name())).append("</strong></td>")
-                    .append("<td>").append(qtyLabel(line.qty())).append("</td>")
-                    .append("<td><strong>").append(priceLabel(line)).append("</strong></td>")
+                    .append("<td><strong>").append(esc(line.name())).append("</strong>");
+            if (!typeHint.isBlank()) {
+                lines.append("<span class=\"unit-hint\">").append(esc(typeHint)).append("</span>");
+            }
+            lines.append(unitHint).append("</td>")
+                    .append("<td class=\"qty-cell\">").append(qtyLabel(line.qty() == null ? 0 : line.qty())).append("</td>")
+                    .append("<td class=\"price-cell\"><strong>").append(sumCell).append("</strong></td>")
                     .append("<td class=\"purpose\">").append(esc(purpose(line))).append("</td>")
                     .append("</tr>");
         }
@@ -109,12 +128,21 @@ public class KpHtmlPdfService {
 
         String dronePurpose = mixedVat
                 ? "Основное воздушное судно *НДС 0% — подробнее стр. 2"
-                : "Основное воздушное судно";
+                : "Основное воздушное судно · НДС 22%";
         String taxText = mixedVat
                 ? "«БАС " + droneFullName + "» поставляется со ставкой НДС 0% согласно ст. 164 НК РФ. "
                 + "Остальные позиции облагаются НДС 22%. Общая сумма к вычету: " + moneyDecimals(ndsDeductible) + " ₽."
-                : "Все позиции комплекта облагаются НДС 22%. Общая сумма к вычету: "
+                : "БАС и остальные позиции облагаются НДС 22%. Общая сумма к вычету: "
                 + moneyDecimals(ndsDeductible) + " ₽.";
+        String costText = mixedVat
+                ? money(p.grandTotal()) + " ₽. В итоговую сумму входит БАС без НДС и позиции с НДС 22%."
+                : money(p.grandTotal()) + " ₽, с учётом НДС 22%.";
+        String totalHint = mixedVat
+                ? "БАС: НДС 0% · остальное: НДС 22%"
+                : "НДС 22% на все позиции, включая БАС";
+        String droneUnitHint = kitQty > 1
+                ? money(droneUnit) + " ₽ / шт."
+                : (mixedVat ? "НДС 0%" : "НДС 22%");
 
         return template
                 .replace("{{KP_NUMBER}}", String.valueOf(p.number()))
@@ -122,12 +150,15 @@ public class KpHtmlPdfService {
                 .replace("{{DATE}}", LocalDate.now().format(DF))
                 .replace("{{DRONE_FULL_NAME}}", esc(droneFullName))
                 .replace("{{DRONE_QTY}}", qtyLabel(kitQty))
-                .replace("{{DRONE_PRICE}}", money(p.dronePrice()))
+                .replace("{{DRONE_LINE_TOTAL}}", money(droneTotal))
+                .replace("{{DRONE_UNIT_HINT}}", esc(droneUnitHint))
                 .replace("{{DRONE_VAT_MARK}}", mixedVat ? "*" : "")
                 .replace("{{DRONE_PURPOSE}}", esc(dronePurpose))
                 .replace("{{GRAND_TOTAL}}", money(p.grandTotal()))
                 .replace("{{NDS_DEDUCTIBLE}}", moneyDecimals(ndsDeductible))
                 .replace("{{TAX_TEXT}}", esc(taxText))
+                .replace("{{COST_TEXT}}", esc(costText))
+                .replace("{{TOTAL_HINT}}", esc(totalHint))
                 .replace("{{TAGS_HTML}}", tagsHtml(code))
                 .replace("{{LINES_HTML}}", lines.toString())
                 .replace("{{KIT_DETAILS_SECTION}}", kitDetailsSection);
@@ -198,8 +229,19 @@ public class KpHtmlPdfService {
         }
         html.append("""
                   <footer>
-                    <span>Простые решения. Реальный результат.</span>
-                    <span class="right">ООО «АТРИС»</span>
+                    <table class="footer-inner"><tr>
+                      <td class="footer-copy">
+                        <div class="footer-title">АТРИС — технологии, которые работают в поле.</div>
+                        <div class="footer-sub">Инженерные решения для современного сельского хозяйства.</div>
+                        <div class="footer-legal">ООО «АТРИС»</div>
+                      </td>
+                      <td class="footer-qr">
+                        <div class="footer-qr-frame">
+                          <img src="static/qr-atris.png" alt="QR atris.su"/>
+                        </div>
+                        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии<br/>агродронов</div>
+                      </td>
+                    </tr></table>
                   </footer>
                 </section>
                 """);
@@ -242,9 +284,9 @@ public class KpHtmlPdfService {
                 table.append("<strong>").append(esc(name)).append("</strong>");
             }
             table.append("</td>")
-                    .append("<td>").append(qtyLabel(qty)).append("</td>")
-                    .append("<td>").append(money(price)).append("</td>")
-                    .append("<td><strong>").append(money(rowTotal)).append("</strong></td>")
+                    .append("<td class=\"qty-cell\">").append(qtyLabel(qty)).append("</td>")
+                    .append("<td class=\"price-cell\">").append(money(price)).append("</td>")
+                    .append("<td class=\"price-cell\"><strong>").append(money(rowTotal)).append("</strong></td>")
                     .append("</tr>");
         }
         table.append("""

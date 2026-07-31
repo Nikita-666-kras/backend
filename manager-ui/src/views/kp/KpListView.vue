@@ -53,6 +53,8 @@ async function cloneAsNew(p: Proposal) {
         droneModelId: full.droneModelId,
         kitQty: full.kitQty || 1,
         unitKitPrice: Number(full.unitKitPrice ?? full.grandTotal),
+        dronePrice: Number(full.dronePrice || 0),
+        droneVatPct: full.droneVatPct === 22 ? 22 : 0,
         extraLines: (full.lines || [])
           .filter((l) => l.refId)
           .map((l) => ({

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { kitPreset } from '@/api/kp'
 import KpCatalogSearch from '@/components/kp/KpCatalogSearch.vue'
 import { useUnsavedGuard } from '@/composables/useUnsavedGuard'
 import { useKpEditorStore } from '@/stores/kpEditor'
@@ -43,6 +44,8 @@ async function initializeEditor(id?: string) {
           droneModelId: string
           kitQty: number
           unitKitPrice: number
+          dronePrice?: number
+          droneVatPct?: 0 | 22
           extraLines?: ProposalLine[]
         }
         editor.recipient = snapshot.recipient
@@ -52,6 +55,21 @@ async function initializeEditor(id?: string) {
         if (snapshot.extraLines?.length) editor.extraLines = snapshot.extraLines
         editor.markDirty()
         await editor.loadZipForModel(editor.modelId)
+        try {
+          const preset = await kitPreset(editor.modelId)
+          editor.listKitPrice = Number(preset.startPrice)
+          editor.listDronePrice = Number(preset.dronePrice)
+          editor.proposalDronePrice = Number(snapshot.dronePrice ?? preset.dronePrice)
+          editor.droneVatPct =
+            snapshot.droneVatPct === 22 || snapshot.droneVatPct === 0
+              ? snapshot.droneVatPct
+              : preset.vatMode === 'all_vat'
+                ? 22
+                : 0
+        } catch {
+          editor.proposalDronePrice = Number(snapshot.dronePrice || 0)
+          editor.droneVatPct = snapshot.droneVatPct === 22 ? 22 : 0
+        }
         await editor.refreshPreview()
       } finally {
         sessionStorage.removeItem('manager_kp_clone')
@@ -71,7 +89,7 @@ watch(
 )
 
 watch(
-  () => [editor.kitQty, editor.unitKitPrice] as const,
+  () => editor.kitQty,
   async () => {
     if (!editor.modelId) return
     editor.markDirty()
@@ -86,6 +104,14 @@ async function onGenerate() {
 
 async function onModelChange() {
   await editor.applyModel(editor.modelId)
+}
+
+async function onDronePriceInput() {
+  await editor.setProposalDronePrice(Number(editor.proposalDronePrice || 0))
+}
+
+async function onVatChange(value: 0 | 22) {
+  await editor.setDroneVatPct(value)
 }
 
 function onAddLines(lines: ProposalLine[]) {
@@ -109,20 +135,50 @@ function onAddLines(lines: ProposalLine[]) {
       </label>
 
       <label class="field">
+        <span>Цена в предложении, ₽</span>
+        <input
+          v-model.number="editor.proposalDronePrice"
+          type="number"
+          min="0"
+          step="1"
+          required
+          @change="onDronePriceInput"
+        />
+      </label>
+      <p v-if="editor.listDronePrice > 0" class="muted price-hint">
+        Прайс БАС {{ money(editor.listDronePrice) }} ₽ · меняется только цена дрона
+      </p>
+
+      <div class="vat-block">
+        <span class="vat-label">НДС на дрон</span>
+        <div class="vat-switch" role="group" aria-label="НДС на дрон">
+          <button
+            type="button"
+            :class="{ on: editor.droneVatPct === 0 }"
+            @click="onVatChange(0)"
+          >
+            0%
+          </button>
+          <button
+            type="button"
+            :class="{ on: editor.droneVatPct === 22 }"
+            @click="onVatChange(22)"
+          >
+            22%
+          </button>
+        </div>
+        <p class="muted price-hint">Только для БАС · комплектующие всегда с НДС 22%</p>
+      </div>
+
+      <label class="field">
         <span>Для кого</span>
         <input v-model="editor.recipient" required placeholder="Уважаемый клиент" @input="editor.markDirty" />
       </label>
 
-      <div class="row2">
-        <label class="field">
-          <span>Количество</span>
-          <input v-model.number="editor.kitQty" type="number" min="1" step="1" required />
-        </label>
-        <label class="field">
-          <span>Цена комплекта, ₽</span>
-          <input v-model.number="editor.unitKitPrice" type="number" min="0" step="1" required />
-        </label>
-      </div>
+      <label class="field">
+        <span>Количество комплектов</span>
+        <input v-model.number="editor.kitQty" type="number" min="1" step="1" required />
+      </label>
 
       <p v-if="editor.calcError" class="error">{{ editor.calcError }}</p>
 
@@ -202,6 +258,11 @@ function onAddLines(lines: ProposalLine[]) {
         <span>Итого</span>
         <strong>{{ money(editor.grandTotal) }} ₽</strong>
       </div>
+      <p v-if="!editor.calcError" class="muted hint">
+        НДС к возмещению {{ money(editor.ndsTotal) }} ₽
+        <template v-if="editor.droneVatPct === 0"> · БАС без НДС</template>
+        <template v-else> · БАС с НДС 22%</template>
+      </p>
       <p v-if="editor.extrasTotal > 0 && !editor.calcError" class="muted hint">
         Базовый комплект {{ money(Number(editor.preview?.grandTotal || 0)) }} ₽
         + доп. {{ money(editor.extrasTotal) }} ₽
@@ -356,7 +417,49 @@ function onAddLines(lines: ProposalLine[]) {
 .sum strong { font-size: 1.25rem; }
 
 .hint { margin: -0.35rem 0 0; font-size: 0.8rem; }
+.price-hint { margin: -0.45rem 0 0; font-size: 0.78rem; }
 .error { margin: 0; color: #ffb4b4; font-size: 0.88rem; }
+
+.vat-block {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: 0.1rem;
+}
+
+.vat-label {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.vat-switch {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  max-width: 220px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--input-bg);
+}
+
+.vat-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  min-height: 2.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vat-switch button.on {
+  background: color-mix(in srgb, #8dc63f 28%, transparent);
+  color: var(--ink);
+}
+
+.vat-switch button:not(.on):hover {
+  color: var(--ink);
+}
 .generate { width: 100%; min-height: 2.75rem; }
 
 .zip-card {

@@ -79,6 +79,7 @@ export interface ProposalUpsertRequest {
   droneModelId: string
   kitQty: number
   unitKitPrice: number
+  droneVatPct: 0 | 22
   extraLines: ProposalLine[]
 }
 
@@ -93,6 +94,7 @@ export interface Proposal {
   dronePrice: number
   kitQty: number
   unitKitPrice: number
+  droneVatPct?: 0 | 22
   status: ProposalStatus
   subtotal: number
   discountTotal: number
@@ -116,6 +118,7 @@ export interface CalcPreview {
   droneTotal: number
   grandTotal: number
   ndsTotal: number
+  droneVatPct?: 0 | 22
   lines: Array<{
     lineType: LineType
     name: string

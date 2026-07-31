@@ -29,6 +29,7 @@ export async function calculateKp(payload: {
   droneModelId: string
   kitQty: number
   unitKitPrice: number
+  droneVatPct?: 0 | 22
 }): Promise<CalcPreview> {
   const { data } = await api.post('/manager/kp/calculate', payload)
   return data.data

@@ -5,6 +5,7 @@ import com.blog.platform.proposal.api.dto.KpDtos;
 import com.blog.platform.proposal.client.PartsCatalogClient;
 import com.blog.platform.proposal.security.AccessGuard;
 import com.blog.platform.proposal.service.KitPresetService;
+import com.blog.platform.proposal.service.KpPcCalculatorService;
 import com.blog.platform.proposal.service.ProposalService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -112,15 +113,18 @@ public class ProposalController {
     public ApiResponse<KpDtos.CalcPreviewDto> calculate(HttpServletRequest request,
                                                         @RequestBody @Valid KpDtos.CalculatorRequest body) {
         guard.requireManagerOrAdmin(request);
-        var calc = service.preview(body.droneModelId(), body.kitQty(), body.unitKitPrice());
+        var calc = service.preview(body.droneModelId(), body.kitQty(), body.unitKitPrice(), body.droneVatPct());
         var lines = calc.lines().stream()
                 .map(l -> new KpDtos.KitPresetLineDto(
                         l.lineType(), l.refId(), l.sku(), l.name(), l.qty(), l.unitPrice(), l.discountPct()))
                 .toList();
+        int droneVatPct = body.droneVatPct() != null
+                ? body.droneVatPct()
+                : KpPcCalculatorService.vatPctFromMode(calc.vatMode());
         return ApiResponse.of(new KpDtos.CalcPreviewDto(
                 calc.priceKey(), calc.vatMode(), calc.kitQty(), calc.startPrice(), calc.unitKitPrice(),
                 calc.priceDiff(), calc.baseDronePrice(), calc.unitDronePrice(), calc.droneTotal(),
-                calc.grandTotal(), calc.ndsTotal(), lines));
+                calc.grandTotal(), calc.ndsTotal(), droneVatPct, lines));
     }
 
     @PostMapping("/manager/kp/proposals")
@@ -138,7 +142,9 @@ public class ProposalController {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Drone model not found"));
         var preset = kitPresetService.presetFor(model.code() + " " + model.name());
-        var upsert = new KpDtos.ProposalUpsertRequest(body.recipient(), body.droneModelId(), 1, preset.startPrice(), List.of());
+        int droneVatPct = KpPcCalculatorService.vatPctFromMode(preset.vatMode());
+        var upsert = new KpDtos.ProposalUpsertRequest(
+                body.recipient(), body.droneModelId(), 1, preset.startPrice(), droneVatPct, List.of());
         return ApiResponse.of(service.saveDraft(guard.userId(request), guard.username(request), null, upsert));
     }
 

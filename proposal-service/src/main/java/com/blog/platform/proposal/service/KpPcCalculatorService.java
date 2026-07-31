@@ -110,6 +110,14 @@ public class KpPcCalculatorService {
     }
 
     public CalcResult calculate(String modelCodeOrName, int kitQty, BigDecimal unitKitPrice) {
+        return calculate(modelCodeOrName, kitQty, unitKitPrice, null);
+    }
+
+    /**
+     * @param droneVatPct НДС на дрон: 0 или 22. null — взять из прайса модели.
+     *                    Комплектующие всегда в базе НДС 22% (кроме случая, когда весь комплект all_vat).
+     */
+    public CalcResult calculate(String modelCodeOrName, int kitQty, BigDecimal unitKitPrice, Integer droneVatPct) {
         if (kitQty < 1) {
             throw new IllegalArgumentException("Количество комплектов должно быть целым числом >= 1");
         }
@@ -121,6 +129,7 @@ public class KpPcCalculatorService {
         }
 
         ModelPrice data = requirePrice(modelCodeOrName);
+        String vatMode = resolveVatMode(data.vatMode(), droneVatPct);
         BigDecimal target = unitKitPrice.setScale(2, RoundingMode.HALF_UP);
         BigDecimal diff = data.startPrice().subtract(target).setScale(2, RoundingMode.HALF_UP);
 
@@ -141,7 +150,8 @@ public class KpPcCalculatorService {
         BigDecimal droneTotal = unitDrone.multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
         BigDecimal grand = target.multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
 
-        BigDecimal ndsBase = "all_vat".equalsIgnoreCase(data.vatMode())
+        // НДС 0% на дрон (mixed): к вычету только остальное. НДС 22% на дрон: вся сумма.
+        BigDecimal ndsBase = "all_vat".equalsIgnoreCase(vatMode)
                 ? grand
                 : grand.subtract(droneTotal).max(BigDecimal.ZERO);
         BigDecimal nds = ndsBase.multiply(BigDecimal.valueOf(22))
@@ -149,7 +159,7 @@ public class KpPcCalculatorService {
 
         return new CalcResult(
                 data.key(),
-                data.vatMode(),
+                vatMode,
                 kitQty,
                 target,
                 data.startPrice(),
@@ -161,6 +171,19 @@ public class KpPcCalculatorService {
                 nds,
                 List.copyOf(lines)
         );
+    }
+
+    public static String resolveVatMode(String priceListMode, Integer droneVatPct) {
+        if (droneVatPct != null) {
+            if (droneVatPct == 0) return "mixed";
+            if (droneVatPct == 22) return "all_vat";
+            throw new IllegalArgumentException("НДС на дрон: допустимы только 0% или 22%");
+        }
+        return priceListMode == null || priceListMode.isBlank() ? "mixed" : priceListMode;
+    }
+
+    public static int vatPctFromMode(String vatMode) {
+        return "all_vat".equalsIgnoreCase(vatMode) ? 22 : 0;
     }
 
     private void addComponent(

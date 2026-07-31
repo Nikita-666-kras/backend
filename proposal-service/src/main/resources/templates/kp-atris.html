@@ -13,11 +13,11 @@
   }
   .page {
     width: 210mm;
-    height: 297mm;
-    padding: 11mm 13mm 16mm;
+    min-height: 297mm;
+    /* нижний отступ ≥ высота footer с QR */
+    padding: 11mm 13mm 38mm;
     position: relative;
     page-break-after: always;
-    overflow: hidden;
     background-color: #062554;
   }
   .page:last-child { page-break-after: auto; }
@@ -30,7 +30,7 @@
     border-bottom-color: #1E3F6E;
     overflow: hidden;
   }
-  .logo { height: 36px; float: left; }
+  .logo { height: 52px; float: left; }
   .contacts {
     float: right;
     text-align: right;
@@ -99,11 +99,11 @@
     overflow: hidden;
     margin-bottom: 9px;
   }
-  table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
   thead th {
     text-align: left;
-    padding: 7px 9px;
-    font-size: 8.5px;
+    padding: 6px 8px;
+    font-size: 8px;
     letter-spacing: .06em;
     text-transform: uppercase;
     color: #B8C4D9;
@@ -112,18 +112,24 @@
     border-bottom-style: solid;
     border-bottom-color: #1E3F6E;
   }
+  thead th.col-qty,
+  thead th.col-sum { text-align: right; }
   tbody td {
-    padding: 6px 9px;
+    padding: 5px 8px;
     border-bottom-width: 1px;
     border-bottom-style: solid;
     border-bottom-color: #1E3F6E;
     color: #D8E0EC;
     vertical-align: top;
+    word-wrap: break-word;
   }
   tbody tr:last-child td { border-bottom: none; }
   tbody td strong { color: #FFFFFF; }
   .num { color: #8DC63F; font-weight: 800; width: 28px; }
-  .purpose { color: #B8C4D9; font-size: 10px; }
+  .qty-cell { white-space: nowrap; text-align: right; }
+  .purpose { color: #B8C4D9; font-size: 9.5px; line-height: 1.35; }
+  .unit-hint { color: #8A97AD; font-size: 9px; display: block; margin-top: 2px; }
+  .price-cell { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
   .green { color: #8DC63F !important; }
   .included { padding: 10px 11px; }
   .included h2 {
@@ -167,12 +173,13 @@
     font-weight: 700;
   }
   .total-box .amt {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     color: #FFFFFF;
     margin: 2px 0;
   }
   .total-box .note { font-size: 9.5px; color: #B8C4D9; }
+  .total-box .sub { font-size: 9px; color: #8A97AD; margin-top: 3px; }
   .term {
     margin-bottom: 9px;
     padding-bottom: 9px;
@@ -238,25 +245,14 @@
   .closing td { vertical-align: bottom; border: none; padding: 0; }
   .closing-text h2 { font-size: 14px; color: #FFFFFF; font-weight: 800; margin-bottom: 3px; }
   .closing-text p { font-size: 10.5px; color: #B8C4D9; }
-  .qr-box {
-    border-width: 2px;
-    border-style: solid;
-    border-color: #8DC63F;
-    border-radius: 10px;
-    padding: 8px;
-    text-align: center;
-    width: 120px;
-    background: #0A2E5C;
-  }
-  .qr-box .site { font-size: 11px; font-weight: 800; color: #8DC63F; margin-bottom: 4px; }
-  .qr-box p { font-size: 8.5px; color: #B8C4D9; line-height: 1.3; }
   .page-title {
     font-size: 24px;
     font-weight: 800;
     color: #FFFFFF;
     margin-bottom: 8px;
-    line-height: 1.05;
+    line-height: 1.15;
   }
+  .nowrap { white-space: nowrap; }
   .page-lead {
     font-size: 11.5px;
     color: #B8C4D9;
@@ -268,18 +264,70 @@
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 7px 13mm;
+    padding: 10px 13mm 9px;
     background: #021331;
     border-top-width: 1px;
     border-top-style: solid;
     border-top-color: #1E3F6E;
-    font-size: 8.5px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: #B8C4D9;
-    font-weight: 600;
   }
-  footer .right { float: right; color: #FFFFFF; }
+  .footer-inner { width: 100%; border-collapse: collapse; }
+  .footer-inner td { border: none; vertical-align: middle; padding: 0; }
+  .footer-copy { text-align: left; padding-right: 12px !important; }
+  .footer-title {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.25;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-bottom: 3px;
+  }
+  .footer-sub {
+    font-size: 10px;
+    font-weight: 400;
+    color: #B8C4D9;
+    line-height: 1.35;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .footer-legal {
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+  }
+  .footer-qr {
+    width: 92px;
+    text-align: center;
+    vertical-align: middle !important;
+  }
+  .footer-qr-frame {
+    display: inline-block;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #8DC63F;
+    border-radius: 8px;
+    padding: 4px;
+    background: #FFFFFF;
+    line-height: 0;
+  }
+  .footer-qr-frame img {
+    width: 56px;
+    height: 56px;
+    display: block;
+  }
+  .footer-qr-cap {
+    margin-top: 4px;
+    font-size: 7.5px;
+    line-height: 1.25;
+    color: #B8C4D9;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
 </style>
 </head>
 <body>
@@ -308,18 +356,21 @@
       <thead>
         <tr>
           <th style="width:28px">№</th>
-          <th>Наименование</th>
-          <th style="width:62px">Кол-во</th>
-          <th style="width:92px">Цена, ₽</th>
-          <th>Назначение</th>
+          <th style="width:42%">Наименование</th>
+          <th class="col-qty" style="width:58px">Кол-во</th>
+          <th class="col-sum" style="width:92px">Сумма, ₽</th>
+          <th style="width:28%">Назначение</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td class="num">01</td>
-          <td><strong>БАС {{DRONE_FULL_NAME}}</strong></td>
-          <td>{{DRONE_QTY}}</td>
-          <td><strong class="green">{{DRONE_PRICE}}{{DRONE_VAT_MARK}}</strong></td>
+          <td>
+            <strong>БАС {{DRONE_FULL_NAME}}</strong>
+            <span class="unit-hint">{{DRONE_UNIT_HINT}}</span>
+          </td>
+          <td class="qty-cell">{{DRONE_QTY}}</td>
+          <td class="price-cell"><strong class="green">{{DRONE_LINE_TOTAL}}{{DRONE_VAT_MARK}}</strong></td>
           <td class="purpose">{{DRONE_PURPOSE}}</td>
         </tr>
         {{LINES_HTML}}
@@ -354,14 +405,26 @@
       <div class="total-box">
         <div class="cap">Итого</div>
         <div class="amt">{{GRAND_TOTAL}} ₽</div>
-        <div class="note">с НДС к возмещению {{NDS_DEDUCTIBLE}} ₽</div>
+        <div class="note">НДС к возмещению {{NDS_DEDUCTIBLE}} ₽</div>
+        <div class="sub">{{TOTAL_HINT}}</div>
       </div>
     </td>
   </tr></table>
 
   <footer>
-    <span>Простые решения. Реальный результат.</span>
-    <span class="right">ООО «АТРИС»</span>
+    <table class="footer-inner"><tr>
+      <td class="footer-copy">
+        <div class="footer-title">АТРИС — технологии, которые работают в поле.</div>
+        <div class="footer-sub">Инженерные решения для современного сельского хозяйства.</div>
+        <div class="footer-legal">ООО «АТРИС»</div>
+      </td>
+      <td class="footer-qr">
+        <div class="footer-qr-frame">
+          <img src="static/qr-atris.png" alt="QR atris.su"/>
+        </div>
+        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии<br/>агродронов</div>
+      </td>
+    </tr></table>
   </footer>
 </section>
 
@@ -380,8 +443,8 @@
   <div class="page-title">Условия поставки</div>
   <p class="page-lead">Коммерческое предложение на поставку {{DRONE_FULL_NAME}}</p>
 
-  <div class="term"><span class="num-badge">1</span><h3>Стоимость комплекта</h3>
-    <p>{{GRAND_TOTAL}} ₽, включая НДС.</p></div>
+  <div class="term"><span class="num-badge">1</span><h3>Стоимость</h3>
+    <p>{{COST_TEXT}}</p></div>
   <div class="term"><span class="num-badge">2</span><h3>Налогообложение</h3>
     <p>{{TAX_TEXT}}</p></div>
   <div class="term"><span class="num-badge">3</span><h3>Срок действия предложения</h3>
@@ -400,8 +463,19 @@
     <p>Регистрация в реестре ФАВТ входит в стоимость комплекта. До передачи клиенту дрон регистрируется на компанию АТРИС. После подписания акта приёма-передачи осуществляется смена собственника в упрощённом порядке.</p></div>
 
   <footer>
-    <span>Простые решения. Реальный результат.</span>
-    <span class="right">ООО «АТРИС»</span>
+    <table class="footer-inner"><tr>
+      <td class="footer-copy">
+        <div class="footer-title">АТРИС — технологии, которые работают в поле.</div>
+        <div class="footer-sub">Инженерные решения для современного сельского хозяйства.</div>
+        <div class="footer-legal">ООО «АТРИС»</div>
+      </td>
+      <td class="footer-qr">
+        <div class="footer-qr-frame">
+          <img src="static/qr-atris.png" alt="QR atris.su"/>
+        </div>
+        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии<br/>агродронов</div>
+      </td>
+    </tr></table>
   </footer>
 </section>
 
@@ -417,7 +491,7 @@
   </header>
 
   <div class="kicker">Страница 3</div>
-  <div class="page-title">Почему выбирают<br/>ООО АТРИС</div>
+  <div class="page-title">Почему выбирают <span class="nowrap">ООО «АТРИС»</span></div>
   <p class="page-lead">Инженерный подход к агроприменению и сопровождению технологии агродронов</p>
 
   <table class="cards"><tr>
@@ -437,24 +511,20 @@
       <p>Помощь в повышении эффективности обработки и оптимизации агропроцессов.</p></div></td>
   </tr></table>
 
-  <table class="closing"><tr>
-    <td style="width:62%">
-      <div class="closing-text">
-        <h2>АТРИС — технологии, которые работают в поле.</h2>
-        <p>Инженерные решения для современного сельского хозяйства.</p>
-      </div>
-    </td>
-    <td style="width:38%; text-align:right;">
-      <div class="qr-box">
-        <div class="site">www.atris.su</div>
-        <p>Подробнее о компании<br/>и технологии агродронов</p>
-      </div>
-    </td>
-  </tr></table>
-
   <footer>
-    <span>Простые решения. Реальный результат.</span>
-    <span class="right">ООО «АТРИС»</span>
+    <table class="footer-inner"><tr>
+      <td class="footer-copy">
+        <div class="footer-title">АТРИС — технологии, которые работают в поле.</div>
+        <div class="footer-sub">Инженерные решения для современного сельского хозяйства.</div>
+        <div class="footer-legal">ООО «АТРИС»</div>
+      </td>
+      <td class="footer-qr">
+        <div class="footer-qr-frame">
+          <img src="static/qr-atris.png" alt="QR atris.su"/>
+        </div>
+        <div class="footer-qr-cap">Подробнее о компании<br/>и технологии<br/>агродронов</div>
+      </td>
+    </tr></table>
   </footer>
 </section>
 

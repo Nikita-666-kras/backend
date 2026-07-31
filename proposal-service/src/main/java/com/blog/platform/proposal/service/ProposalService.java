@@ -147,7 +147,8 @@ public class ProposalService {
         UUID id = proposalId == null ? UUID.randomUUID() : proposalId;
         var model = listModels(false).stream().filter(x -> x.id().equals(req.droneModelId())).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Модель не найдена"));
-        var calc = calculator.calculate(model.code() + " " + model.name(), req.kitQty(), req.unitKitPrice());
+        var calc = calculator.calculate(
+                model.code() + " " + model.name(), req.kitQty(), req.unitKitPrice(), req.droneVatPct());
 
         List<KpDtos.ProposalLineRequest> extras = normalizeExtras(req.extraLines());
         BigDecimal extrasRaw = BigDecimal.ZERO;
@@ -166,7 +167,10 @@ public class ProposalService {
         BigDecimal discount = extrasDiscount.setScale(2, RoundingMode.HALF_UP);
         BigDecimal grand = calc.grandTotal().add(extrasNet).setScale(2, RoundingMode.HALF_UP);
 
-        BigDecimal ndsBase = "all_vat".equalsIgnoreCase(calc.vatMode())
+        int droneVatPct = req.droneVatPct() == null
+                ? KpPcCalculatorService.vatPctFromMode(calc.vatMode())
+                : req.droneVatPct();
+        BigDecimal ndsBase = droneVatPct == 22
                 ? grand
                 : grand.subtract(calc.droneTotal()).max(BigDecimal.ZERO);
         BigDecimal nds = ndsBase.multiply(BigDecimal.valueOf(22))
@@ -181,19 +185,19 @@ public class ProposalService {
             jdbc.update("update kp_settings set last_kp_number=? where id=1", next);
             jdbc.update("""
                     insert into kp_proposals(id, number, manager_id, manager_username, recipient, drone_model_id, drone_model_name,
-                    drone_price, kit_qty, unit_kit_price, status, subtotal, discount_total, grand_total, nds_total, created_at, updated_at)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', ?, ?, ?, ?, now(), now())
+                    drone_price, kit_qty, unit_kit_price, drone_vat_pct, status, subtotal, discount_total, grand_total, nds_total, created_at, updated_at)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', ?, ?, ?, ?, now(), now())
                     """, id, next, managerId, username, req.recipient().trim(), req.droneModelId(), model.name(),
-                    calc.unitDronePrice(), calc.kitQty(), calc.unitKitPrice(),
+                    calc.unitDronePrice(), calc.kitQty(), calc.unitKitPrice(), droneVatPct,
                     subtotal, discount, grand, nds);
         } else {
             int updated = jdbc.update("""
                     update kp_proposals set recipient=?, drone_model_id=?, drone_model_name=?, drone_price=?,
-                    kit_qty=?, unit_kit_price=?, status='DRAFT',
+                    kit_qty=?, unit_kit_price=?, drone_vat_pct=?, status='DRAFT',
                     subtotal=?, discount_total=?, grand_total=?, nds_total=?, updated_at=now()
                     where id=? and manager_id=?
                     """, req.recipient().trim(), req.droneModelId(), model.name(), calc.unitDronePrice(),
-                    calc.kitQty(), calc.unitKitPrice(),
+                    calc.kitQty(), calc.unitKitPrice(), droneVatPct,
                     subtotal, discount, grand, nds, id, managerId);
             if (updated == 0) {
                 throw new IllegalArgumentException("Proposal not found");
@@ -227,10 +231,10 @@ public class ProposalService {
         return List.copyOf(out);
     }
 
-    public KpPcCalculatorService.CalcResult preview(UUID droneModelId, int kitQty, BigDecimal unitKitPrice) {
+    public KpPcCalculatorService.CalcResult preview(UUID droneModelId, int kitQty, BigDecimal unitKitPrice, Integer droneVatPct) {
         var model = listModels(false).stream().filter(x -> x.id().equals(droneModelId)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Модель не найдена"));
-        return calculator.calculate(model.code() + " " + model.name(), kitQty, unitKitPrice);
+        return calculator.calculate(model.code() + " " + model.name(), kitQty, unitKitPrice, droneVatPct);
     }
 
     @Transactional
@@ -287,6 +291,7 @@ public class ProposalService {
                 rs.getBigDecimal("drone_price"),
                 rs.getObject("kit_qty") == null ? 1 : rs.getInt("kit_qty"),
                 rs.getBigDecimal("unit_kit_price") != null ? rs.getBigDecimal("unit_kit_price") : rs.getBigDecimal("grand_total"),
+                rs.getObject("drone_vat_pct") == null ? 0 : rs.getInt("drone_vat_pct"),
                 rs.getString("status"),
                 rs.getBigDecimal("subtotal"), rs.getBigDecimal("discount_total"), rs.getBigDecimal("grand_total"), rs.getBigDecimal("nds_total"),
                 rs.getString("pdf_path"), lines, toInstant(rs.getTimestamp("created_at")), toInstant(rs.getTimestamp("updated_at")));
