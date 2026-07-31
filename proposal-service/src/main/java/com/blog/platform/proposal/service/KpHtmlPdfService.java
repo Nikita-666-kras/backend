@@ -41,8 +41,7 @@ public class KpHtmlPdfService {
         try {
             Files.createDirectories(Path.of(kpDir));
             String html = buildHtml(proposal);
-            String droneLabel = sanitize(displayDroneName(proposal.droneModelName()));
-            String fileName = "KP_" + proposal.number() + "_" + LocalDate.now().format(DF) + "_" + droneLabel + ".pdf";
+            String fileName = buildPdfFileName(proposal);
             Path out = Path.of(kpDir, fileName);
 
             byte[] regBytes;
@@ -128,7 +127,7 @@ public class KpHtmlPdfService {
 
         String dronePurpose = mixedVat
                 ? "Основное воздушное судно *НДС 0% — подробнее стр. 2"
-                : "Основное воздушное судно · НДС 22%";
+                : "Основное воздушное судно · НДС 22% — регистрация стр. 2";
         String taxText = mixedVat
                 ? "«БАС " + droneFullName + "» поставляется со ставкой НДС 0% согласно ст. 164 НК РФ. "
                 + "Остальные позиции облагаются НДС 22%. Общая сумма к вычету: " + moneyDecimals(ndsDeductible) + " ₽."
@@ -143,6 +142,12 @@ public class KpHtmlPdfService {
         String droneUnitHint = kitQty > 1
                 ? money(droneUnit) + " ₽ / шт."
                 : (mixedVat ? "НДС 0%" : "НДС 22%");
+        String registrationText = mixedVat
+                ? "Регистрация в реестре ФАВТ входит в стоимость комплекта. До передачи клиенту дрон регистрируется на компанию АТРИС. После подписания акта приёма-передачи осуществляется смена собственника в упрощённом порядке."
+                : "На момент поставки БАС не зарегистрирован в Росавиации. Мы привозим дрон без регистрации и помогаем клиенту самостоятельно зарегистрировать его на себя.";
+        String includedRegistration = mixedVat
+                ? "Регистрация БВС в реестре ФАВТ"
+                : "Помощь в самостоятельной регистрации БВС на клиента";
 
         return template
                 .replace("{{KP_NUMBER}}", String.valueOf(p.number()))
@@ -159,7 +164,9 @@ public class KpHtmlPdfService {
                 .replace("{{TAX_TEXT}}", esc(taxText))
                 .replace("{{COST_TEXT}}", esc(costText))
                 .replace("{{TOTAL_HINT}}", esc(totalHint))
-                .replace("{{TAGS_HTML}}", tagsHtml(code))
+                .replace("{{REGISTRATION_TEXT}}", esc(registrationText))
+                .replace("{{INCLUDED_REGISTRATION}}", esc(includedRegistration))
+                .replace("{{TAGS_HTML}}", tagsHtml(code, mixedVat))
                 .replace("{{LINES_HTML}}", lines.toString())
                 .replace("{{KIT_DETAILS_SECTION}}", kitDetailsSection);
     }
@@ -290,18 +297,19 @@ public class KpHtmlPdfService {
         }
     }
 
-    private String tagsHtml(String code) {
+    private String tagsHtml(String code, boolean mixedVat) {
         String ha = switch (code) {
             case "T40", "T50" -> "15 га/час";
             default -> "12 га/час";
         };
+        String registrationTag = mixedVat ? "С регистрацией" : "Регистрация на клиента";
         return """
                 <span class="tag">Внесение СЗР</span>
                 <span class="tag">Десикация</span>
                 <span class="tag">Разбрасывание</span>
                 <span class="tag">%s</span>
-                <span class="tag">С регистрацией</span>
-                """.formatted(ha);
+                <span class="tag">%s</span>
+                """.formatted(ha, registrationTag);
     }
 
     private String modelCode(String name) {
@@ -388,13 +396,27 @@ public class KpHtmlPdfService {
         return df.format(value);
     }
 
+    private String buildPdfFileName(ProposalDto proposal) {
+        String drone = fileSafeName(displayDroneName(proposal.droneModelName()));
+        String date = LocalDate.now().format(DF);
+        return "Коммерческое предложение на " + drone
+                + " от компании ATRIS " + date
+                + " КП №" + proposal.number() + ".pdf";
+    }
+
+    /** Имя файла без символов, запрещённых в Windows/Unix. */
+    private String fileSafeName(String value) {
+        if (value == null || value.isBlank()) {
+            return "дрон";
+        }
+        return value
+                .replaceAll("[\\\\/:*?\"<>|]+", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
     private String esc(String value) {
         if (value == null) return "";
         return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
-    }
-
-    private String sanitize(String value) {
-        if (value == null) return "model";
-        return value.replaceAll("[^A-Za-z0-9._-]+", "_");
     }
 }

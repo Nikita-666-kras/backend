@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -81,12 +82,17 @@ public class ProposalServiceClient {
                 .body(new ParameterizedTypeReference<ApiResponse<List<ProposalResponse>>>() {}));
     }
 
-    public byte[] downloadPdf(UUID id, UUID userId, Set<Role> roles) {
-        return proposalServiceRestClient.get()
+    public PdfFile downloadPdf(UUID id, UUID userId, Set<Role> roles) {
+        var response = proposalServiceRestClient.get()
                 .uri("/admin/kp/proposals/{id}/pdf", id)
                 .header(SecurityHeaders.USER_ID, userId.toString())
                 .header(SecurityHeaders.USER_ROLES, rolesHeader(roles))
-                .retrieve().body(byte[].class);
+                .exchange((req, res) -> {
+                    byte[] body = res.getBody() == null ? new byte[0] : res.getBody().readAllBytes();
+                    String disposition = res.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION);
+                    return new PdfFile(body, disposition);
+                });
+        return response;
     }
 
     private <T> T requireData(ApiResponse<T> response) {
@@ -98,6 +104,7 @@ public class ProposalServiceClient {
         return roles.stream().map(Role::name).collect(Collectors.joining(","));
     }
 
+    public record PdfFile(byte[] bytes, String contentDisposition) {}
     public record DroneModelRequest(String code, String name, BigDecimal defaultPrice, Integer sortOrder, Boolean active) {}
     public record DroneModelResponse(UUID id, String code, String name, BigDecimal defaultPrice, Integer sortOrder,
                                      boolean active, boolean hasZipPackage) {}

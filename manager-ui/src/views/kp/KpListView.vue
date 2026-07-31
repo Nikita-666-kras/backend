@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { downloadPdf, finalizeProposal, getProposal, listMyProposals } from '@/api/kp'
+import { downloadPdf, buildKpPdfFilename, finalizeProposal, getProposal, listMyProposals } from '@/api/kp'
 import { useToastStore } from '@/stores/toast'
 import type { Proposal } from '@/types/kp'
 import { formatDate, formatMoney } from '@/utils/format'
@@ -36,7 +36,7 @@ async function onPdf(p: Proposal) {
       id = finalized.id
       await load()
     }
-    await downloadPdf(id, `KP_${p.number}.pdf`)
+    await downloadPdf(id, buildKpPdfFilename(p.droneModelName, p.number))
   } catch (e: unknown) {
     const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message
     toast.error(msg || 'Не удалось скачать PDF')

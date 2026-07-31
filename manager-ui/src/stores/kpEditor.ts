@@ -4,6 +4,7 @@ import {
   calculateKp,
   createProposal,
   downloadPdf,
+  buildKpPdfFilename,
   fetchZipPackage,
   finalizeProposal as finalizeApi,
   getProposal,
@@ -393,7 +394,7 @@ export const useKpEditorStore = defineStore('kpEditor', () => {
     loading.value = true
     try {
       const finalized = await finalizeApi(saved.id)
-      await downloadPdf(finalized.id, `KP_${finalized.number}.pdf`)
+      await downloadPdf(finalized.id, buildKpPdfFilename(finalized.droneModelName, finalized.number))
       snapshotFromProposal(finalized)
       toast.ok(`КП №${finalized.number} готово`)
       return finalized

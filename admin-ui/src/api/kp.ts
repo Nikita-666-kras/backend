@@ -78,13 +78,39 @@ export async function fetchAllProposals() {
 }
 
 export async function downloadProposalPdf(id: string, filename = 'kp.pdf') {
-  const { data } = await api.get(`/admin/kp/proposals/${id}/pdf`, { responseType: 'blob' })
-  const url = URL.createObjectURL(data)
+  const res = await api.get(`/admin/kp/proposals/${id}/pdf`, { responseType: 'blob' })
+  const name = filenameFromContentDisposition(res.headers['content-disposition']) || filename
+  const url = URL.createObjectURL(res.data)
   const a = document.createElement('a')
   a.href = url
-  a.download = filename
+  a.download = name
   document.body.appendChild(a)
   a.click()
   a.remove()
   URL.revokeObjectURL(url)
+}
+
+export function buildKpPdfFilename(droneModelName: string | null | undefined, number: number, date = new Date()) {
+  const drone = String(droneModelName || 'дрон')
+    .replace(/[\\/:*?"<>|]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const dd = String(date.getDate()).padStart(2, '0')
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const yy = String(date.getFullYear()).slice(-2)
+  return `Коммерческое предложение на ${drone} от компании ATRIS ${dd}.${mm}.${yy} КП №${number}.pdf`
+}
+
+function filenameFromContentDisposition(header?: string): string | null {
+  if (!header) return null
+  const utf8 = /filename\*\s*=\s*UTF-8''([^;]+)/i.exec(header)
+  if (utf8?.[1]) {
+    try {
+      return decodeURIComponent(utf8[1].trim().replace(/^"|"$/g, ''))
+    } catch {
+      /* fall through */
+    }
+  }
+  const plain = /filename\s*=\s*"([^"]+)"/i.exec(header) || /filename\s*=\s*([^;]+)/i.exec(header)
+  return plain?.[1]?.trim() || null
 }

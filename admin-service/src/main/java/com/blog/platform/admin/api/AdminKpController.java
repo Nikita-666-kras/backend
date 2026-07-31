@@ -83,10 +83,13 @@ public class AdminKpController {
         accessGuard.requireAdmin(request);
         var userId = accessGuard.userId(request);
         var roles = accessGuard.roles(request);
-        byte[] file = proposalServiceClient.downloadPdf(id, userId, roles);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"kp-" + id + ".pdf\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(file);
+        var file = proposalServiceClient.downloadPdf(id, userId, roles);
+        var builder = ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF);
+        if (file.contentDisposition() != null && !file.contentDisposition().isBlank()) {
+            builder.header(HttpHeaders.CONTENT_DISPOSITION, file.contentDisposition());
+        } else {
+            builder.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"kp-" + id + ".pdf\"");
+        }
+        return builder.body(file.bytes());
     }
 }

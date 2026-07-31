@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { downloadProposalPdf, fetchAllProposals, type KpProposal } from '@/api/kp'
+import { downloadProposalPdf, buildKpPdfFilename, fetchAllProposals, type KpProposal } from '@/api/kp'
 import { useToastStore } from '@/stores/toast'
 
 const toast = useToastStore()
@@ -24,7 +24,7 @@ async function onDownload(item: KpProposal) {
       toast.error('Сначала сформируйте PDF (статус FINAL)')
       return
     }
-    await downloadProposalPdf(item.id, `KP_${item.number}.pdf`)
+    await downloadProposalPdf(item.id, buildKpPdfFilename(item.droneModelName, item.number))
   } catch (e: any) {
     toast.error(e?.response?.data?.message || 'Не удалось скачать PDF')
   }

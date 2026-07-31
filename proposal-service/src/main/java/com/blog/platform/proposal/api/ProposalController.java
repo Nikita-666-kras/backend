@@ -10,6 +10,8 @@ import com.blog.platform.proposal.service.ProposalService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
@@ -193,8 +195,11 @@ public class ProposalController {
     }
 
     private ResponseEntity<byte[]> pdfResponse(String filename, byte[] bytes) {
+        String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+        String asciiFallback = filename.replaceAll("[^\\x20-\\x7E]", "_");
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + asciiFallback + "\"; filename*=UTF-8''" + encoded)
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(bytes);
     }
