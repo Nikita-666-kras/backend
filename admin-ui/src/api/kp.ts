@@ -4,7 +4,11 @@ export interface KpDroneModel {
   id: string
   code: string
   name: string
+  /** Цена комплекта в прайсе КП (start_price). */
   defaultPrice: number
+  /** Базовая цена дрона в прайсе КП. */
+  dronePrice: number
+  vatMode?: string
   sortOrder: number
   active: boolean
   hasZipPackage?: boolean

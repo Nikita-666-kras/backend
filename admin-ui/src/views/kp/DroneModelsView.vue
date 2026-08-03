@@ -13,7 +13,15 @@ import { useToastStore } from '@/stores/toast'
 const toast = useToastStore()
 const items = ref<KpDroneModel[]>([])
 const loading = ref(false)
-const form = ref({ code: '', name: '', defaultPrice: 0, sortOrder: 0, active: true })
+const form = ref({
+  code: '',
+  name: '',
+  defaultPrice: 0,
+  dronePrice: 0,
+  vatMode: 'mixed',
+  sortOrder: 0,
+  active: true
+})
 
 async function load() {
   loading.value = true
@@ -28,9 +36,20 @@ async function load() {
 
 async function submit() {
   try {
+    if (!form.value.dronePrice) {
+      form.value.dronePrice = form.value.defaultPrice
+    }
     await createDroneModel(form.value)
     toast.ok('Модель добавлена')
-    form.value = { code: '', name: '', defaultPrice: 0, sortOrder: 0, active: true }
+    form.value = {
+      code: '',
+      name: '',
+      defaultPrice: 0,
+      dronePrice: 0,
+      vatMode: 'mixed',
+      sortOrder: 0,
+      active: true
+    }
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.message || 'Не удалось добавить модель')
@@ -40,8 +59,11 @@ async function submit() {
 async function save(item: KpDroneModel) {
   try {
     const { id, hasZipPackage: _h, ...payload } = item
+    if (payload.dronePrice == null || Number.isNaN(Number(payload.dronePrice))) {
+      payload.dronePrice = payload.defaultPrice
+    }
     await updateDroneModel(id, payload)
-    toast.ok('Сохранено')
+    toast.ok('Сохранено — прайс КП обновлён')
   } catch (e: any) {
     toast.error(e?.response?.data?.message || 'Не удалось сохранить')
   }
@@ -54,7 +76,7 @@ async function remove(item: KpDroneModel) {
     toast.ok('Удалено')
     await load()
   } catch (e: any) {
-    toast.error(e?.response?.data?.message || 'Не удалось удалить модель')
+    toast.error(e?.response?.data?.message || 'Не удалось удалить')
   }
 }
 
@@ -67,7 +89,9 @@ onMounted(load)
       <div>
         <p class="eyebrow">Коммерческие предложения</p>
         <h1>КП · Модели дронов</h1>
-        <p class="muted">Код, цена по умолчанию и порядок в списке менеджера. ЗИП настраивается отдельно.</p>
+        <p class="muted">
+          Цены комплекта и дрона сразу идут в калькулятор менеджерского хаба. ЗИП настраивается отдельно.
+        </p>
       </div>
       <RouterLink class="btn secondary" to="/kp/zip-packages">ЗИП-пакеты</RouterLink>
     </header>
@@ -82,8 +106,19 @@ onMounted(load)
         <input v-model="form.name" required placeholder="HD580" />
       </label>
       <label class="field">
-        <span>Цена по умолчанию</span>
+        <span>Цена комплекта</span>
         <input v-model.number="form.defaultPrice" type="number" min="0" step="0.01" required />
+      </label>
+      <label class="field">
+        <span>Цена дрона</span>
+        <input v-model.number="form.dronePrice" type="number" min="0" step="0.01" required />
+      </label>
+      <label class="field field--vat">
+        <span>НДС дрона</span>
+        <select v-model="form.vatMode">
+          <option value="mixed">0% (mixed)</option>
+          <option value="all_vat">22% (all_vat)</option>
+        </select>
       </label>
       <label class="field field--order">
         <span>Порядок</span>
@@ -104,7 +139,9 @@ onMounted(load)
           <tr>
             <th>Код</th>
             <th>Название</th>
-            <th>Цена</th>
+            <th>Цена комплекта</th>
+            <th>Цена дрона</th>
+            <th>НДС</th>
             <th>Порядок</th>
             <th>Активна</th>
             <th>ЗИП</th>
@@ -117,6 +154,15 @@ onMounted(load)
             <td><input v-model="item.name" class="cell-input" /></td>
             <td>
               <input v-model.number="item.defaultPrice" class="cell-input" type="number" min="0" step="0.01" />
+            </td>
+            <td>
+              <input v-model.number="item.dronePrice" class="cell-input" type="number" min="0" step="0.01" />
+            </td>
+            <td>
+              <select v-model="item.vatMode" class="cell-input">
+                <option value="mixed">0%</option>
+                <option value="all_vat">22%</option>
+              </select>
             </td>
             <td>
               <input v-model.number="item.sortOrder" class="cell-input cell-input--sm" type="number" />
@@ -139,7 +185,7 @@ onMounted(load)
             </td>
           </tr>
           <tr v-if="!items.length">
-            <td colspan="7" class="muted">Пока нет моделей</td>
+            <td colspan="9" class="muted">Пока нет моделей</td>
           </tr>
         </tbody>
       </table>
@@ -160,7 +206,7 @@ onMounted(load)
 
 .form-card {
   display: grid;
-  grid-template-columns: 110px minmax(160px, 1.4fr) minmax(140px, 1fr) 88px auto auto;
+  grid-template-columns: 100px minmax(140px, 1.2fr) minmax(120px, 1fr) minmax(120px, 1fr) 110px 72px auto auto;
   gap: 0.65rem 0.75rem;
   align-items: end;
   padding: 0.9rem 1rem;
@@ -175,7 +221,8 @@ onMounted(load)
   color: var(--muted);
 }
 
-.field input { width: 100%; min-width: 0; }
+.field input,
+.field select { width: 100%; min-width: 0; }
 
 .check {
   display: inline-flex;
@@ -197,7 +244,7 @@ onMounted(load)
 .models-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 780px;
+  min-width: 980px;
 }
 
 .models-table th,
@@ -251,7 +298,7 @@ onMounted(load)
   white-space: nowrap;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .form-card {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

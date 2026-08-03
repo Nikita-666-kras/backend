@@ -21,6 +21,8 @@ public final class KpDtos {
             String code,
             String name,
             BigDecimal defaultPrice,
+            BigDecimal dronePrice,
+            String vatMode,
             Integer sortOrder,
             boolean active,
             boolean hasZipPackage
@@ -181,6 +183,8 @@ public final class KpDtos {
             @NotBlank String code,
             @NotBlank String name,
             @NotNull @DecimalMin("0.00") BigDecimal defaultPrice,
+            @DecimalMin("0.00") BigDecimal dronePrice,
+            String vatMode,
             Integer sortOrder,
             Boolean active
     ) {}

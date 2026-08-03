@@ -17,12 +17,14 @@ import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * Логика как в PC-калькуляторе Agro-Tech (руководство + main.py):
+ * Логика как в PC-калькуляторе Agro-Tech:
  * менеджер двигает цену продажи — система режет/поднимает только дрон;
- * комплектующие фиксированы; кол-ва на комплект берутся из price_list.json.
+ * комплектующие фиксированы (из price_list.json);
+ * start/drone/vat берутся из БД (админка), с fallback на JSON.
  */
 @Service
 @RequiredArgsConstructor
@@ -31,7 +33,12 @@ public class KpPcCalculatorService {
     private static final Set<String> META_KEYS = Set.of("config_version", "last_kp_number");
 
     private final ObjectMapper objectMapper;
-    private final Map<String, ModelPrice> prices = new LinkedHashMap<>();
+    private final JdbcTemplate jdbc;
+
+    /** Базовый прайс из JSON (комплектующие + дефолтные цены). */
+    private final Map<String, ModelPrice> jsonPrices = new LinkedHashMap<>();
+    /** Актуальный прайс: JSON + оверлей из БД. */
+    private volatile Map<String, ModelPrice> prices = Map.of();
 
     public record Component(String name, BigDecimal unitPrice, int qtyPerKit) {}
 
@@ -59,7 +66,52 @@ public class KpPcCalculatorService {
     ) {}
 
     @PostConstruct
-    void load() {
+    void init() {
+        loadJson();
+        reloadFromDb();
+    }
+
+    /** Перечитать цены моделей из БД (после сохранения в админке). */
+    public synchronized void reloadFromDb() {
+        Map<String, ModelPrice> next = new LinkedHashMap<>(jsonPrices);
+        jdbc.query("""
+                select code, name, start_price, drone_price, vat_mode
+                from kp_drone_models
+                where active = true
+                """, (rs) -> {
+            String code = rs.getString("code");
+            String name = rs.getString("name");
+            BigDecimal start = rs.getBigDecimal("start_price").setScale(2, RoundingMode.HALF_UP);
+            BigDecimal drone = rs.getBigDecimal("drone_price").setScale(2, RoundingMode.HALF_UP);
+            String vat = rs.getString("vat_mode");
+            if (vat == null || vat.isBlank()) {
+                vat = "mixed";
+            }
+            String lookup = code + " " + name;
+            String key = resolveKey(lookup);
+            ModelPrice base = next.get(key);
+            if (base == null) {
+                base = next.get(code);
+            }
+            if (base == null) {
+                base = next.get(lookup);
+            }
+            List<Component> components = base != null ? base.components() : List.of();
+            String priceKey = base != null ? base.key() : (name != null && !name.isBlank() ? name : code);
+            ModelPrice overlay = new ModelPrice(priceKey, vat, start, drone, components);
+            next.put(priceKey, overlay);
+            if (!priceKey.equals(code)) {
+                next.put(code, overlay);
+            }
+            next.put(lookup, overlay);
+            if (name != null && !name.isBlank()) {
+                next.put(name, overlay);
+            }
+        });
+        prices = Map.copyOf(next);
+    }
+
+    private void loadJson() {
         try (InputStream in = new ClassPathResource("kp/price_list.json").getInputStream()) {
             JsonNode root = objectMapper.readTree(in);
             Iterator<Map.Entry<String, JsonNode>> fields = root.fields();
@@ -74,7 +126,7 @@ public class KpPcCalculatorService {
                 addComponent(components, n, "zaryad_price", "zaryad_name", "Зарядное устройство", "zaryad_qty_per_kit", 1);
                 addComponent(components, n, "WB37_hub_price", "WB37_hub_name", "Зарядная станция WB37", "WB37_hub_qty_per_kit", 1);
                 addComponent(components, n, "WB37_price", "WB37_name", "WB37", "WB37_qty_per_kit", 2);
-                prices.put(e.getKey(), new ModelPrice(
+                jsonPrices.put(e.getKey(), new ModelPrice(
                         e.getKey(),
                         text(n, "vat_mode", "mixed"),
                         money(n, "start_price"),
@@ -103,8 +155,9 @@ public class KpPcCalculatorService {
         if (modelCodeOrName == null || modelCodeOrName.isBlank()) {
             return null;
         }
-        if (prices.containsKey(modelCodeOrName)) {
-            return prices.get(modelCodeOrName);
+        ModelPrice direct = prices.get(modelCodeOrName);
+        if (direct != null) {
+            return direct;
         }
         return prices.get(resolveKey(modelCodeOrName));
     }
@@ -133,7 +186,6 @@ public class KpPcCalculatorService {
         BigDecimal target = unitKitPrice.setScale(2, RoundingMode.HALF_UP);
         BigDecimal diff = data.startPrice().subtract(target).setScale(2, RoundingMode.HALF_UP);
 
-        // Ключевая бизнес-логика руководства: скидка/наценка только на дрон
         BigDecimal unitDrone = data.dronePrice().subtract(diff).setScale(2, RoundingMode.HALF_UP);
         if (unitDrone.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException(
@@ -150,7 +202,6 @@ public class KpPcCalculatorService {
         BigDecimal droneTotal = unitDrone.multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
         BigDecimal grand = target.multiply(BigDecimal.valueOf(kitQty)).setScale(2, RoundingMode.HALF_UP);
 
-        // НДС 0% на дрон (mixed): к вычету только остальное. НДС 22% на дрон: вся сумма.
         BigDecimal ndsBase = "all_vat".equalsIgnoreCase(vatMode)
                 ? grand
                 : grand.subtract(droneTotal).max(BigDecimal.ZERO);
@@ -206,7 +257,7 @@ public class KpPcCalculatorService {
         components.add(new Component(text(n, nameField, defaultName), price, qty));
     }
 
-    private String resolveKey(String value) {
+    String resolveKey(String value) {
         String upper = value.toUpperCase(Locale.ROOT)
                 .replace("VECTOR AGR ", "")
                 .replace("DJI AGRAS ", "")

@@ -105,9 +105,10 @@ public class ProposalServiceClient {
     }
 
     public record PdfFile(byte[] bytes, String contentDisposition) {}
-    public record DroneModelRequest(String code, String name, BigDecimal defaultPrice, Integer sortOrder, Boolean active) {}
-    public record DroneModelResponse(UUID id, String code, String name, BigDecimal defaultPrice, Integer sortOrder,
-                                     boolean active, boolean hasZipPackage) {}
+    public record DroneModelRequest(String code, String name, BigDecimal defaultPrice, BigDecimal dronePrice,
+                                    String vatMode, Integer sortOrder, Boolean active) {}
+    public record DroneModelResponse(UUID id, String code, String name, BigDecimal defaultPrice, BigDecimal dronePrice,
+                                     String vatMode, Integer sortOrder, boolean active, boolean hasZipPackage) {}
     public record ZipItemRequest(String name, String sku, Integer qty, BigDecimal unitPrice, Integer sortOrder) {}
     public record ZipPackageRequest(String name, BigDecimal price, List<ZipItemRequest> items) {}
     public record ZipItemResponse(UUID id, String name, String sku, Integer qty, BigDecimal unitPrice, Integer sortOrder) {}

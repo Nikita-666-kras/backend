@@ -31,7 +31,7 @@ public class ProposalService {
 
     public List<DroneModelDto> listModels(boolean onlyActive) {
         String sql = """
-                select m.id, m.code, m.name, m.default_price, m.sort_order, m.active,
+                select m.id, m.code, m.name, m.start_price, m.drone_price, m.vat_mode, m.sort_order, m.active,
                        exists(select 1 from kp_zip_items z where z.drone_model_id = m.id) as has_zip
                 from kp_drone_models m
                 """
@@ -39,24 +39,56 @@ public class ProposalService {
                 + "order by m.sort_order asc, m.name asc";
         return jdbc.query(sql, (rs, i) -> new DroneModelDto(
                 rs.getObject("id", UUID.class), rs.getString("code"), rs.getString("name"),
-                rs.getBigDecimal("default_price"), rs.getInt("sort_order"), rs.getBoolean("active"),
+                rs.getBigDecimal("start_price"), rs.getBigDecimal("drone_price"),
+                rs.getString("vat_mode"), rs.getInt("sort_order"), rs.getBoolean("active"),
                 rs.getBoolean("has_zip")));
     }
 
     @Transactional
     public DroneModelDto upsertModel(UUID id, DroneModelUpsertRequest req) {
         UUID modelId = id == null ? UUID.randomUUID() : id;
+        BigDecimal startPrice = req.defaultPrice().setScale(2, RoundingMode.HALF_UP);
+        BigDecimal dronePrice = req.dronePrice() != null
+                ? req.dronePrice().setScale(2, RoundingMode.HALF_UP)
+                : null;
+        if (dronePrice == null && id != null) {
+            List<BigDecimal> existing = jdbc.query(
+                    "select drone_price from kp_drone_models where id=?",
+                    (rs, i) -> rs.getBigDecimal("drone_price"), modelId);
+            if (!existing.isEmpty() && existing.get(0) != null) {
+                dronePrice = existing.get(0).setScale(2, RoundingMode.HALF_UP);
+            }
+        }
+        if (dronePrice == null) {
+            dronePrice = startPrice;
+        }
+        String vatMode = req.vatMode();
+        if (vatMode == null || vatMode.isBlank()) {
+            if (id != null) {
+                List<String> existingVat = jdbc.query(
+                        "select vat_mode from kp_drone_models where id=?",
+                        (rs, i) -> rs.getString("vat_mode"), modelId);
+                vatMode = existingVat.isEmpty() ? null : existingVat.get(0);
+            }
+        }
+        vatMode = normalizeVatMode(vatMode);
         int updated = jdbc.update("""
-                update kp_drone_models set code=?, name=?, default_price=?, sort_order=?, active=?, updated_at=now() where id=?
-                """, req.code().trim(), req.name().trim(), req.defaultPrice(),
+                update kp_drone_models
+                set code=?, name=?, default_price=?, start_price=?, drone_price=?, vat_mode=?,
+                    sort_order=?, active=?, updated_at=now()
+                where id=?
+                """, req.code().trim(), req.name().trim(), startPrice, startPrice, dronePrice, vatMode,
                 req.sortOrder() == null ? 0 : req.sortOrder(), req.active() == null || req.active(), modelId);
         if (updated == 0) {
             jdbc.update("""
-                    insert into kp_drone_models(id, code, name, default_price, sort_order, active, created_at, updated_at)
-                    values (?, ?, ?, ?, ?, ?, now(), now())
-                    """, modelId, req.code().trim(), req.name().trim(), req.defaultPrice(),
+                    insert into kp_drone_models(
+                        id, code, name, default_price, start_price, drone_price, vat_mode,
+                        sort_order, active, created_at, updated_at)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+                    """, modelId, req.code().trim(), req.name().trim(), startPrice, startPrice, dronePrice, vatMode,
                     req.sortOrder() == null ? 0 : req.sortOrder(), req.active() == null || req.active());
         }
+        calculator.reloadFromDb();
         return listModels(false).stream().filter(x -> x.id().equals(modelId)).findFirst().orElseThrow();
     }
 
@@ -73,6 +105,18 @@ public class ProposalService {
         if (deleted == 0) {
             throw new IllegalArgumentException("Модель не найдена");
         }
+        calculator.reloadFromDb();
+    }
+
+    private static String normalizeVatMode(String vatMode) {
+        if (vatMode == null || vatMode.isBlank()) {
+            return "mixed";
+        }
+        String v = vatMode.trim().toLowerCase();
+        if ("all_vat".equals(v) || "mixed".equals(v)) {
+            return v;
+        }
+        throw new IllegalArgumentException("vatMode: допустимы mixed или all_vat");
     }
 
     public KpDtos.ZipPackageDto getZipPackage(UUID droneModelId) {

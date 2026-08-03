@@ -6,6 +6,8 @@ export interface DroneModel {
   code: string
   name: string
   defaultPrice: number
+  dronePrice?: number
+  vatMode?: string
   sortOrder: number
   active: boolean
   hasZipPackage?: boolean
