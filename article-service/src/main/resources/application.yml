@@ -25,11 +25,6 @@ spring:
 
 security:
   internal-api-key: ${POST_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
-  internal-api-keys:
-    parts: ${PARTS_INTERNAL_API_KEY:${INTERNAL_API_KEY}}
-
-parts-service:
-  base-url: ${PARTS_SERVICE_URL:http://parts-service:9006}
 
 media:
   storage-path: ${MEDIA_STORAGE_PATH:/data/media}

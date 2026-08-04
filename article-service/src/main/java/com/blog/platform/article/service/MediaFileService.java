@@ -45,7 +45,6 @@ public class MediaFileService {
     private final MediaFileRepository mediaFileRepository;
     private final MediaProperties mediaProperties;
     private final ImageProcessingService imageProcessingService;
-    private final MediaPublicAccessService mediaPublicAccessService;
 
     private Path storageRoot;
 
@@ -166,10 +165,10 @@ public class MediaFileService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<Resource> stream(UUID id, boolean trustedInternal) {
-        if (!trustedInternal && !mediaPublicAccessService.isPubliclyAccessible(id)) {
-            throw new NotFoundException("Media not found");
-        }
+    public ResponseEntity<Resource> stream(UUID id) {
+        // UUID в URL — capability-токен: отдаём файл, если запись есть в БД.
+        // Раньше требовалась привязка к PUBLISHED статье/каталогу — превью в админке
+        // (<img src="/media/{id}"> без JWT) всегда получали 404 на свежие загрузки.
         MediaFile media = require(id);
         Path path = storageRoot.resolve(media.getStoredName());
         if (!Files.isRegularFile(path)) {

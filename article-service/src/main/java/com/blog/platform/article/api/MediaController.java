@@ -8,9 +8,7 @@ import com.blog.platform.article.api.dto.MediaDtos.ProcessRequest;
 import com.blog.platform.article.api.dto.MediaDtos.ProcessingSettingsResponse;
 import com.blog.platform.article.api.dto.MediaDtos.SectionUpdateRequest;
 import com.blog.platform.article.service.MediaFileService;
-import com.blog.platform.article.security.TrustedInternalRequest;
 import com.blog.platform.common.api.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -85,8 +83,8 @@ public class MediaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Resource> file(@PathVariable UUID id, HttpServletRequest request) {
-        return mediaFileService.stream(id, TrustedInternalRequest.isTrusted(request));
+    public ResponseEntity<Resource> file(@PathVariable UUID id) {
+        return mediaFileService.stream(id);
     }
 
     @PostMapping("/{id}/process")
