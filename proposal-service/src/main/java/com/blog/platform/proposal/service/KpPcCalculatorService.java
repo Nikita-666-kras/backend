@@ -75,7 +75,7 @@ public class KpPcCalculatorService {
     public synchronized void reloadFromDb() {
         Map<String, ModelPrice> next = new LinkedHashMap<>(jsonPrices);
         jdbc.query("""
-                select code, name, start_price, drone_price, vat_mode
+                select code, name, start_price, drone_price, vat_mode, price_components::text as price_components
                 from kp_drone_models
                 where active = true
                 """, (rs) -> {
@@ -96,7 +96,13 @@ public class KpPcCalculatorService {
             if (base == null) {
                 base = next.get(lookup);
             }
-            List<Component> components = base != null ? base.components() : List.of();
+            String rawComponents = rs.getString("price_components");
+            List<Component> components;
+            if (rawComponents == null) {
+                components = base != null ? base.components() : List.of();
+            } else {
+                components = parseComponentsJson(rawComponents);
+            }
             String priceKey = base != null ? base.key() : (name != null && !name.isBlank() ? name : code);
             ModelPrice overlay = new ModelPrice(priceKey, vat, start, drone, components);
             next.put(priceKey, overlay);
@@ -109,6 +115,40 @@ public class KpPcCalculatorService {
             }
         });
         prices = Map.copyOf(next);
+    }
+
+    private List<Component> parseComponentsJson(String json) {
+        if (json == null || json.isBlank() || "[]".equals(json.trim())) {
+            return List.of();
+        }
+        try {
+            JsonNode arr = objectMapper.readTree(json);
+            if (!arr.isArray() || arr.isEmpty()) {
+                return List.of();
+            }
+            List<Component> out = new ArrayList<>();
+            for (JsonNode n : arr) {
+                String name = text(n, "name", null);
+                if (name == null || name.isBlank()) {
+                    continue;
+                }
+                BigDecimal price = optionalMoney(n, "unitPrice");
+                if (price == null) {
+                    price = optionalMoney(n, "unit_price");
+                }
+                if (price == null) {
+                    continue;
+                }
+                int qty = intOr(n, "qtyPerKit", intOr(n, "qty_per_kit", 1));
+                if (qty < 1) {
+                    continue;
+                }
+                out.add(new Component(name.trim(), price, qty));
+            }
+            return List.copyOf(out);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to parse price_components JSON", ex);
+        }
     }
 
     private void loadJson() {

@@ -1,5 +1,11 @@
 import api from './http'
 
+export interface KpPriceComponent {
+  name: string
+  unitPrice: number
+  qtyPerKit: number
+}
+
 export interface KpDroneModel {
   id: string
   code: string
@@ -9,6 +15,7 @@ export interface KpDroneModel {
   /** Базовая цена дрона в прайсе КП. */
   dronePrice: number
   vatMode?: string
+  components?: KpPriceComponent[]
   sortOrder: number
   active: boolean
   hasZipPackage?: boolean

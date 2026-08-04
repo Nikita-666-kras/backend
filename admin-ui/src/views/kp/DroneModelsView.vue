@@ -6,31 +6,77 @@ import {
   deleteDroneModel,
   fetchDroneModels,
   updateDroneModel,
-  type KpDroneModel
+  type KpDroneModel,
+  type KpPriceComponent
 } from '@/api/kp'
 import { useToastStore } from '@/stores/toast'
 
 const toast = useToastStore()
 const items = ref<KpDroneModel[]>([])
 const loading = ref(false)
+const expandedId = ref<string | null>(null)
+
 const form = ref({
   code: '',
   name: '',
   defaultPrice: 0,
   dronePrice: 0,
   vatMode: 'mixed',
+  components: [] as KpPriceComponent[],
   sortOrder: 0,
   active: true
 })
 
+function emptyPart(): KpPriceComponent {
+  return { name: '', unitPrice: 0, qtyPerKit: 1 }
+}
+
+function ensureComponents(item: KpDroneModel) {
+  if (!item.components) item.components = []
+  return item.components
+}
+
+function toggleParts(id: string) {
+  expandedId.value = expandedId.value === id ? null : id
+}
+
 async function load() {
   loading.value = true
   try {
-    items.value = await fetchDroneModels()
+    items.value = (await fetchDroneModels()).map((m) => ({
+      ...m,
+      components: (m.components || []).map((c) => ({
+        name: c.name,
+        unitPrice: Number(c.unitPrice || 0),
+        qtyPerKit: Number(c.qtyPerKit || 1)
+      })),
+      dronePrice: Number(m.dronePrice ?? m.defaultPrice ?? 0),
+      vatMode: m.vatMode || 'mixed'
+    }))
   } catch (e: any) {
     toast.error(e?.response?.data?.message || 'Не удалось загрузить модели')
   } finally {
     loading.value = false
+  }
+}
+
+function payloadFrom(model: Omit<KpDroneModel, 'id' | 'hasZipPackage'> | typeof form.value) {
+  const components = (model.components || [])
+    .filter((c) => c.name && String(c.name).trim())
+    .map((c) => ({
+      name: String(c.name).trim(),
+      unitPrice: Math.max(0, Number(c.unitPrice) || 0),
+      qtyPerKit: Math.max(1, Number(c.qtyPerKit) || 1)
+    }))
+  return {
+    code: model.code,
+    name: model.name,
+    defaultPrice: Number(model.defaultPrice) || 0,
+    dronePrice: Number(model.dronePrice) || Number(model.defaultPrice) || 0,
+    vatMode: model.vatMode || 'mixed',
+    components,
+    sortOrder: Number(model.sortOrder) || 0,
+    active: !!model.active
   }
 }
 
@@ -39,14 +85,15 @@ async function submit() {
     if (!form.value.dronePrice) {
       form.value.dronePrice = form.value.defaultPrice
     }
-    await createDroneModel(form.value)
-    toast.ok('Модель добавлена')
+    await createDroneModel(payloadFrom(form.value))
+    toast.ok('Модель добавлена — прайс КП обновлён')
     form.value = {
       code: '',
       name: '',
       defaultPrice: 0,
       dronePrice: 0,
       vatMode: 'mixed',
+      components: [],
       sortOrder: 0,
       active: true
     }
@@ -58,12 +105,10 @@ async function submit() {
 
 async function save(item: KpDroneModel) {
   try {
-    const { id, hasZipPackage: _h, ...payload } = item
-    if (payload.dronePrice == null || Number.isNaN(Number(payload.dronePrice))) {
-      payload.dronePrice = payload.defaultPrice
-    }
-    await updateDroneModel(id, payload)
-    toast.ok('Сохранено — прайс КП обновлён')
+    const { id, hasZipPackage: _h, ...rest } = item
+    await updateDroneModel(id, payloadFrom(rest))
+    toast.ok('Сохранено — цены в менеджерском хабе обновлены')
+    await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.message || 'Не удалось сохранить')
   }
@@ -90,7 +135,7 @@ onMounted(load)
         <p class="eyebrow">Коммерческие предложения</p>
         <h1>КП · Модели дронов</h1>
         <p class="muted">
-          Цены комплекта и дрона сразу идут в калькулятор менеджерского хаба. ЗИП настраивается отдельно.
+          Цены комплекта, дрона и комплектующих — единый прайс для менеджерского хаба. ЗИП настраивается отдельно.
         </p>
       </div>
       <RouterLink class="btn secondary" to="/kp/zip-packages">ЗИП-пакеты</RouterLink>
@@ -149,41 +194,77 @@ onMounted(load)
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in items" :key="item.id">
-            <td><input v-model="item.code" class="cell-input" /></td>
-            <td><input v-model="item.name" class="cell-input" /></td>
-            <td>
-              <input v-model.number="item.defaultPrice" class="cell-input" type="number" min="0" step="0.01" />
-            </td>
-            <td>
-              <input v-model.number="item.dronePrice" class="cell-input" type="number" min="0" step="0.01" />
-            </td>
-            <td>
-              <select v-model="item.vatMode" class="cell-input">
-                <option value="mixed">0%</option>
-                <option value="all_vat">22%</option>
-              </select>
-            </td>
-            <td>
-              <input v-model.number="item.sortOrder" class="cell-input cell-input--sm" type="number" />
-            </td>
-            <td class="center">
-              <input v-model="item.active" type="checkbox" />
-            </td>
-            <td>
-              <RouterLink
-                class="zip-link"
-                :class="{ filled: item.hasZipPackage }"
-                :to="{ name: 'kp-zip-packages', query: { modelId: item.id } }"
-              >
-                {{ item.hasZipPackage ? 'Заполнен →' : 'Добавить ЗИП →' }}
-              </RouterLink>
-            </td>
-            <td class="row-actions">
-              <button class="btn secondary tiny" type="button" @click="save(item)">Сохранить</button>
-              <button class="btn danger tiny" type="button" @click="remove(item)">Удалить</button>
-            </td>
-          </tr>
+          <template v-for="item in items" :key="item.id">
+            <tr>
+              <td><input v-model="item.code" class="cell-input" /></td>
+              <td><input v-model="item.name" class="cell-input" /></td>
+              <td>
+                <input v-model.number="item.defaultPrice" class="cell-input" type="number" min="0" step="0.01" />
+              </td>
+              <td>
+                <input v-model.number="item.dronePrice" class="cell-input" type="number" min="0" step="0.01" />
+              </td>
+              <td>
+                <select v-model="item.vatMode" class="cell-input">
+                  <option value="mixed">0%</option>
+                  <option value="all_vat">22%</option>
+                </select>
+              </td>
+              <td>
+                <input v-model.number="item.sortOrder" class="cell-input cell-input--sm" type="number" />
+              </td>
+              <td class="center">
+                <input v-model="item.active" type="checkbox" />
+              </td>
+              <td>
+                <RouterLink
+                  class="zip-link"
+                  :class="{ filled: item.hasZipPackage }"
+                  :to="{ name: 'kp-zip-packages', query: { modelId: item.id } }"
+                >
+                  {{ item.hasZipPackage ? 'Заполнен →' : 'Добавить ЗИП →' }}
+                </RouterLink>
+              </td>
+              <td class="row-actions">
+                <button class="btn secondary tiny" type="button" @click="toggleParts(item.id)">
+                  {{ expandedId === item.id ? 'Скрыть состав' : `Состав (${item.components?.length || 0})` }}
+                </button>
+                <button class="btn secondary tiny" type="button" @click="save(item)">Сохранить</button>
+                <button class="btn danger tiny" type="button" @click="remove(item)">Удалить</button>
+              </td>
+            </tr>
+            <tr v-if="expandedId === item.id" class="parts-row">
+              <td colspan="9">
+                <div class="parts-panel">
+                  <div class="parts-head">
+                    <strong>Комплектующие комплекта</strong>
+                    <span class="muted">АКБ, зарядки и т.п. — входят в расчёт КП в хабе</span>
+                    <button class="btn secondary tiny" type="button" @click="ensureComponents(item).push(emptyPart())">
+                      + позиция
+                    </button>
+                  </div>
+                  <div v-if="!item.components?.length" class="muted parts-empty">Нет позиций (только дрон/комплект)</div>
+                  <div v-for="(part, idx) in item.components" :key="idx" class="parts-grid">
+                    <label class="field">
+                      <span>Название</span>
+                      <input v-model="part.name" placeholder="АКБ…" />
+                    </label>
+                    <label class="field">
+                      <span>Цена, ₽</span>
+                      <input v-model.number="part.unitPrice" type="number" min="0" step="0.01" />
+                    </label>
+                    <label class="field field--qty">
+                      <span>Кол-во / комплект</span>
+                      <input v-model.number="part.qtyPerKit" type="number" min="1" step="1" />
+                    </label>
+                    <button class="btn danger tiny parts-remove" type="button" @click="item.components!.splice(idx, 1)">
+                      Удалить
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </template>
           <tr v-if="!items.length">
             <td colspan="9" class="muted">Пока нет моделей</td>
           </tr>
@@ -298,13 +379,40 @@ onMounted(load)
   white-space: nowrap;
 }
 
+.parts-row td {
+  background: color-mix(in srgb, var(--line) 35%, transparent);
+  padding: 0.75rem 0.9rem 1rem;
+}
+
+.parts-panel { display: grid; gap: 0.65rem; }
+
+.parts-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+}
+
+.parts-empty { font-size: 0.88rem; }
+
+.parts-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(110px, 1fr) 110px auto;
+  gap: 0.5rem 0.65rem;
+  align-items: end;
+}
+
+.parts-remove { min-height: 2.4rem; }
+
 @media (max-width: 1200px) {
-  .form-card {
+  .form-card,
+  .parts-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .form-card { grid-template-columns: 1fr; }
+  .form-card,
+  .parts-grid { grid-template-columns: 1fr; }
 }
 </style>

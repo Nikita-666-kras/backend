@@ -31,7 +31,8 @@ public class ProposalService {
 
     public List<DroneModelDto> listModels(boolean onlyActive) {
         String sql = """
-                select m.id, m.code, m.name, m.start_price, m.drone_price, m.vat_mode, m.sort_order, m.active,
+                select m.id, m.code, m.name, m.start_price, m.drone_price, m.vat_mode, m.price_components,
+                       m.sort_order, m.active,
                        exists(select 1 from kp_zip_items z where z.drone_model_id = m.id) as has_zip
                 from kp_drone_models m
                 """
@@ -40,7 +41,8 @@ public class ProposalService {
         return jdbc.query(sql, (rs, i) -> new DroneModelDto(
                 rs.getObject("id", UUID.class), rs.getString("code"), rs.getString("name"),
                 rs.getBigDecimal("start_price"), rs.getBigDecimal("drone_price"),
-                rs.getString("vat_mode"), rs.getInt("sort_order"), rs.getBoolean("active"),
+                rs.getString("vat_mode"), readComponents(rs.getString("price_components")),
+                rs.getInt("sort_order"), rs.getBoolean("active"),
                 rs.getBoolean("has_zip")));
     }
 
@@ -72,20 +74,23 @@ public class ProposalService {
             }
         }
         vatMode = normalizeVatMode(vatMode);
+        String componentsJson = writeComponents(resolveComponents(id, modelId, req.components()));
         int updated = jdbc.update("""
                 update kp_drone_models
                 set code=?, name=?, default_price=?, start_price=?, drone_price=?, vat_mode=?,
-                    sort_order=?, active=?, updated_at=now()
+                    price_components=?::jsonb, sort_order=?, active=?, updated_at=now()
                 where id=?
                 """, req.code().trim(), req.name().trim(), startPrice, startPrice, dronePrice, vatMode,
+                componentsJson,
                 req.sortOrder() == null ? 0 : req.sortOrder(), req.active() == null || req.active(), modelId);
         if (updated == 0) {
             jdbc.update("""
                     insert into kp_drone_models(
-                        id, code, name, default_price, start_price, drone_price, vat_mode,
+                        id, code, name, default_price, start_price, drone_price, vat_mode, price_components,
                         sort_order, active, created_at, updated_at)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
+                    values (?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?, now(), now())
                     """, modelId, req.code().trim(), req.name().trim(), startPrice, startPrice, dronePrice, vatMode,
+                    componentsJson,
                     req.sortOrder() == null ? 0 : req.sortOrder(), req.active() == null || req.active());
         }
         calculator.reloadFromDb();
@@ -106,6 +111,64 @@ public class ProposalService {
             throw new IllegalArgumentException("Модель не найдена");
         }
         calculator.reloadFromDb();
+    }
+
+    private List<KpDtos.PriceComponentDto> resolveComponents(
+            UUID requestId, UUID modelId, List<KpDtos.PriceComponentDto> incoming) {
+        if (incoming != null) {
+            return normalizeComponents(incoming);
+        }
+        if (requestId != null) {
+            List<String> existing = jdbc.query(
+                    "select price_components::text from kp_drone_models where id=?",
+                    (rs, i) -> rs.getString(1), modelId);
+            if (!existing.isEmpty()) {
+                return readComponents(existing.get(0));
+            }
+        }
+        return List.of();
+    }
+
+    private List<KpDtos.PriceComponentDto> normalizeComponents(List<KpDtos.PriceComponentDto> incoming) {
+        if (incoming == null || incoming.isEmpty()) {
+            return List.of();
+        }
+        java.util.ArrayList<KpDtos.PriceComponentDto> out = new java.util.ArrayList<>();
+        for (KpDtos.PriceComponentDto c : incoming) {
+            if (c == null || c.name() == null || c.name().isBlank()) {
+                continue;
+            }
+            BigDecimal price = c.unitPrice() == null ? BigDecimal.ZERO : c.unitPrice().setScale(2, RoundingMode.HALF_UP);
+            int qty = c.qtyPerKit() == null ? 1 : c.qtyPerKit();
+            if (qty < 1) {
+                throw new IllegalArgumentException("qtyPerKit комплектующего должно быть >= 1");
+            }
+            if (price.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("Цена комплектующего должна быть >= 0");
+            }
+            out.add(new KpDtos.PriceComponentDto(c.name().trim(), price, qty));
+        }
+        return List.copyOf(out);
+    }
+
+    private List<KpDtos.PriceComponentDto> readComponents(String json) {
+        if (json == null || json.isBlank()) {
+            return List.of();
+        }
+        try {
+            List<KpDtos.PriceComponentDto> list = objectMapper.readValue(json, new TypeReference<>() {});
+            return list == null ? List.of() : List.copyOf(list);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Некорректный JSON price_components", ex);
+        }
+    }
+
+    private String writeComponents(List<KpDtos.PriceComponentDto> components) {
+        try {
+            return objectMapper.writeValueAsString(components == null ? List.of() : components);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Не удалось сериализовать price_components", ex);
+        }
     }
 
     private static String normalizeVatMode(String vatMode) {

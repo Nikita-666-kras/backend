@@ -23,9 +23,16 @@ public final class KpDtos {
             BigDecimal defaultPrice,
             BigDecimal dronePrice,
             String vatMode,
+            List<PriceComponentDto> components,
             Integer sortOrder,
             boolean active,
             boolean hasZipPackage
+    ) {}
+
+    public record PriceComponentDto(
+            @NotBlank String name,
+            @NotNull @DecimalMin("0.00") BigDecimal unitPrice,
+            @NotNull @Min(1) Integer qtyPerKit
     ) {}
 
     public record ZipItemDto(
@@ -185,6 +192,7 @@ public final class KpDtos {
             @NotNull @DecimalMin("0.00") BigDecimal defaultPrice,
             @DecimalMin("0.00") BigDecimal dronePrice,
             String vatMode,
+            @Valid List<PriceComponentDto> components,
             Integer sortOrder,
             Boolean active
     ) {}
