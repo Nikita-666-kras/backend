@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
@@ -246,16 +247,23 @@ public class ImageProcessingService {
     }
 
     private void ensureDefaultLogo() throws IOException {
-        if (Files.isRegularFile(resolvedLogoPath)) {
-            return;
-        }
         ClassPathResource resource = new ClassPathResource("watermarks/watermark.png");
-        if (resource.exists()) {
+        String configured = mediaProperties.getWatermark().getLogoPath();
+        boolean defaultRelativePath = !StringUtils.hasText(configured)
+                || (!Paths.get(configured).isAbsolute()
+                && "watermark.png".equals(Paths.get(configured).getFileName().toString()));
+
+        if (resource.exists() && (defaultRelativePath || !Files.isRegularFile(resolvedLogoPath))) {
+            // Refresh bundled ATRIS logo into the default media path so an old
+            // text-fallback PNG in the volume cannot keep overriding the real logo.
             Files.createDirectories(resolvedLogoPath.getParent());
             try (InputStream in = resource.getInputStream()) {
-                Files.copy(in, resolvedLogoPath);
+                Files.copy(in, resolvedLogoPath, StandardCopyOption.REPLACE_EXISTING);
             }
-            log.info("Copied default watermark logo to {}", resolvedLogoPath);
+            log.info("Synced watermark logo from classpath to {}", resolvedLogoPath);
+            return;
+        }
+        if (Files.isRegularFile(resolvedLogoPath)) {
             return;
         }
         Files.createDirectories(resolvedLogoPath.getParent());
