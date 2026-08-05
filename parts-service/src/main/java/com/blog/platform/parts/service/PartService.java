@@ -45,7 +45,8 @@ public class PartService {
             int size
     ) {
         PageRequest pageable = PageRequest.of(page, clamp(size), Sort.by(Sort.Direction.DESC, "updatedAt"));
-        Page<Part> result = partRepository.search(smartQuery(q), status, droneId, categoryId, catalogFilter, pageable);
+        String catalogFilterKey = catalogFilter == null ? null : catalogFilter.name();
+        Page<Part> result = partRepository.search(smartQuery(q), status, droneId, categoryId, catalogFilterKey, pageable);
         return toPage(result);
     }
 

@@ -2,7 +2,6 @@ package com.blog.platform.parts.repository;
 
 import com.blog.platform.parts.domain.CatalogStatus;
 import com.blog.platform.parts.domain.Part;
-import com.blog.platform.parts.domain.PartCatalogFilter;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -38,24 +37,18 @@ public interface PartRepository extends JpaRepository<Part, UUID> {
                 )) LIKE LOWER(CONCAT('%', :q, '%'))
               )
               AND (
-                :catalogFilter IS NULL OR
-                (:catalogFilter = com.blog.platform.parts.domain.PartCatalogFilter.NO_PRICE
-                    AND (p.price IS NULL OR p.price <= 0)) OR
-                (:catalogFilter = com.blog.platform.parts.domain.PartCatalogFilter.NO_NAME
-                    AND LOWER(TRIM(p.name)) = LOWER(TRIM(p.sku))) OR
-                (:catalogFilter = com.blog.platform.parts.domain.PartCatalogFilter.NO_PHOTO
-                    AND p.coverMediaId IS NULL AND p.mediaIds IS EMPTY) OR
-                (:catalogFilter = com.blog.platform.parts.domain.PartCatalogFilter.NO_DRONE
-                    AND p.drone IS NULL) OR
-                (:catalogFilter = com.blog.platform.parts.domain.PartCatalogFilter.NO_CATEGORY
-                    AND p.category IS NULL) OR
-                (:catalogFilter = com.blog.platform.parts.domain.PartCatalogFilter.INCOMPLETE
-                    AND (
-                      p.price IS NULL OR p.price <= 0 OR
-                      LOWER(TRIM(p.name)) = LOWER(TRIM(p.sku)) OR
-                      (p.coverMediaId IS NULL AND p.mediaIds IS EMPTY) OR
-                      p.drone IS NULL OR p.category IS NULL
-                    ))
+                :catalogFilterKey IS NULL OR :catalogFilterKey = '' OR
+                (:catalogFilterKey = 'NO_PRICE' AND (p.price IS NULL OR p.price <= 0)) OR
+                (:catalogFilterKey = 'NO_NAME' AND LOWER(p.name) = LOWER(p.sku)) OR
+                (:catalogFilterKey = 'NO_PHOTO' AND p.coverMediaId IS NULL) OR
+                (:catalogFilterKey = 'NO_DRONE' AND p.drone IS NULL) OR
+                (:catalogFilterKey = 'NO_CATEGORY' AND p.category IS NULL) OR
+                (:catalogFilterKey = 'INCOMPLETE' AND (
+                  p.price IS NULL OR p.price <= 0 OR
+                  LOWER(p.name) = LOWER(p.sku) OR
+                  p.coverMediaId IS NULL OR
+                  p.drone IS NULL OR p.category IS NULL
+                ))
               )
             """)
     Page<Part> search(
@@ -63,7 +56,7 @@ public interface PartRepository extends JpaRepository<Part, UUID> {
             @Param("status") CatalogStatus status,
             @Param("droneId") UUID droneId,
             @Param("categoryId") UUID categoryId,
-            @Param("catalogFilter") PartCatalogFilter catalogFilter,
+            @Param("catalogFilterKey") String catalogFilterKey,
             Pageable pageable
     );
 
