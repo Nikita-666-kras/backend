@@ -1,0 +1,1661 @@
+[
+  {
+    "dir": "RF-модуль_для_DJI_Agras_T50T25,_арт._BC.AG.SS000675_BC.AG.SS000675",
+    "name": "RF-модуль для DJI Agras T50T25",
+    "sku": "BC.AG.SS000675",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\RF-модуль_для_DJI_Agras_T50T25,_арт._BC.AG.SS000675_BC.AG.SS000675\\schema.jpg",
+    "partSku": "BC.AG.SS000675"
+  },
+  {
+    "dir": "Алюминиевая_трубка_заднего_каркаса_для_DJI_Agras_T50,_арт._BC.AG.SS000692_BC.AG.SS000692",
+    "name": "Алюминиевая трубка заднего каркаса для DJI Agras T50",
+    "sku": "BC.AG.SS000692",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Алюминиевая_трубка_заднего_каркаса_для_DJI_Agras_T50,_арт._BC.AG.SS000692_BC.AG.SS000692\\schema.jpg",
+    "partSku": "BC.AG.SS000692"
+  },
+  {
+    "dir": "Алюминиевая_трубка_переднего_каркаса_для_DJI_Agras_T50,_арт._BC.AG.SS000672_BC.AG.SS000672",
+    "name": "Алюминиевая трубка переднего каркаса для DJI Agras T50",
+    "sku": "BC.AG.SS000672",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Алюминиевая_трубка_переднего_каркаса_для_DJI_Agras_T50,_арт._BC.AG.SS000672_BC.AG.SS000672\\schema.jpg",
+    "partSku": "BC.AG.SS000672"
+  },
+  {
+    "dir": "Алюминиевая_трубка_центрального_каркаса_(левая)_для_DJI_Agras_T50,_арт._BC.AG.SS000687_BC.AG.SS000687",
+    "name": "Алюминиевая трубка центрального каркаса (левая) для DJI Agras T50",
+    "sku": "BC.AG.SS000687",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Алюминиевая_трубка_центрального_каркаса_(левая)_для_DJI_Agras_T50,_арт._BC.AG.SS000687_BC.AG.SS000687\\schema.jpg",
+    "partSku": "BC.AG.SS000687"
+  },
+  {
+    "dir": "Алюминиевая_трубка_центрального_каркаса_(правая)_для_DJI_Agras_T50,_арт._BC.AG.SS000688_BC.AG.SS000688",
+    "name": "Алюминиевая трубка центрального каркаса (правая) для DJI Agras T50",
+    "sku": "BC.AG.SS000688",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Алюминиевая_трубка_центрального_каркаса_(правая)_для_DJI_Agras_T50,_арт._BC.AG.SS000688_BC.AG.SS000688\\schema.jpg",
+    "partSku": "BC.AG.SS000688"
+  },
+  {
+    "dir": "Алюминиевая_трубка_шасси_для_DJI_Agras_T50,_арт._YC.JG.BJ001821_YC.JG.BJ001821",
+    "name": "Алюминиевая трубка шасси для DJI Agras T50",
+    "sku": "YC.JG.BJ001821",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Алюминиевая_трубка_шасси_для_DJI_Agras_T50,_арт._YC.JG.BJ001821_YC.JG.BJ001821\\schema.jpg",
+    "partSku": "YC.JG.BJ001821"
+  },
+  {
+    "dir": "Антенна_SDR_(задняя)_для_DJI_Agras_T50,_арт._YC.DZ.AA000325_YC.DZ.AA000325",
+    "name": "Антенна SDR (задняя) для DJI Agras T50",
+    "sku": "YC.DZ.AA000325",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Антенна_SDR_(задняя)_для_DJI_Agras_T50,_арт._YC.DZ.AA000325_YC.DZ.AA000325\\schema.jpg",
+    "partSku": "YC.DZ.AA000325"
+  },
+  {
+    "dir": "Антенна_SDR_(передняя)_для_DJI_Agras_T50T25,_арт._YC.DZ.AA000326_YC.DZ.AA000326",
+    "name": "Антенна SDR (передняя) для DJI Agras T50T25",
+    "sku": "YC.DZ.AA000326",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Антенна_SDR_(передняя)_для_DJI_Agras_T50T25,_арт._YC.DZ.AA000326_YC.DZ.AA000326\\schema.jpg",
+    "partSku": "YC.DZ.AA000326"
+  },
+  {
+    "dir": "Бак_для_жидкости_(40_л)_для_DJI_Agras_T50,_арт._YC.JG.CS000016_YC.JG.CS000016",
+    "name": "Бак для жидкости (40 л) для DJI Agras T50",
+    "sku": "YC.JG.CS000016",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Бак_для_жидкости_(40_л)_для_DJI_Agras_T50,_арт._YC.JG.CS000016_YC.JG.CS000016\\schema.jpg",
+    "partSku": "YC.JG.CS000016"
+  },
+  {
+    "dir": "Боковая_крышка_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003452_YC.JG.ZS003452",
+    "name": "Боковая крышка корпуса для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003452",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Боковая_крышка_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003452_YC.JG.ZS003452\\schema.jpg",
+    "partSku": "YC.JG.ZS003452"
+  },
+  {
+    "dir": "Болт_M20-HPW00600060-065016-5103-Y_02_для_DJI_Agras_T50T40T25T20PT70T100T70PT16T30T10T25P_YC.WJ.LL000235",
+    "name": "Болт M20-HPW00600060-065016-5103-Y 02 для DJI Agras T50T40T25T20PT70T100T70PT16T30T10T25P YC.WJ.LL000235",
+    "sku": "YC.WJ.LL000235",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Болт_M20-HPW00600060-065016-5103-Y_02_для_DJI_Agras_T50T40T25T20PT70T100T70PT16T30T10T25P_YC.WJ.LL000235\\schema.jpg",
+    "partSku": "YC.WJ.LL000235"
+  },
+  {
+    "dir": "Болт_M30-HT01930060-110025-5103-Y_для_DJI_Agras_T50T40T25T20PT10T30T20,_арт._YC.WJ.LL000213_YC.WJ.LL000213",
+    "name": "Болт M30-HT01930060-110025-5103-Y для DJI Agras T50T40T25T20PT10T30T20",
+    "sku": "YC.WJ.LL000213",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Болт_M30-HT01930060-110025-5103-Y_для_DJI_Agras_T50T40T25T20PT10T30T20,_арт._YC.WJ.LL000213_YC.WJ.LL000213\\schema.jpg",
+    "partSku": "YC.WJ.LL000213"
+  },
+  {
+    "dir": "Верхний_диск_центробежного_распылителя_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003459_YC.JG.ZS003459",
+    "name": "Верхний диск центробежного распылителя для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003459",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Верхний_диск_центробежного_распылителя_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003459_YC.JG.ZS003459\\schema.jpg",
+    "partSku": "YC.JG.ZS003459"
+  },
+  {
+    "dir": "Верхний_зажим_пропеллера_для_DJI_Agras_T50,_арт._YC.JG.QX002715_YC.JG.QX002715",
+    "name": "Верхний зажим пропеллера для DJI Agras T50",
+    "sku": "YC.JG.QX002715",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Верхний_зажим_пропеллера_для_DJI_Agras_T50,_арт._YC.JG.QX002715_YC.JG.QX002715\\schema.jpg",
+    "partSku": "YC.JG.QX002715"
+  },
+  {
+    "dir": "Верхняя_крышка_двигателя_для_DJI_Agras_T50T40T20P,_арт._YC.JG.ZS002379_YC.JG.ZS002379",
+    "name": "Верхняя крышка двигателя для DJI Agras T50T40T20P",
+    "sku": "YC.JG.ZS002379",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Верхняя_крышка_двигателя_для_DJI_Agras_T50T40T20P,_арт._YC.JG.ZS002379_YC.JG.ZS002379\\schema.jpg",
+    "partSku": "YC.JG.ZS002379"
+  },
+  {
+    "dir": "Верхняя_крышка_переднего_корпуса_для_DJI_Agras_T50T25_YC.JG.ZS003389",
+    "name": "Верхняя крышка переднего корпуса для DJI Agras T50T25 YC.JG.ZS003389",
+    "sku": "YC.JG.ZS003389",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Верхняя_крышка_переднего_корпуса_для_DJI_Agras_T50T25_YC.JG.ZS003389\\schema.jpg",
+    "partSku": "YC.JG.ZS003389"
+  },
+  {
+    "dir": "Верхняя_опора_двигателя_для_DJI_Agras_T50,_арт._YC.JG.QX003096_YC.JG.QX003096",
+    "name": "Верхняя опора двигателя для DJI Agras T50",
+    "sku": "YC.JG.QX003096",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Верхняя_опора_двигателя_для_DJI_Agras_T50,_арт._YC.JG.QX003096_YC.JG.QX003096\\schema.jpg",
+    "partSku": "YC.JG.QX003096"
+  },
+  {
+    "dir": "Виброгасящая_подушка_для_DJI_Agras_T50T25,_арт._YC.JG.MY000832_YC.JG.MY000832",
+    "name": "Виброгасящая подушка для DJI Agras T50T25",
+    "sku": "YC.JG.MY000832",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Виброгасящая_подушка_для_DJI_Agras_T50T25,_арт._YC.JG.MY000832_YC.JG.MY000832\\schema.jpg",
+    "partSku": "YC.JG.MY000832"
+  },
+  {
+    "dir": "Виброгасящая_подушка_для_DJI_Agras_T50T25,_арт._YC.JG.MY001054_YC.JG.MY001054",
+    "name": "Виброгасящая подушка для DJI Agras T50T25",
+    "sku": "YC.JG.MY001054",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Виброгасящая_подушка_для_DJI_Agras_T50T25,_арт._YC.JG.MY001054_YC.JG.MY001054\\schema.jpg",
+    "partSku": "YC.JG.MY001054"
+  },
+  {
+    "dir": "Виброгасящая_подушка_для_DJI_Agras_T50T25_YC.JG.MY000757",
+    "name": "Виброгасящая подушка для DJI Agras T50T25 YC.JG.MY000757",
+    "sku": "YC.JG.MY000757",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Виброгасящая_подушка_для_DJI_Agras_T50T25_YC.JG.MY000757\\schema.jpg",
+    "partSku": "YC.JG.MY000757"
+  },
+  {
+    "dir": "Виброгасящая_силиконовая_втулка_для_DJI_Agras_T50T25_YC.JG.MY001038",
+    "name": "Виброгасящая силиконовая втулка для DJI Agras T50T25 YC.JG.MY001038",
+    "sku": "YC.JG.MY001038",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Виброгасящая_силиконовая_втулка_для_DJI_Agras_T50T25_YC.JG.MY001038\\schema.jpg",
+    "partSku": "YC.JG.MY001038"
+  },
+  {
+    "dir": "Винт_M20-PC00400040-040010-5103-Y_для_DJI_Agras_T50T25_YC.ST.LL000228",
+    "name": "Винт M20-PC00400040-040010-5103-Y для DJI Agras T50T25 YC.ST.LL000228",
+    "sku": "YC.ST.LL000228",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M20-PC00400040-040010-5103-Y_для_DJI_Agras_T50T25_YC.ST.LL000228\\schema.jpg",
+    "partSku": "YC.ST.LL000228"
+  },
+  {
+    "dir": "Винт_M20-TC00700060-033010-0004-Y_для_DJI_Agras_T50T40T25T20P,_арт._YC.ST.LL000208_YC.ST.LL000208",
+    "name": "Винт M20-TC00700060-033010-0004-Y для DJI Agras T50T40T25T20P",
+    "sku": "YC.ST.LL000208",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M20-TC00700060-033010-0004-Y_для_DJI_Agras_T50T40T25T20P,_арт._YC.ST.LL000208_YC.ST.LL000208\\schema.jpg",
+    "partSku": "YC.ST.LL000208"
+  },
+  {
+    "dir": "Винт_M25-HC00400040-050020-0003-N_для_DJI_Agras_T50T40T25T20PT20_YC.WJ.LL000138",
+    "name": "Винт M25-HC00400040-050020-0003-N для DJI Agras T50T40T25T20PT20 YC.WJ.LL000138",
+    "sku": "YC.WJ.LL000138",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M25-HC00400040-050020-0003-N_для_DJI_Agras_T50T40T25T20PT20_YC.WJ.LL000138\\schema.jpg",
+    "partSku": "YC.WJ.LL000138"
+  },
+  {
+    "dir": "Винт_M25-HC00780040-040020-5108-N_для_DJI_Agras_T50T40T25T20PT70T100T10T30T70PT25P,_арт._YC_YC.ST.LL000122",
+    "name": "Винт M25-HC00780040-040020-5108-N для DJI Agras T50T40T25T20PT70T100T10T30T70PT25P",
+    "sku": "YC.ST.LL000122",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M25-HC00780040-040020-5108-N_для_DJI_Agras_T50T40T25T20PT70T100T10T30T70PT25P,_арт._YC_YC.ST.LL000122\\schema.jpg",
+    "partSku": "YC.ST.LL000122"
+  },
+  {
+    "dir": "Винт_M30-HC00550045-055012-5103-Y_для_DJI_Agras_T50T25,_арт._YC.ST.LL000382_YC.ST.LL000382",
+    "name": "Винт M30-HC00550045-055012-5103-Y для DJI Agras T50T25",
+    "sku": "YC.ST.LL000382",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC00550045-055012-5103-Y_для_DJI_Agras_T50T25,_арт._YC.ST.LL000382_YC.ST.LL000382\\schema.jpg",
+    "partSku": "YC.ST.LL000382"
+  },
+  {
+    "dir": "Винт_M30-HC01150050-120020-5103-Y_для_DJI_Agras_T50T25,_арт._YC.ST.LL000335_YC.ST.LL000335",
+    "name": "Винт M30-HC01150050-120020-5103-Y для DJI Agras T50T25",
+    "sku": "YC.ST.LL000335",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC01150050-120020-5103-Y_для_DJI_Agras_T50T25,_арт._YC.ST.LL000335_YC.ST.LL000335\\schema.jpg",
+    "partSku": "YC.ST.LL000335"
+  },
+  {
+    "dir": "Винт_M30-HC01450080-100020-5103-Y_для_DJI_Agras_T50T40T25T20PT70,_арт._YC.ST.LL000226_YC.ST.LL000226",
+    "name": "Винт M30-HC01450080-100020-5103-Y для DJI Agras T50T40T25T20PT70",
+    "sku": "YC.ST.LL000226",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC01450080-100020-5103-Y_для_DJI_Agras_T50T40T25T20PT70,_арт._YC.ST.LL000226_YC.ST.LL000226\\schema.jpg",
+    "partSku": "YC.ST.LL000226"
+  },
+  {
+    "dir": "Винт_M30-HC01600120-057030-0323-Y_для_DJI_Agras_T50T25_YC.WJ.LL000340",
+    "name": "Винт M30-HC01600120-057030-0323-Y для DJI Agras T50T25 YC.WJ.LL000340",
+    "sku": "YC.WJ.LL000340",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC01600120-057030-0323-Y_для_DJI_Agras_T50T25_YC.WJ.LL000340\\schema.jpg",
+    "partSku": "YC.WJ.LL000340"
+  },
+  {
+    "dir": "Винт_M30-HC02050080-070020-5103-Y_01_для_DJI_Agras_T50T40T25T20PT100T10T30T16T20T25P,_арт._YC.WJ.LL000211",
+    "name": "Винт M30-HC02050080-070020-5103-Y 01 для DJI Agras T50T40T25T20PT100T10T30T16T20T25P",
+    "sku": "YC.WJ.LL000211",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC02050080-070020-5103-Y_01_для_DJI_Agras_T50T40T25T20PT100T10T30T16T20T25P,_арт._YC.WJ.LL000211\\schema.jpg",
+    "partSku": "YC.WJ.LL000211"
+  },
+  {
+    "dir": "Винт_M30-HC02800070-055030-0003-Y_для_DJI_Agras_T50T40T25T70T10T30T20,_арт._YC.ST.LL000017_YC.ST.LL000017",
+    "name": "Винт M30-HC02800070-055030-0003-Y для DJI Agras T50T40T25T70T10T30T20",
+    "sku": "YC.ST.LL000017",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC02800070-055030-0003-Y_для_DJI_Agras_T50T40T25T70T10T30T20,_арт._YC.ST.LL000017_YC.ST.LL000017\\schema.jpg",
+    "partSku": "YC.ST.LL000017"
+  },
+  {
+    "dir": "Винт_M30-HC060060-55-85_для_DJI_Agras_T70P,_арт._YC.WJ.L00870_YC.WJ.L00870",
+    "name": "Винт M30-HC060060-55-85 для DJI Agras T70P",
+    "sku": "YC.WJ.L00870",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC060060-55-85_для_DJI_Agras_T70P,_арт._YC.WJ.L00870_YC.WJ.L00870\\schema.jpg",
+    "partSku": "YC.WJ.L00870"
+  },
+  {
+    "dir": "Винт_M30-HC100100-55-85_для_DJI_Agras_T100T25PT70P,_арт._YC.WJ.L00871_YC.WJ.L00871",
+    "name": "Винт M30-HC100100-55-85 для DJI Agras T100T25PT70P",
+    "sku": "YC.WJ.L00871",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC100100-55-85_для_DJI_Agras_T100T25PT70P,_арт._YC.WJ.L00871_YC.WJ.L00871\\schema.jpg",
+    "partSku": "YC.WJ.L00871"
+  },
+  {
+    "dir": "Винт_M30-HC100100-55-85_для_DJI_Agras_T50T25,_арт._YC.ST.LL000336_YC.ST.LL000336",
+    "name": "Винт M30-HC100100-55-85 для DJI Agras T50T25",
+    "sku": "YC.ST.LL000336",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC100100-55-85_для_DJI_Agras_T50T25,_арт._YC.ST.LL000336_YC.ST.LL000336\\schema.jpg",
+    "partSku": "YC.ST.LL000336"
+  },
+  {
+    "dir": "Винт_M30-HC1880-55-85_для_DJI_Agras_T50T40T25T70T10T30T20,_арт._YC.WJ.L00873_YC.WJ.L00873",
+    "name": "Винт M30-HC1880-55-85 для DJI Agras T50T40T25T70T10T30T20",
+    "sku": "YC.WJ.L00873",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M30-HC1880-55-85_для_DJI_Agras_T50T40T25T70T10T30T20,_арт._YC.WJ.L00873_YC.WJ.L00873\\schema.jpg",
+    "partSku": "YC.WJ.L00873"
+  },
+  {
+    "dir": "Винт_M40-HC00750040-060030-5103-N_01_для_DJI_Agras_T50T25_YC.WJ.LL000188",
+    "name": "Винт M40-HC00750040-060030-5103-N 01 для DJI Agras T50T25 YC.WJ.LL000188",
+    "sku": "YC.WJ.LL000188",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC00750040-060030-5103-N_01_для_DJI_Agras_T50T25_YC.WJ.LL000188\\schema.jpg",
+    "partSku": "YC.WJ.LL000188"
+  },
+  {
+    "dir": "Винт_M40-HC01000100-072028-5103-N_для_DJI_Agras_T70PT100,_арт._YC.WJ.LL000232_YC.WJ.LL000232",
+    "name": "Винт M40-HC01000100-072028-5103-N для DJI Agras T70PT100",
+    "sku": "YC.WJ.LL000232",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC01000100-072028-5103-N_для_DJI_Agras_T70PT100,_арт._YC.WJ.LL000232_YC.WJ.LL000232\\schema.jpg",
+    "partSku": "YC.WJ.LL000232"
+  },
+  {
+    "dir": "Винт_M40-HC01050056-070039-5103-Y_для_DJI_Agras_T25P_YC.ST.LL000327",
+    "name": "Винт M40-HC01050056-070039-5103-Y для DJI Agras T25P YC.ST.LL000327",
+    "sku": "YC.ST.LL000327",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC01050056-070039-5103-Y_для_DJI_Agras_T25P_YC.ST.LL000327\\schema.jpg",
+    "partSku": "YC.ST.LL000327"
+  },
+  {
+    "dir": "Винт_M40-HC01400140-070039-0003-Y_для_DJI_Agras_T100,_арт._YC.ST.LL000013_YC.ST.LL000013",
+    "name": "Винт M40-HC01400140-070039-0003-Y для DJI Agras T100",
+    "sku": "YC.ST.LL000013",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC01400140-070039-0003-Y_для_DJI_Agras_T100,_арт._YC.ST.LL000013_YC.ST.LL000013\\schema.jpg",
+    "partSku": "YC.ST.LL000013"
+  },
+  {
+    "dir": "Винт_M40-HC01400140-070039-4105-Y_для_DJI_Agras_T50T40T25T20PT70,_арт._YC.ST.LL000148_YC.ST.LL000148",
+    "name": "Винт M40-HC01400140-070039-4105-Y для DJI Agras T50T40T25T20PT70",
+    "sku": "YC.ST.LL000148",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC01400140-070039-4105-Y_для_DJI_Agras_T50T40T25T20PT70,_арт._YC.ST.LL000148_YC.ST.LL000148\\schema.jpg",
+    "partSku": "YC.ST.LL000148"
+  },
+  {
+    "dir": "Винт_M40-HC01510056-070039-5103-Y_для_DJI_Agras_T50T25,_арт._YC.ST.LL000330_YC.ST.LL000330",
+    "name": "Винт M40-HC01510056-070039-5103-Y для DJI Agras T50T25",
+    "sku": "YC.ST.LL000330",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC01510056-070039-5103-Y_для_DJI_Agras_T50T25,_арт._YC.ST.LL000330_YC.ST.LL000330\\schema.jpg",
+    "partSku": "YC.ST.LL000330"
+  },
+  {
+    "dir": "Винт_M40-HC03500120-070040-5103-N_для_DJI_Agras_T50T25,_арт._YC.ST.LL000339_YC.ST.LL000339",
+    "name": "Винт M40-HC03500120-070040-5103-N для DJI Agras T50T25",
+    "sku": "YC.ST.LL000339",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC03500120-070040-5103-N_для_DJI_Agras_T50T25,_арт._YC.ST.LL000339_YC.ST.LL000339\\schema.jpg",
+    "partSku": "YC.ST.LL000339"
+  },
+  {
+    "dir": "Винт_M40-HC060060-55-85_для_DJI_Agras_T25P,_арт._YC.WJ.L00876_YC.WJ.L00876",
+    "name": "Винт M40-HC060060-55-85 для DJI Agras T25P",
+    "sku": "YC.WJ.L00876",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC060060-55-85_для_DJI_Agras_T25P,_арт._YC.WJ.L00876_YC.WJ.L00876\\schema.jpg",
+    "partSku": "YC.WJ.L00876"
+  },
+  {
+    "dir": "Винт_M40-HC080080-68-85_для_DJI_Agras_T70P,_арт._YC.WJ.L01234_YC.WJ.L01234",
+    "name": "Винт M40-HC080080-68-85 для DJI Agras T70P",
+    "sku": "YC.WJ.L01234",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M40-HC080080-68-85_для_DJI_Agras_T70P,_арт._YC.WJ.L01234_YC.WJ.L01234\\schema.jpg",
+    "partSku": "YC.WJ.L01234"
+  },
+  {
+    "dir": "Винт_M50-HF01430102-116041-0003-Y_для_DJI_Agras_T50T40T25T20P,_арт._YC.ST.LL000209_YC.ST.LL000209",
+    "name": "Винт M50-HF01430102-116041-0003-Y для DJI Agras T50T40T25T20P",
+    "sku": "YC.ST.LL000209",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M50-HF01430102-116041-0003-Y_для_DJI_Agras_T50T40T25T20P,_арт._YC.ST.LL000209_YC.ST.LL000209\\schema.jpg",
+    "partSku": "YC.ST.LL000209"
+  },
+  {
+    "dir": "Винт_M50-HF01900080-095050-5103-Y_для_DJI_Agras_T50,_арт._YC.ST.LL000326_YC.ST.LL000326",
+    "name": "Винт M50-HF01900080-095050-5103-Y для DJI Agras T50",
+    "sku": "YC.ST.LL000326",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M50-HF01900080-095050-5103-Y_для_DJI_Agras_T50,_арт._YC.ST.LL000326_YC.ST.LL000326\\schema.jpg",
+    "partSku": "YC.ST.LL000326"
+  },
+  {
+    "dir": "Винт_M60-HC01400100-100050-5103-N_для_DJI_Agras_T50,_арт._YC.ST.LL000380_YC.ST.LL000380",
+    "name": "Винт M60-HC01400100-100050-5103-N для DJI Agras T50",
+    "sku": "YC.ST.LL000380",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_M60-HC01400100-100050-5103-N_для_DJI_Agras_T50,_арт._YC.ST.LL000380_YC.ST.LL000380\\schema.jpg",
+    "partSku": "YC.ST.LL000380"
+  },
+  {
+    "dir": "Винт_T20-PC00400040-040010-5103-N_для_DJI_Agras_T25T70PT100,_арт._YC.ST.LL000236_YC.ST.LL000236",
+    "name": "Винт T20-PC00400040-040010-5103-N для DJI Agras T25T70PT100",
+    "sku": "YC.ST.LL000236",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_T20-PC00400040-040010-5103-N_для_DJI_Agras_T25T70PT100,_арт._YC.ST.LL000236_YC.ST.LL000236\\schema.jpg",
+    "partSku": "YC.ST.LL000236"
+  },
+  {
+    "dir": "Винт_T30-HC00800080-057030-5103-N_для_DJI_Agras_T50T40T25T20P,_арт._YC.ST.LL000235_YC.ST.LL000235",
+    "name": "Винт T30-HC00800080-057030-5103-N для DJI Agras T50T40T25T20P",
+    "sku": "YC.ST.LL000235",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_T30-HC00800080-057030-5103-N_для_DJI_Agras_T50T40T25T20P,_арт._YC.ST.LL000235_YC.ST.LL000235\\schema.jpg",
+    "partSku": "YC.ST.LL000235"
+  },
+  {
+    "dir": "Винт_T30-HC01000100-057030-0323-N_для_DJI_Agras_T50T25,_арт._YC.WJ.LL000426_YC.WJ.LL000426",
+    "name": "Винт T30-HC01000100-057030-0323-N для DJI Agras T50T25",
+    "sku": "YC.WJ.LL000426",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_T30-HC01000100-057030-0323-N_для_DJI_Agras_T50T25,_арт._YC.WJ.LL000426_YC.WJ.LL000426\\schema.jpg",
+    "partSku": "YC.WJ.LL000426"
+  },
+  {
+    "dir": "Винт_крепления_луча_для_DJI_Agras_T50T40T70,_арт._YC.JG.LD000039_YC.JG.LD000039",
+    "name": "Винт крепления луча для DJI Agras T50T40T70",
+    "sku": "YC.JG.LD000039",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_крепления_луча_для_DJI_Agras_T50T40T70,_арт._YC.JG.LD000039_YC.JG.LD000039\\schema.jpg",
+    "partSku": "YC.JG.LD000039"
+  },
+  {
+    "dir": "Винт_крепления_луча_для_DJI_Agras_T50T40T70,_арт._YC.JG.QX002314_YC.JG.QX002314",
+    "name": "Винт крепления луча для DJI Agras T50T40T70",
+    "sku": "YC.JG.QX002314",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_крепления_луча_для_DJI_Agras_T50T40T70,_арт._YC.JG.QX002314_YC.JG.QX002314\\schema.jpg",
+    "partSku": "YC.JG.QX002314"
+  },
+  {
+    "dir": "Винт_крепления_фиксирующей_защёлки_для_DJI_Agras_T50T40T25T70,_арт._YC.JG.LD000041_YC.JG.LD000041",
+    "name": "Винт крепления фиксирующей защёлки для DJI Agras T50T40T25T70",
+    "sku": "YC.JG.LD000041",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Винт_крепления_фиксирующей_защёлки_для_DJI_Agras_T50T40T25T70,_арт._YC.JG.LD000041_YC.JG.LD000041\\schema.jpg",
+    "partSku": "YC.JG.LD000041"
+  },
+  {
+    "dir": "Влагозащитная_вентиляционная_крышка_бака_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P,_арт._YC._YC.JG.ZS002250",
+    "name": "Влагозащитная вентиляционная крышка бака для DJI Agras T50T40T25T20PT70T100T70PT25P",
+    "sku": "YC.JG.ZS002250",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Влагозащитная_вентиляционная_крышка_бака_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P,_арт._YC._YC.JG.ZS002250\\schema.jpg",
+    "partSku": "YC.JG.ZS002250"
+  },
+  {
+    "dir": "Влагозащитная_вентиляционная_мембрана_крышки_бака_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P_YC.JG.MY000678",
+    "name": "Влагозащитная вентиляционная мембрана крышки бака для DJI Agras T50T40T25T20PT70T100T70PT25P YC.JG.MY000678",
+    "sku": "YC.JG.MY000678",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Влагозащитная_вентиляционная_мембрана_крышки_бака_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P_YC.JG.MY000678\\schema.jpg",
+    "partSku": "YC.JG.MY000678"
+  },
+  {
+    "dir": "Влагозащитная_крышка_платы_распределения_питания_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003588_YC.JG.ZS003588",
+    "name": "Влагозащитная крышка платы распределения питания для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003588",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Влагозащитная_крышка_платы_распределения_питания_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003588_YC.JG.ZS003588\\schema.jpg",
+    "partSku": "YC.JG.ZS003588"
+  },
+  {
+    "dir": "Влагозащитная_крышка_порта_USB-C_для_DJI_Agras_T50T40T25T20PT70T100T10T30T70PT25P,_арт._YC._YC.JG.MY000389",
+    "name": "Влагозащитная крышка порта USB-C для DJI Agras T50T40T25T20PT70T100T10T30T70PT25P",
+    "sku": "YC.JG.MY000389",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Влагозащитная_крышка_порта_USB-C_для_DJI_Agras_T50T40T25T20PT70T100T10T30T70PT25P,_арт._YC._YC.JG.MY000389\\schema.jpg",
+    "partSku": "YC.JG.MY000389"
+  },
+  {
+    "dir": "Влагозащитная_мембрана_барометра_для_DJI_Agras_T50T25T20PT70T100T10T30T70PT40T25P,_арт._YC._YC.QT.QT000167",
+    "name": "Влагозащитная мембрана барометра для DJI Agras T50T25T20PT70T100T10T30T70PT40T25P",
+    "sku": "YC.QT.QT000167",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Влагозащитная_мембрана_барометра_для_DJI_Agras_T50T25T20PT70T100T10T30T70PT40T25P,_арт._YC._YC.QT.QT000167\\schema.jpg",
+    "partSku": "YC.QT.QT000167"
+  },
+  {
+    "dir": "Внешний_ролик_крепления_аккумулятора_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.XJ.QT000247_YC.XJ.QT000247",
+    "name": "Внешний ролик крепления аккумулятора для DJI Agras T50T40T25T20PT10T30",
+    "sku": "YC.XJ.QT000247",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Внешний_ролик_крепления_аккумулятора_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.XJ.QT000247_YC.XJ.QT000247\\schema.jpg",
+    "partSku": "YC.XJ.QT000247"
+  },
+  {
+    "dir": "Внутренний_ролик_клипсы_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.SJ.WS002500_YC.SJ.WS002500",
+    "name": "Внутренний ролик клипсы бака для DJI Agras T50T40T25T20PT10T30",
+    "sku": "YC.SJ.WS002500",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Внутренний_ролик_клипсы_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.SJ.WS002500_YC.SJ.WS002500\\schema.jpg",
+    "partSku": "YC.SJ.WS002500"
+  },
+  {
+    "dir": "Водяной_шланг_луча_для_DJI_Agras_T50,_арт._YC.JG.JS000030_YC.JG.JS000030",
+    "name": "Водяной шланг луча для DJI Agras T50",
+    "sku": "YC.JG.JS000030",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Водяной_шланг_луча_для_DJI_Agras_T50,_арт._YC.JG.JS000030_YC.JG.JS000030\\schema.jpg",
+    "partSku": "YC.JG.JS000030"
+  },
+  {
+    "dir": "Вспомогательная_штанга_для_DJI_Agras_T50T25_YC.JG.ZS003435",
+    "name": "Вспомогательная штанга для DJI Agras T50T25 YC.JG.ZS003435",
+    "sku": "YC.JG.ZS003435",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Вспомогательная_штанга_для_DJI_Agras_T50T25_YC.JG.ZS003435\\schema.jpg",
+    "partSku": "YC.JG.ZS003435"
+  },
+  {
+    "dir": "Входной_шланг_расходомера_для_DJI_Agras_T50T25,_арт._YC.JG.JS000032_YC.JG.JS000032",
+    "name": "Входной шланг расходомера для DJI Agras T50T25",
+    "sku": "YC.JG.JS000032",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Входной_шланг_расходомера_для_DJI_Agras_T50T25,_арт._YC.JG.JS000032_YC.JG.JS000032\\schema.jpg",
+    "partSku": "YC.JG.JS000032"
+  },
+  {
+    "dir": "Выходной_шланг_расходомера_для_DJI_Agras_T50T25,_арт._YC.JG.JS000033_YC.JG.JS000033",
+    "name": "Выходной шланг расходомера для DJI Agras T50T25",
+    "sku": "YC.JG.JS000033",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Выходной_шланг_расходомера_для_DJI_Agras_T50T25,_арт._YC.JG.JS000033_YC.JG.JS000033\\schema.jpg",
+    "partSku": "YC.JG.JS000033"
+  },
+  {
+    "dir": "Гайка-барашек_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003594_YC.JG.ZS003594",
+    "name": "Гайка-барашек для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003594",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Гайка-барашек_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003594_YC.JG.ZS003594\\schema.jpg",
+    "partSku": "YC.JG.ZS003594"
+  },
+  {
+    "dir": "Гайка-барашек_центробежной_форсунки_для_DJI_Agras_T50T25,_арт._YC.JG.FM000092_YC.JG.FM000092",
+    "name": "Гайка-барашек центробежной форсунки для DJI Agras T50T25",
+    "sku": "YC.JG.FM000092",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Гайка-барашек_центробежной_форсунки_для_DJI_Agras_T50T25,_арт._YC.JG.FM000092_YC.JG.FM000092\\schema.jpg",
+    "partSku": "YC.JG.FM000092"
+  },
+  {
+    "dir": "Гайка_M60-HX100060-5103_01_для_DJI_Agras_T100,_арт._YC.WJ.LM000044_YC.WJ.LM000044",
+    "name": "Гайка M60-HX100060-5103 01 для DJI Agras T100",
+    "sku": "YC.WJ.LM000044",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Гайка_M60-HX100060-5103_01_для_DJI_Agras_T100,_арт._YC.WJ.LM000044_YC.WJ.LM000044\\schema.jpg",
+    "partSku": "YC.WJ.LM000044"
+  },
+  {
+    "dir": "Гайка_водяного_шланга_(M15)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003460_YC.JG.ZS003460",
+    "name": "Гайка водяного шланга (M15) для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003460",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Гайка_водяного_шланга_(M15)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003460_YC.JG.ZS003460\\schema.jpg",
+    "partSku": "YC.JG.ZS003460"
+  },
+  {
+    "dir": "Гайка_шланга_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002255_YC.JG.ZS002255",
+    "name": "Гайка шланга для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.ZS002255",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Гайка_шланга_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002255_YC.JG.ZS002255\\schema.jpg",
+    "partSku": "YC.JG.ZS002255"
+  },
+  {
+    "dir": "Гайка_штанги_опрыскивателя_для_DJI_Agras_T50T40T25,_арт._BC.AG.SS000752_BC.AG.SS000752",
+    "name": "Гайка штанги опрыскивателя для DJI Agras T50T40T25",
+    "sku": "BC.AG.SS000752",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Гайка_штанги_опрыскивателя_для_DJI_Agras_T50T40T25,_арт._BC.AG.SS000752_BC.AG.SS000752\\schema.jpg",
+    "partSku": "BC.AG.SS000752"
+  },
+  {
+    "dir": "Герметизирующая_заглушка_заднего_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.MY001058_YC.JG.MY001058",
+    "name": "Герметизирующая заглушка заднего корпуса для DJI Agras T50T25",
+    "sku": "YC.JG.MY001058",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Герметизирующая_заглушка_заднего_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.MY001058_YC.JG.MY001058\\schema.jpg",
+    "partSku": "YC.JG.MY001058"
+  },
+  {
+    "dir": "Герметизирующая_заглушка_переднего_корпуса_для_DJI_Agras_T50T25T70,_арт._YC.JG.MY001079_YC.JG.MY001079",
+    "name": "Герметизирующая заглушка переднего корпуса для DJI Agras T50T25T70",
+    "sku": "YC.JG.MY001079",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Герметизирующая_заглушка_переднего_корпуса_для_DJI_Agras_T50T25T70,_арт._YC.JG.MY001079_YC.JG.MY001079\\schema.jpg",
+    "partSku": "YC.JG.MY001079"
+  },
+  {
+    "dir": "Гофрированный_шланг_штанги_опрыскивателя_(задний)_для_DJI_Agras_T50,_арт._YC.JG.JS000031_YC.JG.JS000031",
+    "name": "Гофрированный шланг штанги опрыскивателя (задний) для DJI Agras T50",
+    "sku": "YC.JG.JS000031",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Гофрированный_шланг_штанги_опрыскивателя_(задний)_для_DJI_Agras_T50,_арт._YC.JG.JS000031_YC.JG.JS000031\\schema.jpg",
+    "partSku": "YC.JG.JS000031"
+  },
+  {
+    "dir": "Датчик_уровня_жидкости_бака_для_DJI_Agras_T50T40T25T20PT10,_арт._BC.AG.SS000471_BC.AG.SS000471",
+    "name": "Датчик уровня жидкости бака для DJI Agras T50T40T25T20PT10",
+    "sku": "BC.AG.SS000471",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Датчик_уровня_жидкости_бака_для_DJI_Agras_T50T40T25T20PT10,_арт._BC.AG.SS000471_BC.AG.SS000471\\schema.jpg",
+    "partSku": "BC.AG.SS000471"
+  },
+  {
+    "dir": "Двигатель_10033_48KV_для_DJI_Agras_T50,_арт._BC.AG.SS000668_BC.AG.SS000668",
+    "name": "Двигатель 10033 48KV для DJI Agras T50",
+    "sku": "BC.AG.SS000668",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Двигатель_10033_48KV_для_DJI_Agras_T50,_арт._BC.AG.SS000668_BC.AG.SS000668\\schema.jpg",
+    "partSku": "BC.AG.SS000668"
+  },
+  {
+    "dir": "Двигатель_атомайзера_DJI_Agras_T50T40T25T20P_(китайская_версия),_арт._BC.AG.SS000565_BC.AG.SS000565",
+    "name": "Двигатель атомайзера DJI Agras T50T40T25T20P (китайская версия)",
+    "sku": "BC.AG.SS000565",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Двигатель_атомайзера_DJI_Agras_T50T40T25T20P_(китайская_версия),_арт._BC.AG.SS000565_BC.AG.SS000565\\schema.jpg",
+    "partSku": "BC.AG.SS000565"
+  },
+  {
+    "dir": "Двигатель_крыльчатого_насоса_для_DJI_Agras_T40,_арт._BC.AG.SS000543.04_BC.AG.SS000543",
+    "name": "Двигатель крыльчатого насоса для DJI Agras T40",
+    "sku": "BC.AG.SS000543",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Двигатель_крыльчатого_насоса_для_DJI_Agras_T40,_арт._BC.AG.SS000543.04_BC.AG.SS000543\\schema.jpg",
+    "partSku": "BC.AG.SS000543"
+  },
+  {
+    "dir": "Дистанционирующая_втулка_крыльчатого_насоса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003417_YC.JG.ZS003417",
+    "name": "Дистанционирующая втулка крыльчатого насоса для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003417",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Дистанционирующая_втулка_крыльчатого_насоса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003417_YC.JG.ZS003417\\schema.jpg",
+    "partSku": "YC.JG.ZS003417"
+  },
+  {
+    "dir": "Задняя_крышка_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003396_YC.JG.ZS003396",
+    "name": "Задняя крышка корпуса для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003396",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Задняя_крышка_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003396_YC.JG.ZS003396\\schema.jpg",
+    "partSku": "YC.JG.ZS003396"
+  },
+  {
+    "dir": "Зажим_шланга_для_DJI_Agras_T50T25_YC.JG.ZS003479",
+    "name": "Зажим шланга для DJI Agras T50T25 YC.JG.ZS003479",
+    "sku": "YC.JG.ZS003479",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Зажим_шланга_для_DJI_Agras_T50T25_YC.JG.ZS003479\\schema.jpg",
+    "partSku": "YC.JG.ZS003479"
+  },
+  {
+    "dir": "Закладная_вставка_центрального_каркаса_для_DJI_Agras_T50_YC.JG.QX003017",
+    "name": "Закладная вставка центрального каркаса для DJI Agras T50 YC.JG.QX003017",
+    "sku": "YC.JG.QX003017",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Закладная_вставка_центрального_каркаса_для_DJI_Agras_T50_YC.JG.QX003017\\schema.jpg",
+    "partSku": "YC.JG.QX003017"
+  },
+  {
+    "dir": "Защёлка_аккумулятора_для_DJI_Agras_T50T25,_арт._YC.JG.FM000122_YC.JG.FM000122",
+    "name": "Защёлка аккумулятора для DJI Agras T50T25",
+    "sku": "YC.JG.FM000122",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Защёлка_аккумулятора_для_DJI_Agras_T50T25,_арт._YC.JG.FM000122_YC.JG.FM000122\\schema.jpg",
+    "partSku": "YC.JG.FM000122"
+  },
+  {
+    "dir": "Защитная_пластина_от_клея_для_DJI_Agras_T50T25,_арт._YC.JG.MQ001973_YC.JG.MQ001973",
+    "name": "Защитная пластина от клея для DJI Agras T50T25",
+    "sku": "YC.JG.MQ001973",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Защитная_пластина_от_клея_для_DJI_Agras_T50T25,_арт._YC.JG.MQ001973_YC.JG.MQ001973\\schema.jpg",
+    "partSku": "YC.JG.MQ001973"
+  },
+  {
+    "dir": "Защитный_кожух_двигателя_для_DJI_Agras_T50,_арт._YC.JG.FP000028_YC.JG.FP000028",
+    "name": "Защитный кожух двигателя для DJI Agras T50",
+    "sku": "YC.JG.FP000028",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Защитный_кожух_двигателя_для_DJI_Agras_T50,_арт._YC.JG.FP000028_YC.JG.FP000028\\schema.jpg",
+    "partSku": "YC.JG.FP000028"
+  },
+  {
+    "dir": "Защитный_кожух_крыльчатого_насоса_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002389_YC.JG.ZS002389",
+    "name": "Защитный кожух крыльчатого насоса для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.ZS002389",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Защитный_кожух_крыльчатого_насоса_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002389_YC.JG.ZS002389\\schema.jpg",
+    "partSku": "YC.JG.ZS002389"
+  },
+  {
+    "dir": "Защитный_поролон_барометра_для_DJI_Agras_T50T25T70T30,_арт._YC.PM.QT000137_YC.PM.QT000137",
+    "name": "Защитный поролон барометра для DJI Agras T50T25T70T30",
+    "sku": "YC.PM.QT000137",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Защитный_поролон_барометра_для_DJI_Agras_T50T25T70T30,_арт._YC.PM.QT000137_YC.PM.QT000137\\schema.jpg",
+    "partSku": "YC.PM.QT000137"
+  },
+  {
+    "dir": "Износостойкая_втулка_для_DJI_Agras_T50T70,_арт._YC.JG.ZS003557_YC.JG.ZS003557",
+    "name": "Износостойкая втулка для DJI Agras T50T70",
+    "sku": "YC.JG.ZS003557",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Износостойкая_втулка_для_DJI_Agras_T50T70,_арт._YC.JG.ZS003557_YC.JG.ZS003557\\schema.jpg",
+    "partSku": "YC.JG.ZS003557"
+  },
+  {
+    "dir": "Износостойкая_шайба_для_DJI_Agras_T50T25,_арт._YC.JG.QX002485_YC.JG.QX002485",
+    "name": "Износостойкая шайба для DJI Agras T50T25",
+    "sku": "YC.JG.QX002485",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Износостойкая_шайба_для_DJI_Agras_T50T25,_арт._YC.JG.QX002485_YC.JG.QX002485\\schema.jpg",
+    "partSku": "YC.JG.QX002485"
+  },
+  {
+    "dir": "Кабель_питания_переднего_центробежного_распылителя_для_DJI_Agras_T50,_арт._YC.XC.XX000993_YC.XC.XX000993",
+    "name": "Кабель питания переднего центробежного распылителя для DJI Agras T50",
+    "sku": "YC.XC.XX000993",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кабель_питания_переднего_центробежного_распылителя_для_DJI_Agras_T50,_арт._YC.XC.XX000993_YC.XC.XX000993\\schema.jpg",
+    "partSku": "YC.XC.XX000993"
+  },
+  {
+    "dir": "Кабель_управления_газом_(распределитель—модуль_опрыскивания)_для_DJI_Agras_T50,_арт._YC.XC.XX000997_YC.XC.XX000997",
+    "name": "Кабель управления газом (распределитель—модуль опрыскивания) для DJI Agras T50",
+    "sku": "YC.XC.XX000997",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кабель_управления_газом_(распределитель—модуль_опрыскивания)_для_DJI_Agras_T50,_арт._YC.XC.XX000997_YC.XC.XX000997\\schema.jpg",
+    "partSku": "YC.XC.XX000997"
+  },
+  {
+    "dir": "Кабельная_трубка_для_DJI_Agras_T50_YC.JG.JS000035",
+    "name": "Кабельная трубка для DJI Agras T50 YC.JG.JS000035",
+    "sku": "YC.JG.JS000035",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кабельная_трубка_для_DJI_Agras_T50_YC.JG.JS000035\\schema.jpg",
+    "partSku": "YC.JG.JS000035"
+  },
+  {
+    "dir": "Клипса_левого_луча_для_DJI_Agras_T50_YC.JG.ZS003462",
+    "name": "Клипса левого луча для DJI Agras T50 YC.JG.ZS003462",
+    "sku": "YC.JG.ZS003462",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Клипса_левого_луча_для_DJI_Agras_T50_YC.JG.ZS003462\\schema.jpg",
+    "partSku": "YC.JG.ZS003462"
+  },
+  {
+    "dir": "Клипса_правого_луча_для_DJI_Agras_T50_YC.JG.ZS003463",
+    "name": "Клипса правого луча для DJI Agras T50 YC.JG.ZS003463",
+    "sku": "YC.JG.ZS003463",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Клипса_правого_луча_для_DJI_Agras_T50_YC.JG.ZS003463\\schema.jpg",
+    "partSku": "YC.JG.ZS003463"
+  },
+  {
+    "dir": "Клипса_силового_кабеля_для_DJI_Agras_T50T25_YC.JG.ZS003453",
+    "name": "Клипса силового кабеля для DJI Agras T50T25 YC.JG.ZS003453",
+    "sku": "YC.JG.ZS003453",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Клипса_силового_кабеля_для_DJI_Agras_T50T25_YC.JG.ZS003453\\schema.jpg",
+    "partSku": "YC.JG.ZS003453"
+  },
+  {
+    "dir": "Коаксиальный_кабель_RTK_для_DJI_Agras_T50,_арт._YC.XC.TT000132_YC.XC.TT000132",
+    "name": "Коаксиальный кабель RTK для DJI Agras T50",
+    "sku": "YC.XC.TT000132",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Коаксиальный_кабель_RTK_для_DJI_Agras_T50,_арт._YC.XC.TT000132_YC.XC.TT000132\\schema.jpg",
+    "partSku": "YC.XC.TT000132"
+  },
+  {
+    "dir": "Комбинированный_кабель_ESC_консолей_M1_и_M2_для_DJI_Agras_T50,_арт._YC.XC.DD000573_YC.XC.DD000573",
+    "name": "Комбинированный кабель ESC консолей M1 и M2 для DJI Agras T50",
+    "sku": "YC.XC.DD000573",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Комбинированный_кабель_ESC_консолей_M1_и_M2_для_DJI_Agras_T50,_арт._YC.XC.DD000573_YC.XC.DD000573\\schema.jpg",
+    "partSku": "YC.XC.DD000573"
+  },
+  {
+    "dir": "Комбинированный_кабель_ESC_консолей_M3_и_M4_для_DJI_Agras_T50,_арт._YC.XC.DD000572_YC.XC.DD000572",
+    "name": "Комбинированный кабель ESC консолей M3 и M4 для DJI Agras T50",
+    "sku": "YC.XC.DD000572",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Комбинированный_кабель_ESC_консолей_M3_и_M4_для_DJI_Agras_T50,_арт._YC.XC.DD000572_YC.XC.DD000572\\schema.jpg",
+    "partSku": "YC.XC.DD000572"
+  },
+  {
+    "dir": "Коммуникационный_кабель_(распределитель—модуль_опрыскивания)_для_DJI_Agras_T50,_арт._YC.XC.XX001009_YC.XC.XX001009",
+    "name": "Коммуникационный кабель (распределитель—модуль опрыскивания) для DJI Agras T50",
+    "sku": "YC.XC.XX001009",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Коммуникационный_кабель_(распределитель—модуль_опрыскивания)_для_DJI_Agras_T50,_арт._YC.XC.XX001009_YC.XC.XX001009\\schema.jpg",
+    "partSku": "YC.XC.XX001009"
+  },
+  {
+    "dir": "Корпус_барометра_для_DJI_Agras_T50T25T70,_арт._YC.JG.ZS002301_YC.JG.ZS002301",
+    "name": "Корпус барометра для DJI Agras T50T25T70",
+    "sku": "YC.JG.ZS002301",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Корпус_барометра_для_DJI_Agras_T50T25T70,_арт._YC.JG.ZS002301_YC.JG.ZS002301\\schema.jpg",
+    "partSku": "YC.JG.ZS002301"
+  },
+  {
+    "dir": "Корпус_заднего_блока_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003397_YC.JG.ZS003397",
+    "name": "Корпус заднего блока для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003397",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Корпус_заднего_блока_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003397_YC.JG.ZS003397\\schema.jpg",
+    "partSku": "YC.JG.ZS003397"
+  },
+  {
+    "dir": "Корпус_крыльчатого_насоса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003418_YC.JG.ZS003418",
+    "name": "Корпус крыльчатого насоса для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003418",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Корпус_крыльчатого_насоса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003418_YC.JG.ZS003418\\schema.jpg",
+    "partSku": "YC.JG.ZS003418"
+  },
+  {
+    "dir": "Корпус_переднего_блока_для_DJI_Agras_T50T25_YC.JG.ZS003387",
+    "name": "Корпус переднего блока для DJI Agras T50T25 YC.JG.ZS003387",
+    "sku": "YC.JG.ZS003387",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Корпус_переднего_блока_для_DJI_Agras_T50T25_YC.JG.ZS003387\\schema.jpg",
+    "partSku": "YC.JG.ZS003387"
+  },
+  {
+    "dir": "Корпус_штанги_опрыскивателя_(задний)_для_DJI_Agras_T50,_арт._YC.JG.ZS003399_YC.JG.ZS003399",
+    "name": "Корпус штанги опрыскивателя (задний) для DJI Agras T50",
+    "sku": "YC.JG.ZS003399",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Корпус_штанги_опрыскивателя_(задний)_для_DJI_Agras_T50,_арт._YC.JG.ZS003399_YC.JG.ZS003399\\schema.jpg",
+    "partSku": "YC.JG.ZS003399"
+  },
+  {
+    "dir": "Кронштейн_FPV-камеры_для_DJI_Agras_T50T25_YC.JG.ZS003425",
+    "name": "Кронштейн FPV-камеры для DJI Agras T50T25 YC.JG.ZS003425",
+    "sku": "YC.JG.ZS003425",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_FPV-камеры_для_DJI_Agras_T50T25_YC.JG.ZS003425\\schema.jpg",
+    "partSku": "YC.JG.ZS003425"
+  },
+  {
+    "dir": "Кронштейн_датчика_взвешивания_(левый)_для_DJI_Agras_T50T25_YC.JG.ZS003600",
+    "name": "Кронштейн датчика взвешивания (левый) для DJI Agras T50T25 YC.JG.ZS003600",
+    "sku": "YC.JG.ZS003600",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_датчика_взвешивания_(левый)_для_DJI_Agras_T50T25_YC.JG.ZS003600\\schema.jpg",
+    "partSku": "YC.JG.ZS003600"
+  },
+  {
+    "dir": "Кронштейн_датчика_взвешивания_(передний)_для_DJI_Agras_T50T25_YC.JG.ZS003601",
+    "name": "Кронштейн датчика взвешивания (передний) для DJI Agras T50T25 YC.JG.ZS003601",
+    "sku": "YC.JG.ZS003601",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_датчика_взвешивания_(передний)_для_DJI_Agras_T50T25_YC.JG.ZS003601\\schema.jpg",
+    "partSku": "YC.JG.ZS003601"
+  },
+  {
+    "dir": "Кронштейн_датчика_взвешивания_(правый)_для_DJI_Agras_T50T25_YC.JG.ZS003599",
+    "name": "Кронштейн датчика взвешивания (правый) для DJI Agras T50T25 YC.JG.ZS003599",
+    "sku": "YC.JG.ZS003599",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_датчика_взвешивания_(правый)_для_DJI_Agras_T50T25_YC.JG.ZS003599\\schema.jpg",
+    "partSku": "YC.JG.ZS003599"
+  },
+  {
+    "dir": "Кронштейн_датчика_положения_луча_для_DJI_Agras_T50T40T70,_арт._YC.JG.ZS002278_YC.JG.ZS002278",
+    "name": "Кронштейн датчика положения луча для DJI Agras T50T40T70",
+    "sku": "YC.JG.ZS002278",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_датчика_положения_луча_для_DJI_Agras_T50T40T70,_арт._YC.JG.ZS002278_YC.JG.ZS002278\\schema.jpg",
+    "partSku": "YC.JG.ZS002278"
+  },
+  {
+    "dir": "Кронштейн_датчика_уровня_для_DJI_Agras_T50T25P,_арт._YC.JG.ZS002237_YC.JG.ZS002237",
+    "name": "Кронштейн датчика уровня для DJI Agras T50T25P",
+    "sku": "YC.JG.ZS002237",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_датчика_уровня_для_DJI_Agras_T50T25P,_арт._YC.JG.ZS002237_YC.JG.ZS002237\\schema.jpg",
+    "partSku": "YC.JG.ZS002237"
+  },
+  {
+    "dir": "Кронштейн_крепления_луча_M1_к_раме_для_DJI_Agras_T50,_арт._BC.AG.SS000683_BC.AG.SS000683",
+    "name": "Кронштейн крепления луча M1 к раме для DJI Agras T50",
+    "sku": "BC.AG.SS000683",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_крепления_луча_M1_к_раме_для_DJI_Agras_T50,_арт._BC.AG.SS000683_BC.AG.SS000683\\schema.jpg",
+    "partSku": "BC.AG.SS000683"
+  },
+  {
+    "dir": "Кронштейн_крепления_луча_M2_к_раме_для_DJI_Agras_T50,_арт._BC.AG.SS000684_BC.AG.SS000684",
+    "name": "Кронштейн крепления луча M2 к раме для DJI Agras T50",
+    "sku": "BC.AG.SS000684",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_крепления_луча_M2_к_раме_для_DJI_Agras_T50,_арт._BC.AG.SS000684_BC.AG.SS000684\\schema.jpg",
+    "partSku": "BC.AG.SS000684"
+  },
+  {
+    "dir": "Кронштейн_крепления_луча_M3_к_раме_для_DJI_Agras_T50,_арт._BC.AG.SS000685_BC.AG.SS000685",
+    "name": "Кронштейн крепления луча M3 к раме для DJI Agras T50",
+    "sku": "BC.AG.SS000685",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_крепления_луча_M3_к_раме_для_DJI_Agras_T50,_арт._BC.AG.SS000685_BC.AG.SS000685\\schema.jpg",
+    "partSku": "BC.AG.SS000685"
+  },
+  {
+    "dir": "Кронштейн_крепления_луча_M4_к_раме_для_DJI_Agras_T50,_арт._BC.AG.SS000686_BC.AG.SS000686",
+    "name": "Кронштейн крепления луча M4 к раме для DJI Agras T50",
+    "sku": "BC.AG.SS000686",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_крепления_луча_M4_к_раме_для_DJI_Agras_T50,_арт._BC.AG.SS000686_BC.AG.SS000686\\schema.jpg",
+    "partSku": "BC.AG.SS000686"
+  },
+  {
+    "dir": "Кронштейн_крыльчатого_насоса_для_DJI_Agras_T50T25_YC.JG.ZS003392",
+    "name": "Кронштейн крыльчатого насоса для DJI Agras T50T25 YC.JG.ZS003392",
+    "sku": "YC.JG.ZS003392",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_крыльчатого_насоса_для_DJI_Agras_T50T25_YC.JG.ZS003392\\schema.jpg",
+    "partSku": "YC.JG.ZS003392"
+  },
+  {
+    "dir": "Кронштейн_переднего_радара_для_DJI_Agras_T50T25_YC.JG.YZ000671",
+    "name": "Кронштейн переднего радара для DJI Agras T50T25 YC.JG.YZ000671",
+    "sku": "YC.JG.YZ000671",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_переднего_радара_для_DJI_Agras_T50T25_YC.JG.YZ000671\\schema.jpg",
+    "partSku": "YC.JG.YZ000671"
+  },
+  {
+    "dir": "Кронштейн_расходомера_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.JG.ZS000984_YC.JG.ZS000984",
+    "name": "Кронштейн расходомера для DJI Agras T50T40T25T20PT10T30",
+    "sku": "YC.JG.ZS000984",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_расходомера_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.JG.ZS000984_YC.JG.ZS000984\\schema.jpg",
+    "partSku": "YC.JG.ZS000984"
+  },
+  {
+    "dir": "Кронштейн_шасси_(задний_левый)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003466_YC.JG.ZS003466",
+    "name": "Кронштейн шасси (задний левый) для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003466",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_шасси_(задний_левый)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003466_YC.JG.ZS003466\\schema.jpg",
+    "partSku": "YC.JG.ZS003466"
+  },
+  {
+    "dir": "Кронштейн_шасси_(задний_правый)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003467_YC.JG.ZS003467",
+    "name": "Кронштейн шасси (задний правый) для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003467",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_шасси_(задний_правый)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003467_YC.JG.ZS003467\\schema.jpg",
+    "partSku": "YC.JG.ZS003467"
+  },
+  {
+    "dir": "Кронштейн_шасси_(передний_левый)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003465_YC.JG.ZS003465",
+    "name": "Кронштейн шасси (передний левый) для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003465",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_шасси_(передний_левый)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003465_YC.JG.ZS003465\\schema.jpg",
+    "partSku": "YC.JG.ZS003465"
+  },
+  {
+    "dir": "Кронштейн_шасси_(передний_правый)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003464_YC.JG.ZS003464",
+    "name": "Кронштейн шасси (передний правый) для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003464",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Кронштейн_шасси_(передний_правый)_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003464_YC.JG.ZS003464\\schema.jpg",
+    "partSku": "YC.JG.ZS003464"
+  },
+  {
+    "dir": "Крышка_бака_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002251_YC.JG.ZS002251",
+    "name": "Крышка бака для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.ZS002251",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Крышка_бака_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002251_YC.JG.ZS002251\\schema.jpg",
+    "partSku": "YC.JG.ZS002251"
+  },
+  {
+    "dir": "Левая_опора_радара_для_DJI_Agras_T50T25_YC.JG.ZS003493",
+    "name": "Левая опора радара для DJI Agras T50T25 YC.JG.ZS003493",
+    "sku": "YC.JG.ZS003493",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Левая_опора_радара_для_DJI_Agras_T50T25_YC.JG.ZS003493\\schema.jpg",
+    "partSku": "YC.JG.ZS003493"
+  },
+  {
+    "dir": "Левый_задний_луч_M3_для_DJI_Agras_T50,_арт._BC.AG.SS000698_BC.AG.SS000698",
+    "name": "Левый задний луч M3 для DJI Agras T50",
+    "sku": "BC.AG.SS000698",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Левый_задний_луч_M3_для_DJI_Agras_T50,_арт._BC.AG.SS000698_BC.AG.SS000698\\schema.jpg",
+    "partSku": "BC.AG.SS000698"
+  },
+  {
+    "dir": "Модуль_ESC_(регулятор_хода)_для_DJI_Agras_T50T25(Глобальная_версия),_арт._BC.AG.SS000700_BC.AG.SS000700",
+    "name": "Модуль ESC (регулятор хода) для DJI Agras T50T25(Глобальная версия)",
+    "sku": "BC.AG.SS000700",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_ESC_(регулятор_хода)_для_DJI_Agras_T50T25(Глобальная_версия),_арт._BC.AG.SS000700_BC.AG.SS000700\\schema.jpg",
+    "partSku": "BC.AG.SS000700"
+  },
+  {
+    "dir": "Модуль_FPV-камеры_для_DJI_Agras_T50T25,_арт._BC.AG.SS000681_BC.AG.SS000681",
+    "name": "Модуль FPV-камеры для DJI Agras T50T25",
+    "sku": "BC.AG.SS000681",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_FPV-камеры_для_DJI_Agras_T50T25,_арт._BC.AG.SS000681_BC.AG.SS000681\\schema.jpg",
+    "partSku": "BC.AG.SS000681"
+  },
+  {
+    "dir": "Модуль_RTK-антенны_для_DJI_Agras_T50T25,_арт._BC.AG.SS000694_BC.AG.SS000694",
+    "name": "Модуль RTK-антенны для DJI Agras T50T25",
+    "sku": "BC.AG.SS000694",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_RTK-антенны_для_DJI_Agras_T50T25,_арт._BC.AG.SS000694_BC.AG.SS000694\\schema.jpg",
+    "partSku": "BC.AG.SS000694"
+  },
+  {
+    "dir": "Модуль_авионной_системы_для_DJI_Agras_T50T25_BC.AG.SS000674",
+    "name": "Модуль авионной системы для DJI Agras T50T25 BC.AG.SS000674",
+    "sku": "BC.AG.SS000674",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_авионной_системы_для_DJI_Agras_T50T25_BC.AG.SS000674\\schema.jpg",
+    "partSku": "BC.AG.SS000674"
+  },
+  {
+    "dir": "Модуль_барометра_для_DJI_Agras_T50T25,_арт._BC.AG.PP000354_BC.AG.PP000354",
+    "name": "Модуль барометра для DJI Agras T50T25",
+    "sku": "BC.AG.PP000354",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_барометра_для_DJI_Agras_T50T25,_арт._BC.AG.PP000354_BC.AG.PP000354\\schema.jpg",
+    "partSku": "BC.AG.PP000354"
+  },
+  {
+    "dir": "Модуль_датчика_взвешивания_для_DJI_Agras_T50,_арт._BC.AG.SS000673_BC.AG.SS000673",
+    "name": "Модуль датчика взвешивания для DJI Agras T50",
+    "sku": "BC.AG.SS000673",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_датчика_взвешивания_для_DJI_Agras_T50,_арт._BC.AG.SS000673_BC.AG.SS000673\\schema.jpg",
+    "partSku": "BC.AG.SS000673"
+  },
+  {
+    "dir": "Модуль_датчика_уровня_жидкости_для_DJI_Agras_T50T25,_арт._BC.AG.SS000709_BC.AG.SS000709",
+    "name": "Модуль датчика уровня жидкости для DJI Agras T50T25",
+    "sku": "BC.AG.SS000709",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_датчика_уровня_жидкости_для_DJI_Agras_T50T25,_арт._BC.AG.SS000709_BC.AG.SS000709\\schema.jpg",
+    "partSku": "BC.AG.SS000709"
+  },
+  {
+    "dir": "Модуль_заднего_радара_(в_комплекте_с_кабелем)_для_DJI_Agras_T50T25_BC.AG.SS000693",
+    "name": "Модуль заднего радара (в комплекте с кабелем) для DJI Agras T50T25 BC.AG.SS000693",
+    "sku": "BC.AG.SS000693",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_заднего_радара_(в_комплекте_с_кабелем)_для_DJI_Agras_T50T25_BC.AG.SS000693\\schema.jpg",
+    "partSku": "BC.AG.SS000693"
+  },
+  {
+    "dir": "Модуль_защёлки_луча_для_DJI_Agras_T50T25,_арт._BC.AG.SS000701_BC.AG.SS000701",
+    "name": "Модуль защёлки луча для DJI Agras T50T25",
+    "sku": "BC.AG.SS000701",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_защёлки_луча_для_DJI_Agras_T50T25,_арт._BC.AG.SS000701_BC.AG.SS000701\\schema.jpg",
+    "partSku": "BC.AG.SS000701"
+  },
+  {
+    "dir": "Модуль_крыльчатки_насоса_для_DJI_Agras_T50T25,_арт._BC.AG.SS000710_BC.AG.SS000710",
+    "name": "Модуль крыльчатки насоса для DJI Agras T50T25",
+    "sku": "BC.AG.SS000710",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_крыльчатки_насоса_для_DJI_Agras_T50T25,_арт._BC.AG.SS000710_BC.AG.SS000710\\schema.jpg",
+    "partSku": "BC.AG.SS000710"
+  },
+  {
+    "dir": "Модуль_крышки_объектива_для_DJI_Agras_T50T25_BC.AG.SS000682",
+    "name": "Модуль крышки объектива для DJI Agras T50T25 BC.AG.SS000682",
+    "sku": "BC.AG.SS000682",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_крышки_объектива_для_DJI_Agras_T50T25_BC.AG.SS000682\\schema.jpg",
+    "partSku": "BC.AG.SS000682"
+  },
+  {
+    "dir": "Модуль_нижней_подсветки_для_DJI_Agras_T50T25,_арт._BC.AG.SS000677_BC.AG.SS000677",
+    "name": "Модуль нижней подсветки для DJI Agras T50T25",
+    "sku": "BC.AG.SS000677",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_нижней_подсветки_для_DJI_Agras_T50T25,_арт._BC.AG.SS000677_BC.AG.SS000677\\schema.jpg",
+    "partSku": "BC.AG.SS000677"
+  },
+  {
+    "dir": "Модуль_переднего_датчика_технического_зрения_(в_комплекте_с_кабелем)_для_DJI_Agras_T50T25,_арт._BC._BC.AG.SS000671",
+    "name": "Модуль переднего датчика технического зрения (в комплекте с кабелем) для DJI Agras T50T25",
+    "sku": "BC.AG.SS000671",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_переднего_датчика_технического_зрения_(в_комплекте_с_кабелем)_для_DJI_Agras_T50T25,_арт._BC._BC.AG.SS000671\\schema.jpg",
+    "partSku": "BC.AG.SS000671"
+  },
+  {
+    "dir": "Модуль_переднего_радара_(в_комплекте_с_кабелем)_для_DJI_Agras_T50T25_BC.AG.SS000678",
+    "name": "Модуль переднего радара (в комплекте с кабелем) для DJI Agras T50T25 BC.AG.SS000678",
+    "sku": "BC.AG.SS000678",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_переднего_радара_(в_комплекте_с_кабелем)_для_DJI_Agras_T50T25_BC.AG.SS000678\\schema.jpg",
+    "partSku": "BC.AG.SS000678"
+  },
+  {
+    "dir": "Модуль_питания_системы_опрыскивания_для_DJI_Agras_T50T25,_арт._BC.AG.SS000690_BC.AG.SS000690",
+    "name": "Модуль питания системы опрыскивания для DJI Agras T50T25",
+    "sku": "BC.AG.SS000690",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_питания_системы_опрыскивания_для_DJI_Agras_T50T25,_арт._BC.AG.SS000690_BC.AG.SS000690\\schema.jpg",
+    "partSku": "BC.AG.SS000690"
+  },
+  {
+    "dir": "Модуль_платы_распределения_питания_для_DJI_Agras_T50,_арт._BC.AG.SS000691_BC.AG.SS000691",
+    "name": "Модуль платы распределения питания для DJI Agras T50",
+    "sku": "BC.AG.SS000691",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_платы_распределения_питания_для_DJI_Agras_T50,_арт._BC.AG.SS000691_BC.AG.SS000691\\schema.jpg",
+    "partSku": "BC.AG.SS000691"
+  },
+  {
+    "dir": "Модуль_распределительной_платы_для_DJI_Agras_T50,_арт._BC.AG.SS000676_BC.AG.SS000676",
+    "name": "Модуль распределительной платы для DJI Agras T50",
+    "sku": "BC.AG.SS000676",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_распределительной_платы_для_DJI_Agras_T50,_арт._BC.AG.SS000676_BC.AG.SS000676\\schema.jpg",
+    "partSku": "BC.AG.SS000676"
+  },
+  {
+    "dir": "Модуль_расходомера_(в_комплекте_с_сигнальным_кабелем)_для_DJI_Agras_T50T25,_арт._BC.AG.SS000712_BC.AG.SS000712",
+    "name": "Модуль расходомера (в комплекте с сигнальным кабелем) для DJI Agras T50T25",
+    "sku": "BC.AG.SS000712",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_расходомера_(в_комплекте_с_сигнальным_кабелем)_для_DJI_Agras_T50T25,_арт._BC.AG.SS000712_BC.AG.SS000712\\schema.jpg",
+    "partSku": "BC.AG.SS000712"
+  },
+  {
+    "dir": "Модуль_электромагнитного_клапана_для_DJI_Agras_T50T25,_арт._BC.AG.SS000707_BC.AG.SS000707",
+    "name": "Модуль электромагнитного клапана для DJI Agras T50T25",
+    "sku": "BC.AG.SS000707",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Модуль_электромагнитного_клапана_для_DJI_Agras_T50T25,_арт._BC.AG.SS000707_BC.AG.SS000707\\schema.jpg",
+    "partSku": "BC.AG.SS000707"
+  },
+  {
+    "dir": "Монтажная_гайка_датчика_уровня_жидкости_бака_для_DJI_Agras_T50T40T25T20PT10,_арт._YC.SJ.WS002412_YC.SJ.WS002412",
+    "name": "Монтажная гайка датчика уровня жидкости бака для DJI Agras T50T40T25T20PT10",
+    "sku": "YC.SJ.WS002412",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Монтажная_гайка_датчика_уровня_жидкости_бака_для_DJI_Agras_T50T40T25T20PT10,_арт._YC.SJ.WS002412_YC.SJ.WS002412\\schema.jpg",
+    "partSku": "YC.SJ.WS002412"
+  },
+  {
+    "dir": "Мягкий_шланг_штанги_опрыскивателя_(задний)_для_DJI_Agras_T50,_арт._YC.JG.JS000041_YC.JG.JS000041",
+    "name": "Мягкий шланг штанги опрыскивателя (задний) для DJI Agras T50",
+    "sku": "YC.JG.JS000041",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Мягкий_шланг_штанги_опрыскивателя_(задний)_для_DJI_Agras_T50,_арт._YC.JG.JS000041_YC.JG.JS000041\\schema.jpg",
+    "partSku": "YC.JG.JS000041"
+  },
+  {
+    "dir": "Накладка_опоры_аккумулятора_(левая)_для_DJI_Agras_T50T40T25T20P_YC.JG.MQ001385",
+    "name": "Накладка опоры аккумулятора (левая) для DJI Agras T50T40T25T20P YC.JG.MQ001385",
+    "sku": "YC.JG.MQ001385",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Накладка_опоры_аккумулятора_(левая)_для_DJI_Agras_T50T40T25T20P_YC.JG.MQ001385\\schema.jpg",
+    "partSku": "YC.JG.MQ001385"
+  },
+  {
+    "dir": "Накладка_опоры_аккумулятора_(правая)_для_DJI_Agras_T50T40T25T20P_YC.JG.MQ001386",
+    "name": "Накладка опоры аккумулятора (правая) для DJI Agras T50T40T25T20P YC.JG.MQ001386",
+    "sku": "YC.JG.MQ001386",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Накладка_опоры_аккумулятора_(правая)_для_DJI_Agras_T50T40T25T20P_YC.JG.MQ001386\\schema.jpg",
+    "partSku": "YC.JG.MQ001386"
+  },
+  {
+    "dir": "Нижний_диск_центробежного_распылителя_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003458_YC.JG.ZS003458",
+    "name": "Нижний диск центробежного распылителя для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003458",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Нижний_диск_центробежного_распылителя_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003458_YC.JG.ZS003458\\schema.jpg",
+    "partSku": "YC.JG.ZS003458"
+  },
+  {
+    "dir": "Нижний_зажим_пропеллера_для_DJI_Agras_T50T40T20P,_арт._YC.JG.QX002177_YC.JG.QX002177",
+    "name": "Нижний зажим пропеллера для DJI Agras T50T40T20P",
+    "sku": "YC.JG.QX002177",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Нижний_зажим_пропеллера_для_DJI_Agras_T50T40T20P,_арт._YC.JG.QX002177_YC.JG.QX002177\\schema.jpg",
+    "partSku": "YC.JG.QX002177"
+  },
+  {
+    "dir": "Нижняя_крышка_заднего_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003443_YC.JG.ZS003443",
+    "name": "Нижняя крышка заднего корпуса для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003443",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Нижняя_крышка_заднего_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003443_YC.JG.ZS003443\\schema.jpg",
+    "partSku": "YC.JG.ZS003443"
+  },
+  {
+    "dir": "Нижняя_крышка_центробежной_форсунки_для_DJI_Agras_T50T25,_арт._BC.AG.SS000708_BC.AG.SS000708",
+    "name": "Нижняя крышка центробежной форсунки для DJI Agras T50T25",
+    "sku": "BC.AG.SS000708",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Нижняя_крышка_центробежной_форсунки_для_DJI_Agras_T50T25,_арт._BC.AG.SS000708_BC.AG.SS000708\\schema.jpg",
+    "partSku": "BC.AG.SS000708"
+  },
+  {
+    "dir": "Нижняя_опора_двигателя_для_DJI_Agras_T50,_арт._YC.JG.QX003097_YC.JG.QX003097",
+    "name": "Нижняя опора двигателя для DJI Agras T50",
+    "sku": "YC.JG.QX003097",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Нижняя_опора_двигателя_для_DJI_Agras_T50,_арт._YC.JG.QX003097_YC.JG.QX003097\\schema.jpg",
+    "partSku": "YC.JG.QX003097"
+  },
+  {
+    "dir": "Нижняя_пластина_заднего_корпуса_для_DJI_Agras_T50T25_YC.JG.ZS003395",
+    "name": "Нижняя пластина заднего корпуса для DJI Agras T50T25 YC.JG.ZS003395",
+    "sku": "YC.JG.ZS003395",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Нижняя_пластина_заднего_корпуса_для_DJI_Agras_T50T25_YC.JG.ZS003395\\schema.jpg",
+    "partSku": "YC.JG.ZS003395"
+  },
+  {
+    "dir": "Нижняя_пластина_переднего_корпуса_для_DJI_Agras_T50T25_YC.JG.ZS003388",
+    "name": "Нижняя пластина переднего корпуса для DJI Agras T50T25 YC.JG.ZS003388",
+    "sku": "YC.JG.ZS003388",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Нижняя_пластина_переднего_корпуса_для_DJI_Agras_T50T25_YC.JG.ZS003388\\schema.jpg",
+    "partSku": "YC.JG.ZS003388"
+  },
+  {
+    "dir": "Обжимное_кольцо_крышки_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.SJ.WS002423_YC.SJ.WS002423",
+    "name": "Обжимное кольцо крышки бака для DJI Agras T50T40T25T20PT10T30",
+    "sku": "YC.SJ.WS002423",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Обжимное_кольцо_крышки_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.SJ.WS002423_YC.SJ.WS002423\\schema.jpg",
+    "partSku": "YC.SJ.WS002423"
+  },
+  {
+    "dir": "Опора_аккумулятора_(левая)_для_DJI_Agras_T50T25_YC.JG.ZS003438",
+    "name": "Опора аккумулятора (левая) для DJI Agras T50T25 YC.JG.ZS003438",
+    "sku": "YC.JG.ZS003438",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Опора_аккумулятора_(левая)_для_DJI_Agras_T50T25_YC.JG.ZS003438\\schema.jpg",
+    "partSku": "YC.JG.ZS003438"
+  },
+  {
+    "dir": "Опора_аккумулятора_(правая)_для_DJI_Agras_T50T25_YC.JG.ZS003439",
+    "name": "Опора аккумулятора (правая) для DJI Agras T50T25 YC.JG.ZS003439",
+    "sku": "YC.JG.ZS003439",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Опора_аккумулятора_(правая)_для_DJI_Agras_T50T25_YC.JG.ZS003439\\schema.jpg",
+    "partSku": "YC.JG.ZS003439"
+  },
+  {
+    "dir": "Опора_кронштейна_FPV-камеры_для_DJI_Agras_T50T25_YC.JG.QX003038",
+    "name": "Опора кронштейна FPV-камеры для DJI Agras T50T25 YC.JG.QX003038",
+    "sku": "YC.JG.QX003038",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Опора_кронштейна_FPV-камеры_для_DJI_Agras_T50T25_YC.JG.QX003038\\schema.jpg",
+    "partSku": "YC.JG.QX003038"
+  },
+  {
+    "dir": "Основание_переднего_радара_для_DJI_Agras_T50T25_YC.JG.YZ000672",
+    "name": "Основание переднего радара для DJI Agras T50T25 YC.JG.YZ000672",
+    "sku": "YC.JG.YZ000672",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Основание_переднего_радара_для_DJI_Agras_T50T25_YC.JG.YZ000672\\schema.jpg",
+    "partSku": "YC.JG.YZ000672"
+  },
+  {
+    "dir": "Ось_поворота_защёлки_для_DJI_Agras_T50T25T70,_арт._YC.JG.QX003014_YC.JG.QX003014",
+    "name": "Ось поворота защёлки для DJI Agras T50T25T70",
+    "sku": "YC.JG.QX003014",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Ось_поворота_защёлки_для_DJI_Agras_T50T25T70,_арт._YC.JG.QX003014_YC.JG.QX003014\\schema.jpg",
+    "partSku": "YC.JG.QX003014"
+  },
+  {
+    "dir": "Ось_ролика_клипсы_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.WJ.ZZ002618_YC.WJ.ZZ002618",
+    "name": "Ось ролика клипсы бака для DJI Agras T50T40T25T20PT10T30",
+    "sku": "YC.WJ.ZZ002618",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Ось_ролика_клипсы_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.WJ.ZZ002618_YC.WJ.ZZ002618\\schema.jpg",
+    "partSku": "YC.WJ.ZZ002618"
+  },
+  {
+    "dir": "Ось_шарнира_замка_луча_для_DJI_Agras_T50T40T25T70,_арт._YC.JG.QX002089_YC.JG.QX002089",
+    "name": "Ось шарнира замка луча для DJI Agras T50T40T25T70",
+    "sku": "YC.JG.QX002089",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Ось_шарнира_замка_луча_для_DJI_Agras_T50T40T25T70,_арт._YC.JG.QX002089_YC.JG.QX002089\\schema.jpg",
+    "partSku": "YC.JG.QX002089"
+  },
+  {
+    "dir": "Ось_шарнира_рукоятки_замка_для_DJI_Agras_T50T40T25T20PT30,_арт._YC.JG.QX001243_YC.JG.QX001243",
+    "name": "Ось шарнира рукоятки замка для DJI Agras T50T40T25T20PT30",
+    "sku": "YC.JG.QX001243",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Ось_шарнира_рукоятки_замка_для_DJI_Agras_T50T40T25T20PT30,_арт._YC.JG.QX001243_YC.JG.QX001243\\schema.jpg",
+    "partSku": "YC.JG.QX001243"
+  },
+  {
+    "dir": "Ответная_часть_защёлки_(мама)_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.JG.ZS000998_YC.JG.ZS000998",
+    "name": "Ответная часть защёлки (мама) для DJI Agras T50T40T25T20PT10T30",
+    "sku": "YC.JG.ZS000998",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Ответная_часть_защёлки_(мама)_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.JG.ZS000998_YC.JG.ZS000998\\schema.jpg",
+    "partSku": "YC.JG.ZS000998"
+  },
+  {
+    "dir": "Передняя_крышка_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003386_YC.JG.ZS003386",
+    "name": "Передняя крышка корпуса для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003386",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Передняя_крышка_корпуса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003386_YC.JG.ZS003386\\schema.jpg",
+    "partSku": "YC.JG.ZS003386"
+  },
+  {
+    "dir": "Переходной_кабель_питания_ESC_переднего_луча_для_DJI_Agras_T50,_арт._YC.XC.DD000576_YC.XC.DD000576",
+    "name": "Переходной кабель питания ESC переднего луча для DJI Agras T50",
+    "sku": "YC.XC.DD000576",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Переходной_кабель_питания_ESC_переднего_луча_для_DJI_Agras_T50,_арт._YC.XC.DD000576_YC.XC.DD000576\\schema.jpg",
+    "partSku": "YC.XC.DD000576"
+  },
+  {
+    "dir": "Переходной_кабель_системы_опрыскивания_для_DJI_Agras_T50T25,_арт._YC.XC.XX001001_YC.XC.XX001001",
+    "name": "Переходной кабель системы опрыскивания для DJI Agras T50T25",
+    "sku": "YC.XC.XX001001",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Переходной_кабель_системы_опрыскивания_для_DJI_Agras_T50T25,_арт._YC.XC.XX001001_YC.XC.XX001001\\schema.jpg",
+    "partSku": "YC.XC.XX001001"
+  },
+  {
+    "dir": "Переходный_кабель_центробежной_форсунки_(задний)_для_DJI_Agras_T50,_арт._YC.XC.XX001000_YC.XC.XX001000",
+    "name": "Переходный кабель центробежной форсунки (задний) для DJI Agras T50",
+    "sku": "YC.XC.XX001000",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Переходный_кабель_центробежной_форсунки_(задний)_для_DJI_Agras_T50,_арт._YC.XC.XX001000_YC.XC.XX001000\\schema.jpg",
+    "partSku": "YC.XC.XX001000"
+  },
+  {
+    "dir": "Поворотная_крышка_выходного_патрубка_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P,_арт._YC.JG.Z_YC.JG.ZS002233",
+    "name": "Поворотная крышка выходного патрубка для DJI Agras T50T40T25T20PT70T100T70PT25P",
+    "sku": "YC.JG.ZS002233",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Поворотная_крышка_выходного_патрубка_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P,_арт._YC.JG.Z_YC.JG.ZS002233\\schema.jpg",
+    "partSku": "YC.JG.ZS002233"
+  },
+  {
+    "dir": "Поперечная_штанга_шасси_(задняя)_для_DJI_Agras_T50T25,_арт._YC.JG.XW000110_YC.JG.XW000110",
+    "name": "Поперечная штанга шасси (задняя) для DJI Agras T50T25",
+    "sku": "YC.JG.XW000110",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Поперечная_штанга_шасси_(задняя)_для_DJI_Agras_T50T25,_арт._YC.JG.XW000110_YC.JG.XW000110\\schema.jpg",
+    "partSku": "YC.JG.XW000110"
+  },
+  {
+    "dir": "Поперечная_штанга_шасси_(передняя)_для_DJI_Agras_T50,_арт._YC.JG.XW000111_YC.JG.XW000111",
+    "name": "Поперечная штанга шасси (передняя) для DJI Agras T50",
+    "sku": "YC.JG.XW000111",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Поперечная_штанга_шасси_(передняя)_для_DJI_Agras_T50,_арт._YC.JG.XW000111_YC.JG.XW000111\\schema.jpg",
+    "partSku": "YC.JG.XW000111"
+  },
+  {
+    "dir": "Правая_опора_радара_для_DJI_Agras_T50T25T70_YC.JG.ZS003492",
+    "name": "Правая опора радара для DJI Agras T50T25T70 YC.JG.ZS003492",
+    "sku": "YC.JG.ZS003492",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Правая_опора_радара_для_DJI_Agras_T50T25T70_YC.JG.ZS003492\\schema.jpg",
+    "partSku": "YC.JG.ZS003492"
+  },
+  {
+    "dir": "Правый_передний_луч_M1_для_DJI_Agras_T50,_арт._BC.AG.SS000696_BC.AG.SS000696",
+    "name": "Правый передний луч M1 для DJI Agras T50",
+    "sku": "BC.AG.SS000696",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Правый_передний_луч_M1_для_DJI_Agras_T50,_арт._BC.AG.SS000696_BC.AG.SS000696\\schema.jpg",
+    "partSku": "BC.AG.SS000696"
+  },
+  {
+    "dir": "Прокладка_лопасти_пропеллера_для_DJI_Agras_T50,_арт._YC.JG.MQ002040_YC.JG.MQ002040",
+    "name": "Прокладка лопасти пропеллера для DJI Agras T50",
+    "sku": "YC.JG.MQ002040",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Прокладка_лопасти_пропеллера_для_DJI_Agras_T50,_арт._YC.JG.MQ002040_YC.JG.MQ002040\\schema.jpg",
+    "partSku": "YC.JG.MQ002040"
+  },
+  {
+    "dir": "Пропеллерлопасть_для_DJI_Agras_T50T40T20P_U-CCW,_арт._YC.JG.ZS003785_YC.JG.ZS003785",
+    "name": "Пропеллерлопасть для DJI Agras T50T40T20P U-CCW",
+    "sku": "YC.JG.ZS003785",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Пропеллерлопасть_для_DJI_Agras_T50T40T20P_U-CCW,_арт._YC.JG.ZS003785_YC.JG.ZS003785\\schema.jpg",
+    "partSku": "YC.JG.ZS003785"
+  },
+  {
+    "dir": "Пропеллерлопасть_для_DJI_Agras_T50T40T20P_U-CW,_арт._YC.JG.ZS003786_YC.JG.ZS003786",
+    "name": "Пропеллерлопасть для DJI Agras T50T40T20P U-CW",
+    "sku": "YC.JG.ZS003786",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Пропеллерлопасть_для_DJI_Agras_T50T40T20P_U-CW,_арт._YC.JG.ZS003786_YC.JG.ZS003786\\schema.jpg",
+    "partSku": "YC.JG.ZS003786"
+  },
+  {
+    "dir": "Пропеллерлопасть_для_DJI_Agras_T50T40_L-CCW,_арт._YC.JG.ZS003787_YC.JG.ZS003787",
+    "name": "Пропеллерлопасть для DJI Agras T50T40 L-CCW",
+    "sku": "YC.JG.ZS003787",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Пропеллерлопасть_для_DJI_Agras_T50T40_L-CCW,_арт._YC.JG.ZS003787_YC.JG.ZS003787\\schema.jpg",
+    "partSku": "YC.JG.ZS003787"
+  },
+  {
+    "dir": "Пропеллерлопасть_для_DJI_Agras_T50T40_L-CW,_арт._YC.JG.ZS003788_YC.JG.ZS003788",
+    "name": "Пропеллерлопасть для DJI Agras T50T40 L-CW",
+    "sku": "YC.JG.ZS003788",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Пропеллерлопасть_для_DJI_Agras_T50T40_L-CW,_арт._YC.JG.ZS003788_YC.JG.ZS003788\\schema.jpg",
+    "partSku": "YC.JG.ZS003788"
+  },
+  {
+    "dir": "Противоударная_накладка_для_DJI_Agras_T50_YC.JG.MY001055",
+    "name": "Противоударная накладка для DJI Agras T50 YC.JG.MY001055",
+    "sku": "YC.JG.MY001055",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Противоударная_накладка_для_DJI_Agras_T50_YC.JG.MY001055\\schema.jpg",
+    "partSku": "YC.JG.MY001055"
+  },
+  {
+    "dir": "Пружинный_кронштейн_центробежной_форсунки_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002289_YC.JG.ZS002289",
+    "name": "Пружинный кронштейн центробежной форсунки для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.ZS002289",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Пружинный_кронштейн_центробежной_форсунки_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002289_YC.JG.ZS002289\\schema.jpg",
+    "partSku": "YC.JG.ZS002289"
+  },
+  {
+    "dir": "Резиновая_втулка_переходного_кабеля_для_DJI_Agras_T50T25_YC.JG.MY001057",
+    "name": "Резиновая втулка переходного кабеля для DJI Agras T50T25 YC.JG.MY001057",
+    "sku": "YC.JG.MY001057",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновая_втулка_переходного_кабеля_для_DJI_Agras_T50T25_YC.JG.MY001057\\schema.jpg",
+    "partSku": "YC.JG.MY001057"
+  },
+  {
+    "dir": "Резиновая_заглушка_кабельной_трубки_для_DJI_Agras_T50T25,_арт._YC.JG.MY001051_YC.JG.MY001051",
+    "name": "Резиновая заглушка кабельной трубки для DJI Agras T50T25",
+    "sku": "YC.JG.MY001051",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновая_заглушка_кабельной_трубки_для_DJI_Agras_T50T25,_арт._YC.JG.MY001051_YC.JG.MY001051\\schema.jpg",
+    "partSku": "YC.JG.MY001051"
+  },
+  {
+    "dir": "Резиновая_муфта_шланга_для_DJI_Agras_T50,_арт._YC.JG.MY001062_YC.JG.MY001062",
+    "name": "Резиновая муфта шланга для DJI Agras T50",
+    "sku": "YC.JG.MY001062",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновая_муфта_шланга_для_DJI_Agras_T50,_арт._YC.JG.MY001062_YC.JG.MY001062\\schema.jpg",
+    "partSku": "YC.JG.MY001062"
+  },
+  {
+    "dir": "Резиновая_накладка_рукоятки_замка_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003560_YC.JG.ZS003560",
+    "name": "Резиновая накладка рукоятки замка для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003560",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновая_накладка_рукоятки_замка_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003560_YC.JG.ZS003560\\schema.jpg",
+    "partSku": "YC.JG.ZS003560"
+  },
+  {
+    "dir": "Резиновая_подошва_шасси_для_DJI_Agras_T50T25T70_YC.JG.ZS003558",
+    "name": "Резиновая подошва шасси для DJI Agras T50T25T70 YC.JG.ZS003558",
+    "sku": "YC.JG.ZS003558",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновая_подошва_шасси_для_DJI_Agras_T50T25T70_YC.JG.ZS003558\\schema.jpg",
+    "partSku": "YC.JG.ZS003558"
+  },
+  {
+    "dir": "Резиновая_стопорная_шайба_для_DJI_Agras_T50T25T70T100T70PT40T20PT25P,_арт._YC.JG.MY000845_YC.JG.MY000845",
+    "name": "Резиновая стопорная шайба для DJI Agras T50T25T70T100T70PT40T20PT25P",
+    "sku": "YC.JG.MY000845",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновая_стопорная_шайба_для_DJI_Agras_T50T25T70T100T70PT40T20PT25P,_арт._YC.JG.MY000845_YC.JG.MY000845\\schema.jpg",
+    "partSku": "YC.JG.MY000845"
+  },
+  {
+    "dir": "Резиновое_кольцо_центробежного_клапана_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.MY000712_YC.JG.MY000712",
+    "name": "Резиновое кольцо центробежного клапана для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.MY000712",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновое_кольцо_центробежного_клапана_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.MY000712_YC.JG.MY000712\\schema.jpg",
+    "partSku": "YC.JG.MY000712"
+  },
+  {
+    "dir": "Резиновое_опорное_кольцо_RTK_для_DJI_Agras_T50T25T70,_арт._YC.JG.MY001073_YC.JG.MY001073",
+    "name": "Резиновое опорное кольцо RTK для DJI Agras T50T25T70",
+    "sku": "YC.JG.MY001073",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновое_опорное_кольцо_RTK_для_DJI_Agras_T50T25T70,_арт._YC.JG.MY001073_YC.JG.MY001073\\schema.jpg",
+    "partSku": "YC.JG.MY001073"
+  },
+  {
+    "dir": "Резиновое_уплотнение_фильтра_для_DJI_Agras_T50T40T25T20PT70T100T10T30T70PT20T25P,_арт._YC._YC.SJ.J01186",
+    "name": "Резиновое уплотнение фильтра для DJI Agras T50T40T25T20PT70T100T10T30T70PT20T25P",
+    "sku": "YC.SJ.J01186",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновое_уплотнение_фильтра_для_DJI_Agras_T50T40T25T20PT70T100T10T30T70PT20T25P,_арт._YC._YC.SJ.J01186\\schema.jpg",
+    "partSku": "YC.SJ.J01186"
+  },
+  {
+    "dir": "Резиновый_наконечник_датчика_взвешивания_для_DJI_Agras_T50T25,_арт._YC.JG.MY001011_YC.JG.MY001011",
+    "name": "Резиновый наконечник датчика взвешивания для DJI Agras T50T25",
+    "sku": "YC.JG.MY001011",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Резиновый_наконечник_датчика_взвешивания_для_DJI_Agras_T50T25,_арт._YC.JG.MY001011_YC.JG.MY001011\\schema.jpg",
+    "partSku": "YC.JG.MY001011"
+  },
+  {
+    "dir": "Ролик_кронштейна_датчика_взвешивания_для_DJI_Agras_T50T25_YC.JG.ZS003602",
+    "name": "Ролик кронштейна датчика взвешивания для DJI Agras T50T25 YC.JG.ZS003602",
+    "sku": "YC.JG.ZS003602",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Ролик_кронштейна_датчика_взвешивания_для_DJI_Agras_T50T25_YC.JG.ZS003602\\schema.jpg",
+    "partSku": "YC.JG.ZS003602"
+  },
+  {
+    "dir": "Рукоятка_замка_складывания_луча_для_DJI_Agras_T50T25,_арт._YC.JG.QX003012_YC.JG.QX003012",
+    "name": "Рукоятка замка складывания луча для DJI Agras T50T25",
+    "sku": "YC.JG.QX003012",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Рукоятка_замка_складывания_луча_для_DJI_Agras_T50T25,_арт._YC.JG.QX003012_YC.JG.QX003012\\schema.jpg",
+    "partSku": "YC.JG.QX003012"
+  },
+  {
+    "dir": "Самоконтрящаяся_гайка_M3_для_DJI_Agras_T50T40T25T70T10T30T20,_арт._YC.WJ.L00877_YC.WJ.L00877",
+    "name": "Самоконтрящаяся гайка M3 для DJI Agras T50T40T25T70T10T30T20",
+    "sku": "YC.WJ.L00877",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Самоконтрящаяся_гайка_M3_для_DJI_Agras_T50T40T25T70T10T30T20,_арт._YC.WJ.L00877_YC.WJ.L00877\\schema.jpg",
+    "partSku": "YC.WJ.L00877"
+  },
+  {
+    "dir": "Сетчатый_фильтр_50_меш_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002429_YC.JG.ZS002429",
+    "name": "Сетчатый фильтр 50 меш для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.ZS002429",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Сетчатый_фильтр_50_меш_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002429_YC.JG.ZS002429\\schema.jpg",
+    "partSku": "YC.JG.ZS002429"
+  },
+  {
+    "dir": "Сигнальный_кабель_FPV-камеры_для_DJI_Agras_T50T25,_арт._YC.XC.XX001014_YC.XC.XX001014",
+    "name": "Сигнальный кабель FPV-камеры для DJI Agras T50T25",
+    "sku": "YC.XC.XX001014",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Сигнальный_кабель_FPV-камеры_для_DJI_Agras_T50T25,_арт._YC.XC.XX001014_YC.XC.XX001014\\schema.jpg",
+    "partSku": "YC.XC.XX001014"
+  },
+  {
+    "dir": "Сигнальный_кабель_заднего_радара_для_DJI_Agras_T50T25_YC.XC.XX001012",
+    "name": "Сигнальный кабель заднего радара для DJI Agras T50T25 YC.XC.XX001012",
+    "sku": "YC.XC.XX001012",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Сигнальный_кабель_заднего_радара_для_DJI_Agras_T50T25_YC.XC.XX001012\\schema.jpg",
+    "partSku": "YC.XC.XX001012"
+  },
+  {
+    "dir": "Сигнальный_кабель_нижней_подсветки_для_DJI_Agras_T50T25,_арт._YC.XC.XX000999_YC.XC.XX000999",
+    "name": "Сигнальный кабель нижней подсветки для DJI Agras T50T25",
+    "sku": "YC.XC.XX000999",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Сигнальный_кабель_нижней_подсветки_для_DJI_Agras_T50T25,_арт._YC.XC.XX000999_YC.XC.XX000999\\schema.jpg",
+    "partSku": "YC.XC.XX000999"
+  },
+  {
+    "dir": "Сигнальный_кабель_переднего_датчика_зрения_для_DJI_Agras_T50T25,_арт._YC.XC.XX001013_YC.XC.XX001013",
+    "name": "Сигнальный кабель переднего датчика зрения для DJI Agras T50T25",
+    "sku": "YC.XC.XX001013",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Сигнальный_кабель_переднего_датчика_зрения_для_DJI_Agras_T50T25,_арт._YC.XC.XX001013_YC.XC.XX001013\\schema.jpg",
+    "partSku": "YC.XC.XX001013"
+  },
+  {
+    "dir": "Сигнальный_кабель_переднего_радара_для_DJI_Agras_T50T25_YC.XC.XX001011",
+    "name": "Сигнальный кабель переднего радара для DJI Agras T50T25 YC.XC.XX001011",
+    "sku": "YC.XC.XX001011",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Сигнальный_кабель_переднего_радара_для_DJI_Agras_T50T25_YC.XC.XX001011\\schema.jpg",
+    "partSku": "YC.XC.XX001011"
+  },
+  {
+    "dir": "Сигнальный_кабель_распределителя_опрыскивания_для_DJI_Agras_T50T25,_арт._YC.XC.XX001002_YC.XC.XX001002",
+    "name": "Сигнальный кабель распределителя опрыскивания для DJI Agras T50T25",
+    "sku": "YC.XC.XX001002",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Сигнальный_кабель_распределителя_опрыскивания_для_DJI_Agras_T50T25,_арт._YC.XC.XX001002_YC.XC.XX001002\\schema.jpg",
+    "partSku": "YC.XC.XX001002"
+  },
+  {
+    "dir": "Сигнальный_кабель_расходомера_для_DJI_Agras_T50T25,_арт._YC.XC.XX001004_YC.XC.XX001004",
+    "name": "Сигнальный кабель расходомера для DJI Agras T50T25",
+    "sku": "YC.XC.XX001004",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Сигнальный_кабель_расходомера_для_DJI_Agras_T50T25,_арт._YC.XC.XX001004_YC.XC.XX001004\\schema.jpg",
+    "partSku": "YC.XC.XX001004"
+  },
+  {
+    "dir": "Скоба_кабеля_датчика_взвешивания_для_DJI_Agras_T50T40T25T20P_YC.JG.ZS002229",
+    "name": "Скоба кабеля датчика взвешивания для DJI Agras T50T40T25T20P YC.JG.ZS002229",
+    "sku": "YC.JG.ZS002229",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Скоба_кабеля_датчика_взвешивания_для_DJI_Agras_T50T40T25T20P_YC.JG.ZS002229\\schema.jpg",
+    "partSku": "YC.JG.ZS002229"
+  },
+  {
+    "dir": "Скоба_крепления_RF-кабеля_для_DJI_Agras_T50T25_YC.JG.ZS003455",
+    "name": "Скоба крепления RF-кабеля для DJI Agras T50T25 YC.JG.ZS003455",
+    "sku": "YC.JG.ZS003455",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Скоба_крепления_RF-кабеля_для_DJI_Agras_T50T25_YC.JG.ZS003455\\schema.jpg",
+    "partSku": "YC.JG.ZS003455"
+  },
+  {
+    "dir": "Скоба_крепления_кабеля_бака_для_DJI_Agras_T50T25_YC.JG.ZS003393",
+    "name": "Скоба крепления кабеля бака для DJI Agras T50T25 YC.JG.ZS003393",
+    "sku": "YC.JG.ZS003393",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Скоба_крепления_кабеля_бака_для_DJI_Agras_T50T25_YC.JG.ZS003393\\schema.jpg",
+    "partSku": "YC.JG.ZS003393"
+  },
+  {
+    "dir": "Скоба_крепления_кабеля_для_DJI_Agras_T50T25_YC.JG.ZS003589",
+    "name": "Скоба крепления кабеля для DJI Agras T50T25 YC.JG.ZS003589",
+    "sku": "YC.JG.ZS003589",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Скоба_крепления_кабеля_для_DJI_Agras_T50T25_YC.JG.ZS003589\\schema.jpg",
+    "partSku": "YC.JG.ZS003589"
+  },
+  {
+    "dir": "Скоба_крепления_кабеля_на_шасси_для_DJI_Agras_T50T25T70,_арт._YC.JG.ZS003725_YC.JG.ZS003725",
+    "name": "Скоба крепления кабеля на шасси для DJI Agras T50T25T70",
+    "sku": "YC.JG.ZS003725",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Скоба_крепления_кабеля_на_шасси_для_DJI_Agras_T50T25T70,_арт._YC.JG.ZS003725_YC.JG.ZS003725\\schema.jpg",
+    "partSku": "YC.JG.ZS003725"
+  },
+  {
+    "dir": "Стопорная_гайка_M4_из_нержавеющей_стали_для_DJI_Agras_T50T25T20PT10T30T20,_арт._YC.WJ.L00961_YC.WJ.L00961",
+    "name": "Стопорная гайка M4 из нержавеющей стали для DJI Agras T50T25T20PT10T30T20",
+    "sku": "YC.WJ.L00961",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Стопорная_гайка_M4_из_нержавеющей_стали_для_DJI_Agras_T50T25T20PT10T30T20,_арт._YC.WJ.L00961_YC.WJ.L00961\\schema.jpg",
+    "partSku": "YC.WJ.L00961"
+  },
+  {
+    "dir": "Стопорное_кольцо_E-образное_(6_мм)_для_DJI_Agras_T50T25,_арт._YC.JG.BJ001891_YC.JG.BJ001891",
+    "name": "Стопорное кольцо E-образное (6 мм) для DJI Agras T50T25",
+    "sku": "YC.JG.BJ001891",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Стопорное_кольцо_E-образное_(6_мм)_для_DJI_Agras_T50T25,_арт._YC.JG.BJ001891_YC.JG.BJ001891\\schema.jpg",
+    "partSku": "YC.JG.BJ001891"
+  },
+  {
+    "dir": "Страховочный_шнур_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.BZ.RB000011_YC.BZ.RB000011",
+    "name": "Страховочный шнур бака для DJI Agras T50T40T25T20PT10T30",
+    "sku": "YC.BZ.RB000011",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Страховочный_шнур_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.BZ.RB000011_YC.BZ.RB000011\\schema.jpg",
+    "partSku": "YC.BZ.RB000011"
+  },
+  {
+    "dir": "Стяжная_лента_для_фиксации_пропеллеров_для_DJI_Agras_T50,_арт._YC.BZ.RB000090_YC.BZ.RB000090",
+    "name": "Стяжная лента для фиксации пропеллеров для DJI Agras T50",
+    "sku": "YC.BZ.RB000090",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Стяжная_лента_для_фиксации_пропеллеров_для_DJI_Agras_T50,_арт._YC.BZ.RB000090_YC.BZ.RB000090\\schema.jpg",
+    "partSku": "YC.BZ.RB000090"
+  },
+  {
+    "dir": "Теплопроводящая_прокладка_RF-блока_авионного_модуля_для_DJI_Agras_T50T40T25,_арт._YC.JG.MQ001294_YC.JG.MQ001294",
+    "name": "Теплопроводящая прокладка RF-блока авионного модуля для DJI Agras T50T40T25",
+    "sku": "YC.JG.MQ001294",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Теплопроводящая_прокладка_RF-блока_авионного_модуля_для_DJI_Agras_T50T40T25,_арт._YC.JG.MQ001294_YC.JG.MQ001294\\schema.jpg",
+    "partSku": "YC.JG.MQ001294"
+  },
+  {
+    "dir": "Торсионная_пружина_защёлки_для_DJI_Agras_T50T25T70,_арт._YC.JG.TT000165_YC.JG.TT000165",
+    "name": "Торсионная пружина защёлки для DJI Agras T50T25T70",
+    "sku": "YC.JG.TT000165",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Торсионная_пружина_защёлки_для_DJI_Agras_T50T25T70,_арт._YC.JG.TT000165_YC.JG.TT000165\\schema.jpg",
+    "partSku": "YC.JG.TT000165"
+  },
+  {
+    "dir": "Тройник_бака_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P,_арт._YC.JG.ZS002232_YC.JG.ZS002232",
+    "name": "Тройник бака для DJI Agras T50T40T25T20PT70T100T70PT25P",
+    "sku": "YC.JG.ZS002232",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Тройник_бака_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P,_арт._YC.JG.ZS002232_YC.JG.ZS002232\\schema.jpg",
+    "partSku": "YC.JG.ZS002232"
+  },
+  {
+    "dir": "Тройник_шасси_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003468_YC.JG.ZS003468",
+    "name": "Тройник шасси для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003468",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Тройник_шасси_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003468_YC.JG.ZS003468\\schema.jpg",
+    "partSku": "YC.JG.ZS003468"
+  },
+  {
+    "dir": "Тяга_замка-защёлки_для_DJI_Agras_T50T40T25T70,_арт._YC.JG.QX002088_YC.JG.QX002088",
+    "name": "Тяга замка-защёлки для DJI Agras T50T40T25T70",
+    "sku": "YC.JG.QX002088",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Тяга_замка-защёлки_для_DJI_Agras_T50T40T25T70,_арт._YC.JG.QX002088_YC.JG.QX002088\\schema.jpg",
+    "partSku": "YC.JG.QX002088"
+  },
+  {
+    "dir": "Угловой_штуцер_барометра_для_DJI_Agras_T50T25,_арт._YC.JG.MY000797_YC.JG.MY000797",
+    "name": "Угловой штуцер барометра для DJI Agras T50T25",
+    "sku": "YC.JG.MY000797",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Угловой_штуцер_барометра_для_DJI_Agras_T50T25,_арт._YC.JG.MY000797_YC.JG.MY000797\\schema.jpg",
+    "partSku": "YC.JG.MY000797"
+  },
+  {
+    "dir": "Угловой_штуцер_крыльчатого_насоса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003420_YC.JG.ZS003420",
+    "name": "Угловой штуцер крыльчатого насоса для DJI Agras T50T25",
+    "sku": "YC.JG.ZS003420",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Угловой_штуцер_крыльчатого_насоса_для_DJI_Agras_T50T25,_арт._YC.JG.ZS003420_YC.JG.ZS003420\\schema.jpg",
+    "partSku": "YC.JG.ZS003420"
+  },
+  {
+    "dir": "Угловой_штуцер_шланга_(M15)_для_DJI_Agras_T50,_арт._YC.JG.ZS003478_YC.JG.ZS003478",
+    "name": "Угловой штуцер шланга (M15) для DJI Agras T50",
+    "sku": "YC.JG.ZS003478",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Угловой_штуцер_шланга_(M15)_для_DJI_Agras_T50,_арт._YC.JG.ZS003478_YC.JG.ZS003478\\schema.jpg",
+    "partSku": "YC.JG.ZS003478"
+  },
+  {
+    "dir": "Уплотнительная_прокладка_крышки_объектива_для_DJI_Agras_T50T25_YC.JG.MY000985",
+    "name": "Уплотнительная прокладка крышки объектива для DJI Agras T50T25 YC.JG.MY000985",
+    "sku": "YC.JG.MY000985",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительная_прокладка_крышки_объектива_для_DJI_Agras_T50T25_YC.JG.MY000985\\schema.jpg",
+    "partSku": "YC.JG.MY000985"
+  },
+  {
+    "dir": "Уплотнительная_прокладка_трёхфазного_кабеля_(силиконовая)_для_DJI_Agras_T50T25,_арт._YC.JG.MY000397_YC.JG.MY000397",
+    "name": "Уплотнительная прокладка трёхфазного кабеля (силиконовая) для DJI Agras T50T25",
+    "sku": "YC.JG.MY000397",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительная_прокладка_трёхфазного_кабеля_(силиконовая)_для_DJI_Agras_T50T25,_арт._YC.JG.MY000397_YC.JG.MY000397\\schema.jpg",
+    "partSku": "YC.JG.MY000397"
+  },
+  {
+    "dir": "Уплотнительная_прокладка_тройника_для_DJI_Agras_T50T25T70T100T70PT25P,_арт._YC.JG.MY001053_YC.JG.MY001053",
+    "name": "Уплотнительная прокладка тройника для DJI Agras T50T25T70T100T70PT25P",
+    "sku": "YC.JG.MY001053",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительная_прокладка_тройника_для_DJI_Agras_T50T25T70T100T70PT25P,_арт._YC.JG.MY001053_YC.JG.MY001053\\schema.jpg",
+    "partSku": "YC.JG.MY001053"
+  },
+  {
+    "dir": "Уплотнительная_прокладка_шины_питания_для_DJI_Agras_T50,_арт._YC.JG.MY000399_YC.JG.MY000399",
+    "name": "Уплотнительная прокладка шины питания для DJI Agras T50",
+    "sku": "YC.JG.MY000399",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительная_прокладка_шины_питания_для_DJI_Agras_T50,_арт._YC.JG.MY000399_YC.JG.MY000399\\schema.jpg",
+    "partSku": "YC.JG.MY000399"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_RF-модуля_для_DJI_Agras_T50T25_YC.JG.MY001045",
+    "name": "Уплотнительное кольцо RF-модуля для DJI Agras T50T25 YC.JG.MY001045",
+    "sku": "YC.JG.MY001045",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_RF-модуля_для_DJI_Agras_T50T25_YC.JG.MY001045\\schema.jpg",
+    "partSku": "YC.JG.MY001045"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_авионного_модуля_для_DJI_Agras_T50T25,_арт._YC.JG.MY001046_YC.JG.MY001046",
+    "name": "Уплотнительное кольцо авионного модуля для DJI Agras T50T25",
+    "sku": "YC.JG.MY001046",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_авионного_модуля_для_DJI_Agras_T50T25,_арт._YC.JG.MY001046_YC.JG.MY001046\\schema.jpg",
+    "partSku": "YC.JG.MY001046"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_бинокулярных_датчиков_зрения_для_DJI_Agras_T50T25_YC.JG.MY001044",
+    "name": "Уплотнительное кольцо бинокулярных датчиков зрения для DJI Agras T50T25 YC.JG.MY001044",
+    "sku": "YC.JG.MY001044",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_бинокулярных_датчиков_зрения_для_DJI_Agras_T50T25_YC.JG.MY001044\\schema.jpg",
+    "partSku": "YC.JG.MY001044"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_двигателя_насоса_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.MY000704_YC.JG.MY000704",
+    "name": "Уплотнительное кольцо двигателя насоса для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.MY000704",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_двигателя_насоса_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.MY000704_YC.JG.MY000704\\schema.jpg",
+    "partSku": "YC.JG.MY000704"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_корпуса_насоса_для_DJI_Agras_T50T25T70T100T70PT25P,_арт._YC.JG.MY001052_YC.JG.MY001052",
+    "name": "Уплотнительное кольцо корпуса насоса для DJI Agras T50T25T70T100T70PT25P",
+    "sku": "YC.JG.MY001052",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_корпуса_насоса_для_DJI_Agras_T50T25T70T100T70PT25P,_арт._YC.JG.MY001052_YC.JG.MY001052\\schema.jpg",
+    "partSku": "YC.JG.MY001052"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_крышки_бака_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.MY000679_YC.JG.MY000679",
+    "name": "Уплотнительное кольцо крышки бака для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.MY000679",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_крышки_бака_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.MY000679_YC.JG.MY000679\\schema.jpg",
+    "partSku": "YC.JG.MY000679"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_модуля_барометра_для_DJI_Agras_T50T25T20PT70,_арт._YC.JG.MY000699_YC.JG.MY000699",
+    "name": "Уплотнительное кольцо модуля барометра для DJI Agras T50T25T20PT70",
+    "sku": "YC.JG.MY000699",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_модуля_барометра_для_DJI_Agras_T50T25T20PT70,_арт._YC.JG.MY000699_YC.JG.MY000699\\schema.jpg",
+    "partSku": "YC.JG.MY000699"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_монтажной_гайки_датчика_уровня_жидкости_для_DJI_Agras_T50T40T25T20PT10,_ар_YC.XJ.QT000194",
+    "name": "Уплотнительное кольцо монтажной гайки датчика уровня жидкости для DJI Agras T50T40T25T20PT10, ар YC.XJ.QT000194",
+    "sku": "YC.XJ.QT000194",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_монтажной_гайки_датчика_уровня_жидкости_для_DJI_Agras_T50T40T25T20PT10,_ар_YC.XJ.QT000194\\schema.jpg",
+    "partSku": "YC.XJ.QT000194"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_нижней_подсветки_для_DJI_Agras_T50T25,_арт._YC.JG.MY001043_YC.JG.MY001043",
+    "name": "Уплотнительное кольцо нижней подсветки для DJI Agras T50T25",
+    "sku": "YC.JG.MY001043",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_нижней_подсветки_для_DJI_Agras_T50T25,_арт._YC.JG.MY001043_YC.JG.MY001043\\schema.jpg",
+    "partSku": "YC.JG.MY001043"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_основания_радара_для_DJI_Agras_T50T25_YC.JG.MY001042",
+    "name": "Уплотнительное кольцо основания радара для DJI Agras T50T25 YC.JG.MY001042",
+    "sku": "YC.JG.MY001042",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_основания_радара_для_DJI_Agras_T50T25_YC.JG.MY001042\\schema.jpg",
+    "partSku": "YC.JG.MY001042"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_радара_для_DJI_Agras_T50T25_YC.JG.MY001041",
+    "name": "Уплотнительное кольцо радара для DJI Agras T50T25 YC.JG.MY001041",
+    "sku": "YC.JG.MY001041",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_радара_для_DJI_Agras_T50T25_YC.JG.MY001041\\schema.jpg",
+    "partSku": "YC.JG.MY001041"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_тройника_бака_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P,_арт._YC.JG.MY_YC.JG.MY000687",
+    "name": "Уплотнительное кольцо тройника бака для DJI Agras T50T40T25T20PT70T100T70PT25P",
+    "sku": "YC.JG.MY000687",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_тройника_бака_для_DJI_Agras_T50T40T25T20PT70T100T70PT25P,_арт._YC.JG.MY_YC.JG.MY000687\\schema.jpg",
+    "partSku": "YC.JG.MY000687"
+  },
+  {
+    "dir": "Уплотнительное_кольцо_штуцера_насоса_для_DJI_Agras_T50T40T25T20PT10,_арт._YC.XJ.QT000350_YC.XJ.QT000350",
+    "name": "Уплотнительное кольцо штуцера насоса для DJI Agras T50T40T25T20PT10",
+    "sku": "YC.XJ.QT000350",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Уплотнительное_кольцо_штуцера_насоса_для_DJI_Agras_T50T40T25T20PT10,_арт._YC.XJ.QT000350_YC.XJ.QT000350\\schema.jpg",
+    "partSku": "YC.XJ.QT000350"
+  },
+  {
+    "dir": "Фильтр_быстросъёмный_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002235_YC.JG.ZS002235",
+    "name": "Фильтр быстросъёмный для DJI Agras T50T40T25T20P",
+    "sku": "YC.JG.ZS002235",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Фильтр_быстросъёмный_для_DJI_Agras_T50T40T25T20P,_арт._YC.JG.ZS002235_YC.JG.ZS002235\\schema.jpg",
+    "partSku": "YC.JG.ZS002235"
+  },
+  {
+    "dir": "Фильтр_входного_отверстия_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.JG.ZS001085_YC.JG.ZS001085",
+    "name": "Фильтр входного отверстия бака для DJI Agras T50T40T25T20PT10T30",
+    "sku": "YC.JG.ZS001085",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Фильтр_входного_отверстия_бака_для_DJI_Agras_T50T40T25T20PT10T30,_арт._YC.JG.ZS001085_YC.JG.ZS001085\\schema.jpg",
+    "partSku": "YC.JG.ZS001085"
+  },
+  {
+    "dir": "Штуцер-угольник_180°_для_DJI_Agras_T50T25,_арт._YC.JG.CS000020_YC.JG.CS000020",
+    "name": "Штуцер-угольник 180° для DJI Agras T50T25",
+    "sku": "YC.JG.CS000020",
+    "schema": "d:\\Agent\\agi-parts-images\\T50\\Штуцер-угольник_180°_для_DJI_Agras_T50T25,_арт._YC.JG.CS000020_YC.JG.CS000020\\schema.jpg",
+    "partSku": "YC.JG.CS000020"
+  }
+]

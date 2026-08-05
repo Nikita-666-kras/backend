@@ -1,0 +1,35 @@
+# Public read-only API — GET (and OPTIONS) only. Mutations are rejected in filter.
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: post-service-public
+          uri: ${POST_SERVICE_URL:http://post-service:9003}
+          predicates:
+            - Path=/posts/**
+            - Method=GET,HEAD,OPTIONS
+        - id: media-public
+          uri: ${POST_SERVICE_URL:http://post-service:9003}
+          predicates:
+            - Path=/media/**
+            - Method=GET,HEAD,OPTIONS
+        - id: parts-public
+          uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
+          predicates:
+            - Path=/parts/**
+            - Method=GET,HEAD,OPTIONS
+        - id: kits-public
+          uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
+          predicates:
+            - Path=/kits/**
+            - Method=GET,HEAD,OPTIONS
+        - id: drones-public
+          uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
+          predicates:
+            - Path=/drones/**
+            - Method=GET,HEAD,OPTIONS
+        - id: part-categories-public
+          uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
+          predicates:
+            - Path=/part-categories/**
+            - Method=GET,HEAD,OPTIONS

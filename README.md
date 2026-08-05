@@ -2,37 +2,41 @@
 
 Расширяемая микросервисная платформа блога:
 
-- `post-service` — публичные посты
+- `post-service` — публичные посты + медиа
+- `parts-service` — каталог запчастей / комплектов / дронов
 - `sso-service` — login / refresh / roles
 - `admin-service` — BFF для админки
-- `api-gateway` — единая точка входа + JWT
-- `admin-ui` — Vue 3 админка
+- `api-gateway` — **admin-gateway** (JWT + CRUD): `/auth`, `/admin`, `/manager`, preview `/media`
+- `public-gateway` — **read-only API** (только GET): `/posts`, `/parts`, `/kits`, `/drones`, `/media/{uuid}`
+- `admin-ui` / `manager-ui` / `public-ui`
 
 ## Архитектура
 
 ```text
 Admin UI (:8088) ──proxy──┐
-                          ▼
-                    api-gateway :8080   ← единственный публичный API
-                      ├── /auth/**   → sso-service (internal)
-                      ├── /admin/**  → admin-service (internal)
-                      └── /posts/**  → post-service (internal)
-                                           ▲
-                                           │ X-Internal-Api-Key
-                                    admin-service
+Manager UI (:8090) ───────┼──► api-gateway :8080   (profile=admin)
+                          │      ├── /auth/**     → sso
+                          │      ├── /admin/**    → admin-service
+                          │      ├── /manager/**  → proposal-service
+                          │      └── GET /media/** → post-service
+                          │
+Public UI / Tilda ────────┴──► public-gateway :8081 (profile=public, GET only)
+                                 ├── /posts/** /media/{uuid} → post-service
+                                 └── /parts|/kits|/drones/** → parts-service
+                                      (status forced PUBLISHED)
 ```
+
+Gateway — одна кодовая база (`api-gateway`), два инстанса с разными профилями:
+`SPRING_PROFILES_ACTIVE=admin|public|combined` + `GATEWAY_MODE=…`.
 
 ## Security model
 
-- Наружу опубликованы только `:8080` (gateway) и `:8088` (admin-ui)
-- SSO / admin / post / DB порты **не** публикуются на host
-- Gateway всегда снимает client `X-User-*`, выставляет их только после JWT
-- Mutating `/posts` и `/admin` требуют роль `EDITOR` или `ADMIN`
-- Публичный `GET /posts` — только `PUBLISHED` (slug тоже)
-- `post-service` write/`by-id` только с `X-Internal-Api-Key`
-- Refresh tokens хранятся как SHA-256 hash
-- Seed users только при `APP_SEED_USERS=true`
-- Admin UI: DOMPurify, sessionStorage, CSP, same-origin proxy
+- Наружу: `:8080` (admin API), `:8081` (public GET API), UI порты
+- Public-gateway отклоняет не-GET (`405`) и пути `/admin|/auth|/manager` (`404`)
+- Admin-gateway не отдаёт публичный каталог `/parts|/kits|/posts` (только через `/admin/**`)
+- SSO / DB порты **не** публикуются на host
+- Gateway снимает client `X-User-*`, выставляет их только после JWT (admin)
+- Публичный `GET` — только `PUBLISHED`
 
 ## Роли
 
@@ -54,7 +58,8 @@ docker compose up --build -d
 
 URLs:
 
-- Gateway: http://localhost:8080
+- Admin gateway: http://localhost:8080
+- Public gateway (GET): http://localhost:8081
 - Admin UI: http://localhost:8088
 - Public blog UI: http://localhost:8089
 
@@ -62,6 +67,9 @@ Health:
 
 ```bash
 curl http://localhost:8080/application/health
+curl http://localhost:8081/application/health
+# public rejects writes:
+curl -X POST http://localhost:8081/parts -i   # → 405
 ```
 
 ## Admin UI

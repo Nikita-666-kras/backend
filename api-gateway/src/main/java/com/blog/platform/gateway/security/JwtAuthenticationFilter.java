@@ -1,5 +1,6 @@
 package com.blog.platform.gateway.security;
 
+import com.blog.platform.gateway.config.GatewayMode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -51,8 +52,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Value("${security.internal-api-keys.proposal:${PROPOSAL_INTERNAL_API_KEY:${INTERNAL_API_KEY}}}")
     private String proposalInternalApiKey;
 
+    private final GatewayMode mode;
+
     @Autowired
     private TokenVersionCache tokenVersionCache;
+
+    public JwtAuthenticationFilter(@Value("${gateway.mode:combined}") String mode) {
+        this.mode = GatewayMode.from(mode);
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -61,6 +68,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
         stripIdentityHeaders(requestBuilder);
+
+        if (mode.isPublic()) {
+            return filterPublic(exchange, chain, requestBuilder, path, method);
+        }
+
+        if (mode.isAdmin() && isPublicOnlySurface(path)) {
+            exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
+            return exchange.getResponse().setComplete();
+        }
 
         if (isBlockedPublic(path) || isBlockedDirectMediaApi(path, method)) {
             exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
@@ -81,6 +97,45 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(next);
         }
 
+        return filterAuthenticated(exchange, chain, requestBuilder, path, method);
+    }
+
+    private Mono<Void> filterPublic(
+            ServerWebExchange exchange,
+            GatewayFilterChain chain,
+            ServerHttpRequest.Builder requestBuilder,
+            String path,
+            HttpMethod method
+    ) {
+        if (isBlockedPublic(path)) {
+            exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
+            return exchange.getResponse().setComplete();
+        }
+        if (HttpMethod.OPTIONS.equals(method)
+                || "/application/health".equals(path)
+                || "/application/health/".equals(path)
+                || isPublicPublishedPosts(path, method)
+                || isPublicCatalog(path, method)
+                || isPublicMediaFile(path, method)) {
+            ServerWebExchange next = exchange.mutate().request(requestBuilder.build()).build();
+            if (isPublicPublishedPosts(path, method)) {
+                next = forcePublishedStatus(next, "/posts");
+            } else if (isPublicCatalog(path, method)) {
+                next = forcePublishedCatalog(next, path);
+            }
+            return chain.filter(next);
+        }
+        exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
+        return exchange.getResponse().setComplete();
+    }
+
+    private Mono<Void> filterAuthenticated(
+            ServerWebExchange exchange,
+            GatewayFilterChain chain,
+            ServerHttpRequest.Builder requestBuilder,
+            String path,
+            HttpMethod method
+    ) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -135,6 +190,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
     }
 
+    /** Surfaces that belong only on public-gateway — hide on admin-gateway. */
+    private boolean isPublicOnlySurface(String path) {
+        return path.startsWith("/posts")
+                || path.startsWith("/parts")
+                || path.startsWith("/kits")
+                || path.startsWith("/drones")
+                || path.startsWith("/part-categories");
+    }
+
     private void stripIdentityHeaders(ServerHttpRequest.Builder builder) {
         builder.headers(headers -> {
             headers.remove(HEADER_USER_ID);
@@ -159,7 +223,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         if (!path.startsWith("/media")) {
             return false;
         }
-        if (!HttpMethod.GET.equals(method)) {
+        if (!HttpMethod.GET.equals(method) && !HttpMethod.HEAD.equals(method)) {
             return true;
         }
         return !isPublicMediaFile(path, method);
@@ -174,14 +238,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicPublishedPosts(String path, HttpMethod method) {
-        if (!HttpMethod.GET.equals(method) || !path.startsWith("/posts")) {
+        if ((!HttpMethod.GET.equals(method) && !HttpMethod.HEAD.equals(method)) || !path.startsWith("/posts")) {
             return false;
         }
         return !path.startsWith("/posts/by-id/");
     }
 
     private boolean isPublicCatalog(String path, HttpMethod method) {
-        if (!HttpMethod.GET.equals(method)) {
+        if (!HttpMethod.GET.equals(method) && !HttpMethod.HEAD.equals(method)) {
             return false;
         }
         if (path.startsWith("/parts/by-id/") || path.startsWith("/kits/by-id/") || path.startsWith("/drones/by-id/")) {
@@ -194,7 +258,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicMediaFile(String path, HttpMethod method) {
-        return HttpMethod.GET.equals(method) && path.matches("^/media/[0-9a-fA-F-]{36}$");
+        return (HttpMethod.GET.equals(method) || HttpMethod.HEAD.equals(method))
+                && path.matches("^/media/[0-9a-fA-F-]{36}$");
     }
 
     private boolean requiresEditorRole(String path, HttpMethod method) {
