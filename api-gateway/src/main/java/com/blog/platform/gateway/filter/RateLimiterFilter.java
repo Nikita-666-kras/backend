@@ -27,7 +27,7 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
     private static final Logger log = LoggerFactory.getLogger(RateLimiterFilter.class);
     private final Map<String, Counter> requestCounters = new ConcurrentHashMap<>();
 
-    @Value("${security.rate-limit.api-per-minute:120}")
+    @Value("${security.rate-limit.api-per-minute:300}")
     private int defaultLimit;
 
     @Value("${security.rate-limit.auth-per-minute:20}")
@@ -35,8 +35,12 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String ip = clientIp(exchange.getRequest());
         String path = exchange.getRequest().getPath().value();
+        if (isExemptFromRateLimit(exchange.getRequest().getMethod().name(), path)) {
+            return chain.filter(exchange);
+        }
+
+        String ip = clientIp(exchange.getRequest());
         boolean authEndpoint = path.startsWith("/auth/login")
                 || path.startsWith("/auth/refresh")
                 || path.startsWith("/auth/logout");
@@ -58,6 +62,19 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
         }
         log.debug("{} {}", exchange.getRequest().getMethod(), path);
         return chain.filter(exchange);
+    }
+
+    /**
+     * Медиатека: пакетная загрузка и превью не должны упираться в edge-лимит.
+     */
+    private boolean isExemptFromRateLimit(String method, String path) {
+        if ("GET".equals(method) && path.matches("^/media/[0-9a-fA-F-]{36}$")) {
+            return true;
+        }
+        if (path.startsWith("/admin/media")) {
+            return true;
+        }
+        return false;
     }
 
     @Scheduled(fixedDelayString = "${security.rate-limit.cleanup-ms:60000}")

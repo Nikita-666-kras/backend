@@ -1,6 +1,7 @@
 package com.blog.platform.article.service;
 
 import com.blog.platform.article.api.dto.MediaDtos.BatchProcessResponse;
+import com.blog.platform.article.api.dto.MediaDtos.BatchUploadResponse;
 import com.blog.platform.article.api.dto.MediaDtos.MediaResponse;
 import com.blog.platform.article.api.dto.MediaDtos.PageResponse;
 import com.blog.platform.article.api.dto.MediaDtos.ProcessingSettingsResponse;
@@ -102,6 +103,33 @@ public class MediaFileService {
         entity.setSquare(false);
         entity.setWatermark(false);
         return toResponse(mediaFileRepository.save(entity));
+    }
+
+  @Transactional
+    public BatchUploadResponse uploadBatch(List<MultipartFile> files, UUID uploadedBy, String sectionRaw) {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("Файлы не выбраны");
+        }
+        List<MediaResponse> uploaded = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        int failed = 0;
+        for (MultipartFile file : files) {
+            if (file == null || file.isEmpty()) {
+                continue;
+            }
+            try {
+                uploaded.add(upload(file, uploadedBy, sectionRaw));
+            } catch (Exception ex) {
+                failed++;
+                String name = file.getOriginalFilename() != null ? file.getOriginalFilename() : "file";
+                errors.add(name + ": " + ex.getMessage());
+            }
+        }
+        if (uploaded.isEmpty() && failed > 0) {
+            throw new IllegalArgumentException(
+                    "Не удалось загрузить файлы: " + String.join("; ", errors));
+        }
+        return new BatchUploadResponse(List.copyOf(uploaded), failed, List.copyOf(errors));
     }
 
     @Transactional(readOnly = true)

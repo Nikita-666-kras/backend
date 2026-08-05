@@ -13,7 +13,9 @@ import {
   moveMedia,
   processMedia,
   processMediaBatch,
-  uploadMedia,
+  processMediaBatch,
+  uploadMediaBatch,
+  MEDIA_UPLOAD_BATCH_SIZE,
   type MediaAsset,
   type MediaPage,
   type MediaProcessOptions,
@@ -312,12 +314,17 @@ async function onFiles(files: FileList | null) {
   try {
     const targetSection = section.value || uploadSection.value || defaultMediaSection(auth.user?.roles)
     const list = Array.from(files)
-    for (let i = 0; i < list.length; i++) {
-      progress.value = Math.round(((i + 0.5) / list.length) * 100)
-      const asset = await uploadMedia(list[i], targetSection, (pct) => {
-        progress.value = Math.round(((i + pct / 100) / list.length) * 100)
+    for (let i = 0; i < list.length; i += MEDIA_UPLOAD_BATCH_SIZE) {
+      const chunk = list.slice(i, i + MEDIA_UPLOAD_BATCH_SIZE)
+      const batchIndex = Math.floor(i / MEDIA_UPLOAD_BATCH_SIZE)
+      const batchCount = Math.ceil(list.length / MEDIA_UPLOAD_BATCH_SIZE)
+      const result = await uploadMediaBatch(chunk, targetSection, (pct) => {
+        progress.value = Math.round(((batchIndex + pct / 100) / batchCount) * 100)
       })
-      uploaded.push(asset)
+      uploaded.push(...result.uploaded)
+      if (result.failed > 0 && result.errors?.length) {
+        error.value = result.errors.slice(0, 3).join('; ')
+      }
     }
 
     const needProcess = autoSquare.value || autoWatermark.value || autoWebp.value

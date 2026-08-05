@@ -148,6 +148,13 @@ public final class AdminDtos {
     ) {
     }
 
+    public record MediaBatchUploadResponse(
+            List<MediaResponse> uploaded,
+            int failed,
+            List<String> errors
+    ) {
+    }
+
     public record ProcessingSettingsResponse(
             String squareBackground,
             String logoPath,

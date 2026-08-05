@@ -2,6 +2,7 @@ package com.blog.platform.admin.api;
 
 import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchProcessRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchProcessResponse;
+import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchUploadResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaPageResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaProcessRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaResponse;
@@ -12,6 +13,7 @@ import com.blog.platform.admin.security.AdminAccessGuard;
 import com.blog.platform.common.api.ApiResponse;
 import com.blog.platform.common.logging.AuditClient;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,26 @@ public class AdminMediaController {
         accessGuard.requireMediaAccess(request, effectiveSection);
         MediaResponse response = postServiceClient.uploadMedia(file, accessGuard.userId(request), effectiveSection);
         auditClient.audit("MEDIA", "Media uploaded", Map.of("mediaId", response.id().toString(), "section", effectiveSection), accessGuard.userId(request).toString(), null, null);
+        return ResponseEntity.ok(ApiResponse.of(response));
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<ApiResponse<MediaBatchUploadResponse>> uploadBatch(
+            HttpServletRequest request,
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam(required = false) String section
+    ) {
+        String effectiveSection = section == null || section.isBlank() ? "OTHER" : section;
+        accessGuard.requireMediaAccess(request, effectiveSection);
+        MediaBatchUploadResponse response = postServiceClient.uploadMediaBatch(
+                files, accessGuard.userId(request), effectiveSection);
+        auditClient.audit(
+                "MEDIA",
+                "Media batch uploaded",
+                Map.of("count", response.uploaded().size(), "failed", response.failed(), "section", effectiveSection),
+                accessGuard.userId(request).toString(),
+                null,
+                null);
         return ResponseEntity.ok(ApiResponse.of(response));
     }
 

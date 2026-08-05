@@ -63,6 +63,14 @@ export async function fetchMedia(params: {
   return data.data as MediaPage
 }
 
+export interface MediaBatchUploadResult {
+  uploaded: MediaAsset[]
+  failed: number
+  errors: string[]
+}
+
+export const MEDIA_UPLOAD_BATCH_SIZE = 25
+
 export async function uploadMedia(file: File, section?: MediaSection | '', onProgress?: (pct: number) => void) {
   const form = new FormData()
   form.append('file', file)
@@ -77,6 +85,28 @@ export async function uploadMedia(file: File, section?: MediaSection | '', onPro
     }
   })
   return data.data as MediaAsset
+}
+
+export async function uploadMediaBatch(
+  files: File[],
+  section?: MediaSection | '',
+  onProgress?: (pct: number) => void
+) {
+  const form = new FormData()
+  for (const file of files) {
+    form.append('files', file)
+  }
+  if (section) {
+    form.append('section', section)
+  }
+  const { data } = await api.post('/admin/media/batch', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: (e) => {
+      if (!onProgress || !e.total) return
+      onProgress(Math.round((e.loaded / e.total) * 100))
+    }
+  })
+  return data.data as MediaBatchUploadResult
 }
 
 export async function deleteMedia(id: string) {

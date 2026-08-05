@@ -2,6 +2,7 @@ package com.blog.platform.admin.client;
 
 import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchProcessRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchProcessResponse;
+import com.blog.platform.admin.api.dto.AdminDtos.MediaBatchUploadResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaPageResponse;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaProcessRequest;
 import com.blog.platform.admin.api.dto.AdminDtos.MediaResponse;
@@ -139,6 +140,41 @@ public class PostServiceClient {
             return requireData(response);
         } catch (Exception ex) {
             throw new IllegalStateException("Не удалось загрузить файл", ex);
+        }
+    }
+
+    public MediaBatchUploadResponse uploadMediaBatch(List<MultipartFile> files, UUID uploadedBy, String section) {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("Файлы не выбраны");
+        }
+        try {
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            for (MultipartFile file : files) {
+                if (file == null || file.isEmpty()) {
+                    continue;
+                }
+                ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return file.getOriginalFilename();
+                    }
+                };
+                body.add("files", resource);
+            }
+            body.add("uploadedBy", uploadedBy.toString());
+            if (section != null && !section.isBlank()) {
+                body.add("section", section);
+            }
+            ApiResponse<MediaBatchUploadResponse> response = postServiceRestClient.post()
+                    .uri("/media/batch")
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(body)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+            return requireData(response);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Не удалось загрузить файлы", ex);
         }
     }
 

@@ -54,6 +54,13 @@ public final class MediaDtos {
     ) {
     }
 
+    public record BatchUploadResponse(
+            List<MediaResponse> uploaded,
+            int failed,
+            List<String> errors
+    ) {
+    }
+
     public record ProcessingSettingsResponse(
             String squareBackground,
             String logoPath,

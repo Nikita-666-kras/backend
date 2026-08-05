@@ -2,6 +2,7 @@ package com.blog.platform.article.api;
 
 import com.blog.platform.article.api.dto.MediaDtos.BatchProcessRequest;
 import com.blog.platform.article.api.dto.MediaDtos.BatchProcessResponse;
+import com.blog.platform.article.api.dto.MediaDtos.BatchUploadResponse;
 import com.blog.platform.article.api.dto.MediaDtos.MediaResponse;
 import com.blog.platform.article.api.dto.MediaDtos.PageResponse;
 import com.blog.platform.article.api.dto.MediaDtos.ProcessRequest;
@@ -9,6 +10,7 @@ import com.blog.platform.article.api.dto.MediaDtos.ProcessingSettingsResponse;
 import com.blog.platform.article.api.dto.MediaDtos.SectionUpdateRequest;
 import com.blog.platform.article.service.MediaFileService;
 import com.blog.platform.common.api.ApiResponse;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -38,6 +40,15 @@ public class MediaController {
             @RequestParam(required = false) String section
     ) {
         return ResponseEntity.ok(ApiResponse.of(mediaFileService.upload(file, uploadedBy, section)));
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<ApiResponse<BatchUploadResponse>> uploadBatch(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("uploadedBy") UUID uploadedBy,
+            @RequestParam(required = false) String section
+    ) {
+        return ResponseEntity.ok(ApiResponse.of(mediaFileService.uploadBatch(files, uploadedBy, section)));
     }
 
     @GetMapping
