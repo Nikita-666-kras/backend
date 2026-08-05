@@ -27,7 +27,7 @@ export interface Part {
   name: string
   sku: string
   description?: string | null
-  price: number
+  price: number | null
   currency: string
   droneId?: string | null
   droneName?: string | null
@@ -84,7 +84,7 @@ export interface PartPayload {
   name: string
   sku: string
   description?: string
-  price: number
+  price: number | null
   currency?: string
   droneId?: string | null
   categoryId?: string | null
@@ -100,7 +100,7 @@ export interface KitPayload {
   name: string
   sku: string
   description?: string
-  price: number
+  price: number | null
   currency?: string
   priceMode?: KitPriceMode
   droneId?: string | null
@@ -120,11 +120,20 @@ export interface DronePayload {
   sortOrder?: number
 }
 
+export type PartCatalogFilter =
+  | 'NO_PRICE'
+  | 'NO_NAME'
+  | 'NO_PHOTO'
+  | 'NO_DRONE'
+  | 'NO_CATEGORY'
+  | 'INCOMPLETE'
+
 export async function fetchParts(params: {
   q?: string
   status?: string
   droneId?: string
   categoryId?: string
+  catalogFilter?: PartCatalogFilter | ''
   page?: number
   size?: number
 }) {
@@ -241,7 +250,8 @@ export async function deletePartCategory(id: string) {
   await api.delete(`/admin/part-categories/${id}`)
 }
 
-export function formatPrice(value: number, currency = 'RUB') {
+export function formatPrice(value: number | null | undefined, currency = 'RUB') {
+  if (value == null || Number.isNaN(value)) return '—'
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency,
@@ -272,7 +282,7 @@ export interface ImportPreview {
   suggestedMapping: ColumnMapping[]
   sampleRows: Record<string, string>[]
   totalRows: number
-  stats: { valid: number; toCreate: number; toUpdate: number; invalid: number }
+  stats: { valid: number; toCreate: number; toUpdate: number; invalid: number; withoutPrice: number; withoutName: number }
   issues: Array<{ rowNumber: number; message: string }>
 }
 

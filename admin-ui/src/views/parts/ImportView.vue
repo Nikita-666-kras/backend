@@ -166,6 +166,8 @@ function resetAll() {
         <div><strong>{{ preview.totalRows }}</strong><span>строк</span></div>
         <div><strong>{{ preview.stats.toCreate }}</strong><span>новых</span></div>
         <div><strong>{{ preview.stats.toUpdate }}</strong><span>обновлений</span></div>
+        <div><strong>{{ preview.stats.withoutPrice }}</strong><span>без цены</span></div>
+        <div><strong>{{ preview.stats.withoutName }}</strong><span>без названия</span></div>
         <div><strong>{{ preview.stats.invalid }}</strong><span>ошибок</span></div>
       </div>
 

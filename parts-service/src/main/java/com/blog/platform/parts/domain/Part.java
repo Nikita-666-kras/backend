@@ -34,7 +34,7 @@ public class Part extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false, precision = 12, scale = 2)
+    @Column(precision = 12, scale = 2)
     private BigDecimal price;
 
     @Column(nullable = false, length = 3)

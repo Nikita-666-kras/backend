@@ -150,11 +150,20 @@ export async function fetchProcessingSettings() {
 
 export function mediaPublicUrl(idOrUrl: string | null | undefined, cacheBust?: string | number) {
   if (!idOrUrl) return ''
-  let path = idOrUrl
+  const raw = String(idOrUrl).trim()
+  const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i
+
+  let path = raw
   if (path.startsWith('http://')) {
     path = `https://${path.slice('http://'.length)}`
   } else if (!path.startsWith('https://')) {
-    path = path.startsWith('/media/') ? path : `/media/${path}`
+    const uuidMatch = path.match(UUID_RE)
+    const uuid = uuidMatch ? uuidMatch[0] : ''
+    if (uuid) {
+      path = `/media/${uuid}`
+    } else {
+      path = path.startsWith('/media/') ? path : `/media/${path}`
+    }
     path = `${window.location.origin}${path}`
   }
   if (cacheBust !== undefined && cacheBust !== '') {

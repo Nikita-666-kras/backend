@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
  * This filter is process-local — fine for a single gateway replica.
  */
 @Component
+@ConditionalOnProperty(name = "security.rate-limit.enabled", havingValue = "true", matchIfMissing = true)
 public class RateLimiterFilter implements GlobalFilter, Ordered {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimiterFilter.class);
@@ -36,7 +38,7 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
-        if (isExemptFromRateLimit(exchange.getRequest().getMethod().name(), path)) {
+        if (isExemptFromRateLimit(path)) {
             return chain.filter(exchange);
         }
 
@@ -65,13 +67,14 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
     }
 
     /**
-     * Медиатека: пакетная загрузка и превью не должны упираться в edge-лимит.
+     * Админка и менеджерский хаб — JWT на gateway; превью /media — десятки параллельных GET.
+     * Не режем по IP-лимиту (иначе 429 при каталоге запчастей и загрузке папки).
      */
-    private boolean isExemptFromRateLimit(String method, String path) {
-        if ("GET".equals(method) && path.matches("^/media/[0-9a-fA-F-]{36}$")) {
+    private boolean isExemptFromRateLimit(String path) {
+        if (path.startsWith("/admin/") || path.startsWith("/manager/")) {
             return true;
         }
-        if (path.startsWith("/admin/media")) {
+        if (path.startsWith("/media/") || path.equals("/media")) {
             return true;
         }
         return false;

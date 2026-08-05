@@ -53,11 +53,14 @@ public class AdminPartsController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) UUID droneId,
             @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) String catalogFilter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
         accessGuard.requireCatalogOrAdmin(request);
-        return ResponseEntity.ok(ApiResponse.of(partsServiceClient.searchParts(q, status, droneId, categoryId, page, size)));
+        return ResponseEntity.ok(ApiResponse.of(
+                partsServiceClient.searchParts(q, status, droneId, categoryId, catalogFilter, page, size)
+        ));
     }
 
     @GetMapping("/parts/{id}")

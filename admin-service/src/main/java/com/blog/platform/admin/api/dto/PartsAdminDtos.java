@@ -63,7 +63,7 @@ public final class PartsAdminDtos {
             @NotBlank @Size(max = 240) String name,
             @NotBlank @Size(max = 120) String sku,
             String description,
-            @NotNull @DecimalMin("0.00") BigDecimal price,
+            @DecimalMin("0.00") BigDecimal price,
             @Size(max = 3) String currency,
             UUID droneId,
             UUID categoryId,
@@ -179,7 +179,7 @@ public final class PartsAdminDtos {
     ) {
     }
 
-    public record PreviewStats(int valid, int toCreate, int toUpdate, int invalid) {
+    public record PreviewStats(int valid, int toCreate, int toUpdate, int invalid, int withoutPrice, int withoutName) {
     }
 
     public record RowIssue(int rowNumber, String message) {

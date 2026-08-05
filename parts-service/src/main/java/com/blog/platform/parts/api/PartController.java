@@ -7,6 +7,7 @@ import com.blog.platform.parts.api.dto.PartsDtos.PartRequest;
 import com.blog.platform.parts.api.dto.PartsDtos.PartResponse;
 import com.blog.platform.parts.api.dto.PartsDtos.StatusBody;
 import com.blog.platform.parts.domain.CatalogStatus;
+import com.blog.platform.parts.domain.PartCatalogFilter;
 import com.blog.platform.parts.security.TrustedInternalRequest;
 import com.blog.platform.parts.service.PartService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,12 +39,15 @@ public class PartController {
             @RequestParam(required = false) CatalogStatus status,
             @RequestParam(required = false) UUID droneId,
             @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) PartCatalogFilter catalogFilter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request
     ) {
         CatalogStatus effectiveStatus = TrustedInternalRequest.isTrusted(request) ? status : CatalogStatus.PUBLISHED;
-        return ResponseEntity.ok(ApiResponse.of(partService.search(q, effectiveStatus, droneId, categoryId, page, size)));
+        return ResponseEntity.ok(ApiResponse.of(
+                partService.search(q, effectiveStatus, droneId, categoryId, catalogFilter, page, size)
+        ));
     }
 
     @GetMapping("/by-id/{id}")

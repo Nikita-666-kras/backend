@@ -9,6 +9,7 @@ import com.blog.platform.parts.domain.Kit;
 import com.blog.platform.parts.domain.KitItem;
 import com.blog.platform.parts.domain.KitPriceMode;
 import com.blog.platform.parts.domain.Part;
+import com.blog.platform.parts.domain.PartCatalogFilter;
 import com.blog.platform.parts.domain.PartCategory;
 import com.blog.platform.parts.repository.KitRepository;
 import com.blog.platform.parts.repository.PartCategoryRepository;
@@ -39,11 +40,12 @@ public class PartService {
             CatalogStatus status,
             UUID droneId,
             UUID categoryId,
+            PartCatalogFilter catalogFilter,
             int page,
             int size
     ) {
         PageRequest pageable = PageRequest.of(page, clamp(size), Sort.by(Sort.Direction.DESC, "updatedAt"));
-        Page<Part> result = partRepository.search(smartQuery(q), status, droneId, categoryId, pageable);
+        Page<Part> result = partRepository.search(smartQuery(q), status, droneId, categoryId, catalogFilter, pageable);
         return toPage(result);
     }
 
@@ -132,7 +134,7 @@ public class PartService {
         part.setName(request.name().trim());
         part.setSku(request.sku().trim());
         part.setDescription(blankToNull(request.description()));
-        if (request.price() == null || request.price().compareTo(BigDecimal.ZERO) < 0) {
+        if (request.price() != null && request.price().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Цена должна быть >= 0");
         }
         part.setPrice(request.price());

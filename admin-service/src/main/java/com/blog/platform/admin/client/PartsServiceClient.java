@@ -33,7 +33,15 @@ public class PartsServiceClient {
 
     private final RestClient partsServiceRestClient;
 
-    public PageResponse<PartResponse> searchParts(String q, String status, UUID droneId, UUID categoryId, int page, int size) {
+    public PageResponse<PartResponse> searchParts(
+            String q,
+            String status,
+            UUID droneId,
+            UUID categoryId,
+            String catalogFilter,
+            int page,
+            int size
+    ) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/parts")
                 .queryParam("page", page)
                 .queryParam("size", size);
@@ -41,6 +49,7 @@ public class PartsServiceClient {
         if (status != null && !status.isBlank()) builder.queryParam("status", status);
         if (droneId != null) builder.queryParam("droneId", droneId);
         if (categoryId != null) builder.queryParam("categoryId", categoryId);
+        if (catalogFilter != null && !catalogFilter.isBlank()) builder.queryParam("catalogFilter", catalogFilter);
         return requireData(partsServiceRestClient.get()
                 .uri(builder.build(true).toUriString())
                 .retrieve()

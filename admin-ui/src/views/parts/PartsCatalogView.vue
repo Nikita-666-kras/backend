@@ -25,7 +25,7 @@ import { statusLabel } from '@/utils/labels'
 const auth = useAuthStore()
 const toast = useToastStore()
 const store = usePartsCatalogStore()
-const { q, status, droneId, categoryId, page, pageSize, columns } = storeToRefs(store)
+const { q, status, droneId, categoryId, catalogFilter, page, pageSize, columns } = storeToRefs(store)
 
 const data = ref<PageResponse<Part> | null>(null)
 const drones = ref<Drone[]>([])
@@ -67,6 +67,10 @@ function normalizeSku(value: string) {
   return value.trim().toUpperCase().replace(/\s+/g, '')
 }
 
+function compactSku(value: string) {
+  return normalizeSku(value).replace(/[^A-Z0-9]/g, '')
+}
+
 function stemFromFilename(name: string) {
   const base = name.replace(/^.*[\\/]/, '')
   return base.replace(/\.[^.]+$/, '')
@@ -75,17 +79,21 @@ function stemFromFilename(name: string) {
 /** Longest SKU that appears as a contiguous token in the filename stem. */
 function matchSkuFromFilename(filename: string, skus: string[]): string | null {
   const stem = normalizeSku(stemFromFilename(filename))
+  const stemCompact = compactSku(stemFromFilename(filename))
   if (!stem) return null
 
   const sorted = [...skus].sort((a, b) => b.length - a.length)
   for (const sku of sorted) {
     const n = normalizeSku(sku)
+    const nc = compactSku(sku)
     if (!n || n.length < 2) continue
     if (stem === n) return sku
     // token boundaries: start/end or non-alnum around SKU
     const escaped = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const re = new RegExp(`(?:^|[^A-Z0-9])${escaped}(?:$|[^A-Z0-9])`)
     if (re.test(stem)) return sku
+    // relaxed match for different separators: BC.AG.SS000391.01 vs BC-AG-SS000391-01
+    if (nc.length >= 4 && stemCompact.includes(nc)) return sku
   }
   return null
 }
@@ -124,6 +132,7 @@ async function load() {
       status: status.value || undefined,
       droneId: droneId.value || undefined,
       categoryId: categoryId.value || undefined,
+      catalogFilter: catalogFilter.value || undefined,
       page: page.value,
       size: pageSize.value
     })
@@ -236,6 +245,7 @@ async function fetchAllPartsForMatching(): Promise<Part[]> {
       status: status.value || undefined,
       droneId: droneId.value || undefined,
       categoryId: categoryId.value || undefined,
+      catalogFilter: catalogFilter.value || undefined,
       page: p,
       size: 500
     })
@@ -327,7 +337,7 @@ onMounted(async () => {
   }
 })
 
-watch([status, droneId, categoryId, pageSize], () => {
+watch([status, droneId, categoryId, catalogFilter, pageSize], () => {
   page.value = 0
   clearSelection()
   load()
@@ -376,6 +386,15 @@ watch([status, droneId, categoryId, pageSize], () => {
       <select v-model="categoryId">
         <option value="">Все категории</option>
         <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+      </select>
+      <select v-model="catalogFilter">
+        <option value="">Все позиции</option>
+        <option value="INCOMPLETE">Неполные (любой пробел)</option>
+        <option value="NO_PRICE">Без цены</option>
+        <option value="NO_NAME">Без названия</option>
+        <option value="NO_PHOTO">Без фото</option>
+        <option value="NO_DRONE">Без дрона</option>
+        <option value="NO_CATEGORY">Без категории</option>
       </select>
       <select v-model.number="pageSize">
         <option :value="10">10 / стр.</option>

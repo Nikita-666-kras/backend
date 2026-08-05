@@ -21,7 +21,7 @@ const isNew = computed(() => route.name === 'part-new')
 const name = ref('')
 const sku = ref('')
 const description = ref('')
-const price = ref(0)
+const price = ref<number | null>(null)
 const droneId = ref('')
 const categoryId = ref('')
 const coverMediaId = ref<string | null>(null)
@@ -41,7 +41,7 @@ function payload() {
     name: name.value.trim(),
     sku: sku.value.trim(),
     description: description.value.trim() || undefined,
-    price: Number(price.value),
+    price: price.value == null || Number.isNaN(price.value) ? null : price.value,
     currency: 'RUB',
     droneId: droneId.value || null,
     categoryId: categoryId.value || null,
@@ -69,7 +69,7 @@ async function load() {
   name.value = part.name
   sku.value = part.sku
   description.value = part.description || ''
-  price.value = Number(part.price)
+  price.value = part.price == null ? null : Number(part.price)
   droneId.value = part.droneId || ''
   categoryId.value = part.categoryId || ''
   coverMediaId.value = part.coverMediaId || null
@@ -218,7 +218,7 @@ onMounted(async () => {
         <div class="grid-2">
           <div class="field">
             <label>Цена (₽)</label>
-            <input v-model.number="price" type="number" min="0" step="0.01" required />
+            <input v-model.number="price" type="number" min="0" step="0.01" placeholder="Без цены" />
           </div>
           <div class="field">
             <label>Дрон</label>

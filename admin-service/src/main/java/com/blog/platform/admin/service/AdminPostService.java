@@ -88,7 +88,7 @@ public class AdminPostService {
     public DashboardStats dashboard() {
         StatusCounts posts = statusCounts((status, size) -> postServiceClient.search(null, status, null, 0, size).totalElements());
         StatusCounts parts = statusCounts((status, size) ->
-                partsServiceClient.searchParts(null, status, null, null, 0, size).totalElements());
+                partsServiceClient.searchParts(null, status, null, null, null, 0, size).totalElements());
         StatusCounts kits = statusCounts((status, size) ->
                 partsServiceClient.searchKits(null, status, null, 0, size).totalElements());
         long mediaTotal = postServiceClient.listMedia(null, null, null, null, null, null, 0, 1).totalElements();

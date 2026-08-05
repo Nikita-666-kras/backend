@@ -57,6 +57,7 @@ security:
   token-version:
     refresh-ms: ${TOKEN_VERSION_REFRESH_MS:1000}
   rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
     api-per-minute: ${RATE_LIMIT_API_PER_MINUTE:300}
     auth-per-minute: ${RATE_LIMIT_AUTH_PER_MINUTE:20}
     cleanup-ms: ${RATE_LIMIT_CLEANUP_MS:60000}

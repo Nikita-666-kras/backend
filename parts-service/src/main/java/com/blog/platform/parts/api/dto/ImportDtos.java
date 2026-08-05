@@ -48,7 +48,9 @@ public final class ImportDtos {
             int valid,
             int toCreate,
             int toUpdate,
-            int invalid
+            int invalid,
+            int withoutPrice,
+            int withoutName
     ) {
     }
 

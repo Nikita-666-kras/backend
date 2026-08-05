@@ -55,7 +55,9 @@ public class ImportService {
     private static final Set<String> SKU_ALIASES = Set.of(
             "sku", "артикул", "артикул запчасти", "код", "код товара", "article", "articul"
     );
-    private static final Set<String> NAME_ALIASES = Set.of("name", "название", "наименование", "товар");
+    private static final Set<String> NAME_ALIASES = Set.of(
+            "name", "название", "наименование", "товар", "title", "product title", "наименование товара"
+    );
     private static final Set<String> PRICE_ALIASES = Set.of("price", "цена", "розничная цена", "saleprice", "sale_price");
     private static final Set<String> DESC_ALIASES = Set.of("description", "описание", "desc");
     private static final Set<String> DRONE_ALIASES = Set.of("drone", "дрон", "модель", "модель дрона");
@@ -115,14 +117,9 @@ public class ImportService {
                         mapped = mapped.withSku(mapped.barcode());
                     }
                 }
-                if (mapped.sku() == null || mapped.sku().isBlank() || mapped.name() == null || mapped.name().isBlank()) {
+                if (mapped.sku() == null || mapped.sku().isBlank()) {
                     skipped++;
-                    errors.add(new RowIssue(rowNumber, "Нужны артикул и название"));
-                    continue;
-                }
-                if (mapped.price() == null) {
-                    skipped++;
-                    errors.add(new RowIssue(rowNumber, "Нужна цена"));
+                    errors.add(new RowIssue(rowNumber, "Нужен артикул"));
                     continue;
                 }
 
@@ -130,7 +127,7 @@ public class ImportService {
                 Part part = existing.orElseGet(Part::new);
                 boolean isNew = existing.isEmpty();
                 part.setSku(mapped.sku().trim());
-                part.setName(mapped.name().trim());
+                part.setName(resolveImportName(mapped));
                 part.setDescription(blankToNull(mapped.description()));
                 part.setPrice(mapped.price());
                 part.setCurrency("RUB");
@@ -386,6 +383,8 @@ public class ImportService {
         int toCreate = 0;
         int toUpdate = 0;
         int invalid = 0;
+        int withoutPrice = 0;
+        int withoutName = 0;
         List<RowIssue> issues = new ArrayList<>();
         int rowNumber = 1;
         for (Map<String, String> row : rows) {
@@ -394,19 +393,35 @@ public class ImportService {
             if ((mapped.sku() == null || mapped.sku().isBlank()) && mapped.barcode() != null) {
                 mapped = mapped.withSku(mapped.barcode());
             }
-            if (mapped.sku() == null || mapped.sku().isBlank() || mapped.name() == null || mapped.name().isBlank() || mapped.price() == null) {
+            if (mapped.sku() == null || mapped.sku().isBlank()) {
                 invalid++;
-                issues.add(new RowIssue(rowNumber, "Нужны артикул, название и цена"));
+                issues.add(new RowIssue(rowNumber, "Нужен артикул"));
                 continue;
             }
             valid++;
+            if (mapped.price() == null) {
+                withoutPrice++;
+            }
+            if (mapped.name() == null || mapped.name().isBlank()) {
+                withoutName++;
+            }
             if (findExisting(mapped).isPresent()) {
                 toUpdate++;
             } else {
                 toCreate++;
             }
         }
-        return new PreviewAnalysis(new PreviewStats(valid, toCreate, toUpdate, invalid), issues);
+        return new PreviewAnalysis(
+                new PreviewStats(valid, toCreate, toUpdate, invalid, withoutPrice, withoutName),
+                issues
+        );
+    }
+
+    private String resolveImportName(MappedRow mapped) {
+        if (mapped.name() != null && !mapped.name().isBlank()) {
+            return mapped.name().trim();
+        }
+        return mapped.sku().trim();
     }
 
     private MappedRow mapRow(Map<String, String> row, List<ColumnMapping> mapping) {
