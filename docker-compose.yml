@@ -196,7 +196,6 @@ services:
     environment:
       AMOCRM_AR_FIELD_ID: ${AMOCRM_AR_FIELD_ID:-1853459}
       AMOCRM_WEBHOOK_SECRET: ${AMOCRM_WEBHOOK_SECRET:-}
-      AMOCRM_AUTOAR_MODE: ${AMOCRM_AUTOAR_MODE:-handlers}
     networks:
       - blog-net
     expose:

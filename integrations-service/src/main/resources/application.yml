@@ -13,8 +13,7 @@ spring:
 amocrm:
   ar-field-id: ${AMOCRM_AR_FIELD_ID:1853459}
   webhook-secret: ${AMOCRM_WEBHOOK_SECRET:}
-  # handlers = set_custom_fields via execute_handlers; data_only = only {{json.ar}} for next bot step
-  autoar-mode: ${AMOCRM_AUTOAR_MODE:handlers}
+  # Continue body is always { "data": { "ar": "...." } }; Salesbot writes the field via {{json.ar}}
 
 management:
   endpoints:

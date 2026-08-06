@@ -11,18 +11,13 @@ import org.springframework.core.Ordered;
 public class FilterConfig {
 
     @Bean
-    WebhookSecretFilter webhookSecretFilter(@Value("${amocrm.webhook-secret:}") String secret) {
-        return new WebhookSecretFilter(secret);
-    }
-
-    @Bean
-    FilterRegistrationBean<WebhookSecretFilter> webhookSecretFilterRegistration(WebhookSecretFilter webhookSecretFilter) {
+    FilterRegistrationBean<WebhookSecretFilter> webhookSecretFilterRegistration(
+            @Value("${amocrm.webhook-secret:}") String secret
+    ) {
         FilterRegistrationBean<WebhookSecretFilter> bean = new FilterRegistrationBean<>();
-        bean.setFilter(webhookSecretFilter);
+        bean.setFilter(new WebhookSecretFilter(secret));
         bean.addUrlPatterns("/amocrm/*");
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
-        // Prevent Spring Boot from also registering the filter as a generic servlet filter
-        bean.setEnabled(true);
         return bean;
     }
 }
