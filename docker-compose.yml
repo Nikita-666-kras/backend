@@ -188,6 +188,20 @@ services:
       - blog-net
     expose:
       - "9008"
+
+  integrations-service:
+    build:
+      context: .
+      dockerfile: integrations-service/Dockerfile
+    environment:
+      AMOCRM_AR_FIELD_ID: ${AMOCRM_AR_FIELD_ID:-1853459}
+      AMOCRM_WEBHOOK_SECRET: ${AMOCRM_WEBHOOK_SECRET:-}
+      AMOCRM_AUTOAR_MODE: ${AMOCRM_AUTOAR_MODE:-handlers}
+    networks:
+      - blog-net
+    expose:
+      - "9009"
+
   admin-service:
     build:
       context: .
@@ -257,6 +271,7 @@ services:
     depends_on:
       - post-service
       - parts-service
+      - integrations-service
     ports:
       - "8081:8080"
     environment:
@@ -269,9 +284,10 @@ services:
       RATE_LIMIT_ENABLED: ${PUBLIC_RATE_LIMIT_ENABLED:-${RATE_LIMIT_ENABLED:-true}}
       RATE_LIMIT_API_PER_MINUTE: ${PUBLIC_RATE_LIMIT_API_PER_MINUTE:-600}
       CORS_ALLOWED_ORIGINS: ${PUBLIC_CORS_ALLOWED_ORIGINS:-${CORS_ALLOWED_ORIGINS:-http://localhost:8089,http://127.0.0.1:8089}}
-      CORS_ALLOWED_METHODS: GET,HEAD,OPTIONS
+      CORS_ALLOWED_METHODS: GET,HEAD,POST,OPTIONS
       POST_SERVICE_URL: http://post-service:9003
       PARTS_SERVICE_URL: http://parts-service:9006
+      INTEGRATIONS_SERVICE_URL: http://integrations-service:9009
       SSO_SERVICE_URL: http://sso-service:9001
       SSO_INTERNAL_API_KEY: ${SSO_INTERNAL_API_KEY:-${INTERNAL_API_KEY}}
     networks:

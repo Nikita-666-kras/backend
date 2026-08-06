@@ -6,8 +6,9 @@
 - `parts-service` — каталог запчастей / комплектов / дронов
 - `sso-service` — login / refresh / roles
 - `admin-service` — BFF для админки
+- `integrations-service` — внешние webhook (amoCRM Salesbot autoar)
 - `api-gateway` — **admin-gateway** (JWT + CRUD): `/auth`, `/admin`, `/manager`, preview `/media`
-- `public-gateway` — **read-only API** (только GET): `/posts`, `/parts`, `/kits`, `/drones`, `/media/{uuid}`
+- `public-gateway` — **read-only API** (GET) + **POST `/amocrm/**`**: `/posts`, `/parts`, `/kits`, `/drones`, `/media/{uuid}`
 - `admin-ui` / `manager-ui` / `public-ui`
 
 ## Архитектура
@@ -20,10 +21,11 @@ Manager UI (:8090) ───────┼──► api-gateway :8080   (profil
                           │      ├── /manager/**  → proposal-service
                           │      └── GET /media/** → post-service
                           │
-Public UI / Tilda ────────┴──► public-gateway :8081 (profile=public, GET only)
-                                 ├── /posts/** /media/{uuid} → post-service
-                                 └── /parts|/kits|/drones/** → parts-service
-                                      (status forced PUBLISHED)
+Public UI / Tilda / amo ──┴──► public-gateway :8081 (profile=public)
+                                 ├── GET /posts/** /media/{uuid} → post-service
+                                 ├── GET /parts|/kits|/drones/** → parts-service
+                                 └── POST /amocrm/** → integrations-service
+                                      (status forced PUBLISHED on catalog)
 ```
 
 Gateway — одна кодовая база (`api-gateway`), два инстанса с разными профилями:
@@ -31,8 +33,8 @@ Gateway — одна кодовая база (`api-gateway`), два инста�
 
 ## Security model
 
-- Наружу: `:8080` (admin API), `:8081` (public GET API), UI порты
-- Public-gateway отклоняет не-GET (`405`) и пути `/admin|/auth|/manager` (`404`)
+- Наружу: `:8080` (admin API), `:8081` (public GET API + amoCRM POST), UI порты
+- Public-gateway отклоняет не-GET (`405`), кроме **`POST /amocrm/**`**; пути `/admin|/auth|/manager` → `404`
 - Admin-gateway не отдаёт публичный каталог `/parts|/kits|/posts` (только через `/admin/**`)
 - SSO / DB порты **не** публикуются на host
 - Gateway снимает client `X-User-*`, выставляет их только после JWT (admin)
@@ -68,9 +70,13 @@ Health:
 ```bash
 curl http://localhost:8080/application/health
 curl http://localhost:8081/application/health
-# public rejects writes:
+# public rejects writes (except /amocrm):
 curl -X POST http://localhost:8081/parts -i   # → 405
+curl -X POST http://localhost:8081/amocrm/autoar -H 'Content-Type: application/json' \
+  -d '{"data":{"phone":"+7 (999) 123-45-67","ar_field_id":"1853459"}}'   # → 200
 ```
+
+Salesbot JSON: `deploy/amocrm/autoar.json` → URL `https://api.atris.site/amocrm/autoar`.
 
 ## Admin UI
 

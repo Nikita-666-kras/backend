@@ -1,0 +1,109 @@
+# GitLab CI — blog-platform
+# Runner: Docker executor, image eclipse-temurin:21-jdk
+# На VPS ~8GB: concurrent=1, docker/deploy только manual
+
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx512m"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+  FF_USE_FASTZIP: "true"
+
+default:
+  timeout: 30m
+  interruptible: true
+
+.gradle_cache: &gradle_cache
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-gradle"
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+    policy: pull-push
+
+# ─── MR и main: сборка ───────────────────────────────────────────
+build:
+  stage: build
+  image: eclipse-temurin:21-jdk
+  tags:
+    - docker
+  <<: *gradle_cache
+  script:
+    - chmod +x gradlew || true
+    - |
+      if [ -f ./gradlew ]; then
+        ./gradlew build -x test --no-daemon
+      else
+        echo "ERROR: нет gradlew. Добавьте Gradle Wrapper в репозиторий."
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - "**/build/libs/*.jar"
+    expire_in: 3 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ─── MR и main: тесты ────────────────────────────────────────────
+test:
+  stage: test
+  image: eclipse-temurin:21-jdk
+  tags:
+    - docker
+  <<: *gradle_cache
+  script:
+    - chmod +x gradlew
+    - ./gradlew test --no-daemon
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - "**/build/test-results/test/TEST-*.xml"
+    expire_in: 3 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ─── Только main, вручную: деплой на VPS по SSH ──────────────────
+# Variables (Protected): DEPLOY_HOST, DEPLOY_USER, SSH_PRIVATE_KEY, DEPLOY_PATH
+deploy:production:
+  stage: deploy
+  image: alpine:3.20
+  tags:
+    - docker
+  resource_group: production
+  before_script:
+    - apk add --no-cache openssh-client bash
+    - eval "$(ssh-agent -s)"
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+  script:
+    - |
+      test -n "$DEPLOY_HOST"
+      test -n "$DEPLOY_USER"
+      test -n "$DEPLOY_PATH"
+      ssh -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" bash -s <<EOF
+        set -euo pipefail
+        cd "$DEPLOY_PATH"
+        git fetch origin
+        git checkout "$CI_DEFAULT_BRANCH"
+        git pull --ff-only origin "$CI_DEFAULT_BRANCH"
+        docker compose up -d --build
+        docker compose ps
+      EOF
+  environment:
+    name: production
+    url: https://api.atris.site
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  needs:
+    - job: test
+      optional: true
+    - job: build
+      optional: true

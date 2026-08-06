@@ -1,0 +1,18 @@
+# project path                          mode
+# strict = merge только Maintainers
+# free   = merge Developers (MR без обязательного вас)
+# open   = можно push в main (операционка)
+
+atris/products/blog-platform            strict
+atris/products/atris-site               strict
+atris/ops/infra                         strict
+
+atris/products/mobile-hub               free
+atris/ops/runbooks                      free
+atris/_meta/handbook                    free
+atris/_meta/templates                   free
+atris/_meta/roadmap                     free
+
+atris/work/support                      open
+atris/work/content                      open
+atris/work/partners                     open

@@ -77,6 +77,9 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
         if (path.startsWith("/media/") || path.equals("/media")) {
             return true;
         }
+        if (path.startsWith("/amocrm")) {
+            return true;
+        }
         return false;
     }
 

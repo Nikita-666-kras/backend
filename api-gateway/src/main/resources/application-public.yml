@@ -28,3 +28,7 @@ spring:
           uri: ${PARTS_SERVICE_URL:http://parts-service:9006}
           predicates:
             - Path=/part-categories,/part-categories/**
+        - id: integrations-amocrm
+          uri: ${INTEGRATIONS_SERVICE_URL:http://integrations-service:9009}
+          predicates:
+            - Path=/amocrm,/amocrm/**

@@ -1,0 +1,39 @@
+# GitLab CE — https://git.atris.site
+# Install: see deploy/GITLAB_ATRIS.md
+#
+# Требования: ≥4 GB RAM (лучше 8 GB), Docker + Compose plugin
+
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: always
+    hostname: git.atris.site
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://git.atris.site'
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        nginx['proxy_set_headers'] = {
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on"
+        }
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        # Профиль под ~8 GB RAM (GitLab + blog-platform на одном VPS)
+        puma['worker_processes'] = 1
+        sidekiq['max_concurrency'] = 5
+        prometheus_monitoring['enable'] = false
+    ports:
+      - '127.0.0.1:8929:80'
+      - '2222:22'
+    volumes:
+      - './config:/etc/gitlab'
+      - './logs:/var/log/gitlab'
+      - './data:/var/opt/gitlab'
+    shm_size: '256m'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost/-/health']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s

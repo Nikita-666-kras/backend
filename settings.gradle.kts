@@ -16,7 +16,8 @@ include(
     "api-gateway",
     "admin-service",
     "proposal-service",
-    "logging-service"
+    "logging-service",
+    "integrations-service"
 )
 
 project(":post-service").projectDir = file("article-service")

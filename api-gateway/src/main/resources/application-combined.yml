@@ -39,3 +39,7 @@ spring:
           uri: ${PROPOSAL_SERVICE_URL:http://proposal-service:9007}
           predicates:
             - Path=/manager/kp/**
+        - id: integrations-amocrm
+          uri: ${INTEGRATIONS_SERVICE_URL:http://integrations-service:9009}
+          predicates:
+            - Path=/amocrm,/amocrm/**

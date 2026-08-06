@@ -116,7 +116,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 || "/application/health/".equals(path)
                 || isPublicPublishedPosts(path, method)
                 || isPublicCatalog(path, method)
-                || isPublicMediaFile(path, method)) {
+                || isPublicMediaFile(path, method)
+                || isPublicAmocrmWebhook(path, method)) {
             ServerWebExchange next = exchange.mutate().request(requestBuilder.build()).build();
             if (isPublicPublishedPosts(path, method)) {
                 next = forcePublishedStatus(next, "/posts");
@@ -127,6 +128,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
         exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
         return exchange.getResponse().setComplete();
+    }
+
+    private boolean isPublicAmocrmWebhook(String path, HttpMethod method) {
+        return path.startsWith("/amocrm")
+                && (HttpMethod.POST.equals(method) || HttpMethod.OPTIONS.equals(method));
     }
 
     private Mono<Void> filterAuthenticated(
