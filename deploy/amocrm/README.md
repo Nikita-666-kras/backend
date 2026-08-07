@@ -40,6 +40,8 @@ AMOCRM_AR_FIELD_ID=1902113
 
 ---
 
+Если бот «не работает» — см. [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+
 ## 3. amoCRM — Salesbot
 
 Загрузите / вставьте [`autoar.json`](autoar.json):

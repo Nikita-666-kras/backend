@@ -6,9 +6,7 @@ import com.blog.platform.integrations.api.dto.AmoDtos.WidgetRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -22,16 +20,13 @@ public class AutoArService {
     private static final Logger log = LoggerFactory.getLogger(AutoArService.class);
 
     private final RestClient.Builder restClientBuilder;
-    private final TaskExecutor continueExecutor;
     private final long defaultArFieldId;
 
     public AutoArService(
             RestClient.Builder restClientBuilder,
-            @Qualifier("amocrmContinueExecutor") TaskExecutor continueExecutor,
             @Value("${amocrm.ar-field-id:1902113}") long defaultArFieldId
     ) {
         this.restClientBuilder = restClientBuilder;
-        this.continueExecutor = continueExecutor;
         this.defaultArFieldId = defaultArFieldId;
     }
 
@@ -43,13 +38,16 @@ public class AutoArService {
         String status = ar.isEmpty() ? "fail" : "success";
         String contactId = text(data, "contact_id");
         String returnUrl = request.returnUrl();
+        boolean hasToken = request.token() != null && !request.token().isBlank();
 
         log.info(
-                "autoar: contact_id={} ar={} status={} return_url={}",
+                "autoar: contact_id={} phone_len={} ar={} status={} return_url={} token={}",
                 contactId,
+                phone == null ? 0 : phone.length(),
                 ar,
                 status,
-                returnUrl == null || returnUrl.isBlank() ? "missing" : "present"
+                returnUrl == null || returnUrl.isBlank() ? "missing" : "present",
+                hasToken ? "present" : "missing"
         );
 
         if (returnUrl == null || returnUrl.isBlank()) {
@@ -57,9 +55,9 @@ public class AutoArService {
             return new AutoArResult(ar, status, arFieldId);
         }
 
+        // Salesbot needs continue BEFORE 200 — otherwise {{json.ar}} is empty in the next step
         ContinuePayload payload = buildContinuePayload(ar);
-        String token = request.token();
-        continueExecutor.execute(() -> postContinue(returnUrl, token, payload));
+        postContinue(returnUrl, request.token(), payload);
         return new AutoArResult(ar, status, arFieldId);
     }
 
