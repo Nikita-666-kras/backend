@@ -1,6 +1,6 @@
-# GitLab CI — blog-platform
-# Runner: Docker executor, image eclipse-temurin:21-jdk
-# На VPS ~8GB: concurrent=1, docker/deploy только manual
+# GitLab CI — atris_ofice/server-project (blog-platform)
+# Runner: docker tags; VPS concurrent=1
+# Flow: MR/master → build+test; deploy on master = manual ▶
 
 stages:
   - build
@@ -13,7 +13,7 @@ variables:
   FF_USE_FASTZIP: "true"
 
 default:
-  timeout: 30m
+  timeout: 45m
   interruptible: true
 
 .gradle_cache: &gradle_cache
@@ -24,7 +24,6 @@ default:
       - .gradle/caches
     policy: pull-push
 
-# ─── MR и main: сборка ───────────────────────────────────────────
 build:
   stage: build
   image: eclipse-temurin:21-jdk
@@ -32,14 +31,8 @@ build:
     - docker
   <<: *gradle_cache
   script:
-    - chmod +x gradlew || true
-    - |
-      if [ -f ./gradlew ]; then
-        ./gradlew build -x test --no-daemon
-      else
-        echo "ERROR: нет gradlew. Добавьте Gradle Wrapper в репозиторий."
-        exit 1
-      fi
+    - chmod +x gradlew
+    - ./gradlew build -x test --no-daemon
   artifacts:
     paths:
       - "**/build/libs/*.jar"
@@ -48,7 +41,6 @@ build:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-# ─── MR и main: тесты ────────────────────────────────────────────
 test:
   stage: test
   image: eclipse-temurin:21-jdk
@@ -68,8 +60,7 @@ test:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-# ─── Только main, вручную: деплой на VPS по SSH ──────────────────
-# Variables (Protected): DEPLOY_HOST, DEPLOY_USER, SSH_PRIVATE_KEY, DEPLOY_PATH
+# Push в default branch (master) → кнопка ▶ деплоит на VPS
 deploy:production:
   stage: deploy
   image: alpine:3.20
@@ -103,7 +94,5 @@ deploy:production:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
   needs:
-    - job: test
-      optional: true
     - job: build
-      optional: true
+    - job: test
