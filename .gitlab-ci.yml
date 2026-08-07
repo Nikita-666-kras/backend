@@ -33,10 +33,7 @@ build:
   script:
     - chmod +x gradlew
     - ./gradlew build -x test --no-daemon
-  artifacts:
-    paths:
-      - "**/build/libs/*.jar"
-    expire_in: 3 days
+  # JAR не сохраняем: 18 bootJar > лимит GitLab (413). Deploy собирает на VPS через compose.
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -94,5 +91,4 @@ deploy:production:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
   needs:
-    - job: build
     - job: test
