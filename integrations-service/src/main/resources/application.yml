@@ -11,7 +11,7 @@ spring:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 
 amocrm:
-  ar-field-id: ${AMOCRM_AR_FIELD_ID:1853459}
+  ar-field-id: ${AMOCRM_AR_FIELD_ID:1902113}
   webhook-secret: ${AMOCRM_WEBHOOK_SECRET:}
   # Continue body is always { "data": { "ar": "...." } }; Salesbot writes the field via {{json.ar}}
 

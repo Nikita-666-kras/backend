@@ -34,7 +34,7 @@ curl -s -X POST https://api.atris.site/amocrm/autoar \
 ## 2. Env (опционально)
 
 ```env
-AMOCRM_AR_FIELD_ID=1853459
+AMOCRM_AR_FIELD_ID=1902113
 # AMOCRM_WEBHOOK_SECRET=...   # тогда URL: .../autoar?secret=...
 ```
 
@@ -45,7 +45,7 @@ AMOCRM_AR_FIELD_ID=1853459
 Загрузите / вставьте [`autoar.json`](autoar.json):
 
 1. Шаг `widget_request` → наш URL + `contact_id`, `phone`.
-2. Шаг `set_custom_fields` → значение `{{json.ar}}`, поле `1853459`.
+2. Шаг `set_custom_fields` → значение `{{json.ar}}`, поле `1902113`.
 
 Проверьте ID телефона: `{{contact.cf.1844509}}` — замените, если в аккаунте другой.
 

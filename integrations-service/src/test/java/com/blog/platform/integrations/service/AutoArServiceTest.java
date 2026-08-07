@@ -13,6 +13,7 @@ class AutoArServiceTest {
     @Test
     void extractAr_takesLastFourDigits() {
         assertEquals("4567", AutoArService.extractAr("+7 (999) 123-45-67"));
+        assertEquals("0440", AutoArService.extractAr("+7 (918) 958-04-40"));
         assertEquals("4567", AutoArService.extractAr("89991234567"));
         assertEquals("67", AutoArService.extractAr("67"));
         assertEquals("", AutoArService.extractAr("abc"));

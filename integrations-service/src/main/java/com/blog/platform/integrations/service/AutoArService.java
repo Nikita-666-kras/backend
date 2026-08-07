@@ -28,7 +28,7 @@ public class AutoArService {
     public AutoArService(
             RestClient.Builder restClientBuilder,
             @Qualifier("amocrmContinueExecutor") TaskExecutor continueExecutor,
-            @Value("${amocrm.ar-field-id:1853459}") long defaultArFieldId
+            @Value("${amocrm.ar-field-id:1902113}") long defaultArFieldId
     ) {
         this.restClientBuilder = restClientBuilder;
         this.continueExecutor = continueExecutor;

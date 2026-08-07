@@ -194,7 +194,7 @@ services:
       context: .
       dockerfile: integrations-service/Dockerfile
     environment:
-      AMOCRM_AR_FIELD_ID: ${AMOCRM_AR_FIELD_ID:-1853459}
+      AMOCRM_AR_FIELD_ID: ${AMOCRM_AR_FIELD_ID:-1902113}
       AMOCRM_WEBHOOK_SECRET: ${AMOCRM_WEBHOOK_SECRET:-}
     networks:
       - blog-net

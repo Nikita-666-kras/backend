@@ -73,7 +73,7 @@ curl http://localhost:8081/application/health
 # public rejects writes (except /amocrm):
 curl -X POST http://localhost:8081/parts -i   # → 405
 curl -X POST http://localhost:8081/amocrm/autoar -H 'Content-Type: application/json' \
-  -d '{"data":{"phone":"+7 (999) 123-45-67","ar_field_id":"1853459"}}'   # → 200
+  -d '{"data":{"phone":"+7 (999) 123-45-67","ar_field_id":"1902113"}}'   # → 200
 ```
 
 Salesbot JSON: `deploy/amocrm/autoar.json` → URL `https://api.atris.site/amocrm/autoar`.
