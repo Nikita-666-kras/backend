@@ -98,6 +98,16 @@ public class AmoCrmApiClient {
         return findCustomFieldValue(root.path("custom_fields_values"), fieldId);
     }
 
+    boolean patchContactArField(long contactId, long arFieldId, String ar) {
+        Map<String, Object> body = Map.of(
+                "custom_fields_values", List.of(Map.of(
+                        "field_id", arFieldId,
+                        "values", List.of(Map.of("value", ar))
+                ))
+        );
+        return patch("/api/v4/contacts/" + contactId, body);
+    }
+
     boolean patchLeadArField(long leadId, long arFieldId, String ar) {
         Map<String, Object> body = Map.of(
                 "custom_fields_values", List.of(Map.of(

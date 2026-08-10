@@ -102,9 +102,9 @@ public class PipelineAutoArService {
         }
 
         String leadName = buildLeadName(leadId, contactId, ar, snapshot.name());
-        // Name and AR separately: wrong field id must not block rename.
+        // AR lives on contact (field 1902113); lead name is updated separately.
         boolean nameOk = amoCrmApiClient.patchLeadName(leadId, leadName);
-        boolean arOk = amoCrmApiClient.patchLeadArField(leadId, properties.arFieldId(), ar);
+        boolean arOk = amoCrmApiClient.patchContactArField(contactId, properties.arFieldId(), ar);
 
         log.info(
                 "pipeline-autoar: lead_id={} contact_id={} ar={} ar_field_id={} name_patch={} ar_patch={} name={}",

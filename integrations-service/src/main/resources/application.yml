@@ -13,7 +13,7 @@ spring:
 amocrm:
   base-url: ${AMOCRM_BASE_URL:}
   access-token: ${AMOCRM_ACCESS_TOKEN:}
-  ar-field-id: ${AMOCRM_AR_FIELD_ID:1902731}
+  ar-field-id: ${AMOCRM_AR_FIELD_ID:1902113}
   phone-field-id: ${AMOCRM_PHONE_FIELD_ID:1844509}
   webhook-secret: ${AMOCRM_WEBHOOK_SECRET:}
   pipeline-enabled: ${AMOCRM_PIPELINE_ENABLED:false}
