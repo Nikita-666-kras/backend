@@ -1,5 +1,11 @@
 # amoCRM Salesbot — autoar (АР из телефона)
 
+**Гайд с нуля:** [SETUP_FROM_SCRATCH.md](SETUP_FROM_SCRATCH.md)  
+**Лучшие практики (дока amo):** [BEST_PRACTICES.md](BEST_PRACTICES.md)  
+**Ревью кода:** [CODE_REVIEW.md](CODE_REVIEW.md)  
+**Чеклист запуска:** [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md)  
+**Если не работает:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
 Обработчик: `POST https://api.atris.site/amocrm/autoar`  
 Сервис: `integrations-service` → public-gateway `:8081`.
 

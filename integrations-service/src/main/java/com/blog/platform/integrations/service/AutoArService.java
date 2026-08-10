@@ -14,6 +14,20 @@ import org.springframework.web.client.RestClient;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * amoCRM Salesbot {@code widget_request} handler.
+ * <p>
+ * Official contract:
+ * <ul>
+ *   <li>POST body: {@code token}, {@code data}, {@code return_url} (root)</li>
+ *   <li>Respond HTTP 200 within ~2s</li>
+ *   <li>POST {@code return_url} with {@code { "data": { ... } }} — keys available as {@code {{json.*}}}</li>
+ *   <li>{@code execute_handlers} on continue supports only {@code show}/{@code goto} — not field writes</li>
+ * </ul>
+ *
+ * @see <a href="https://www.amocrm.ru/developers/content/digital_pipeline/salesbot">Salesbot</a>
+ * @see <a href="https://www.amocrm.ru/developers/content/crm_platform/widgets-api">continue API</a>
+ */
 @Service
 public class AutoArService {
 
@@ -37,11 +51,13 @@ public class AutoArService {
         long arFieldId = resolveArFieldId(data);
         String status = ar.isEmpty() ? "fail" : "success";
         String contactId = text(data, "contact_id");
+        String leadId = text(data, "lead_id");
         String returnUrl = request.returnUrl();
         boolean hasToken = request.token() != null && !request.token().isBlank();
 
         log.info(
-                "autoar: contact_id={} phone_len={} ar={} status={} return_url={} token={}",
+                "autoar: lead_id={} contact_id={} phone_len={} ar={} status={} return_url={} token={}",
+                leadId,
                 contactId,
                 phone == null ? 0 : phone.length(),
                 ar,
@@ -55,8 +71,8 @@ public class AutoArService {
             return new AutoArResult(ar, status, arFieldId);
         }
 
-        // Salesbot needs continue BEFORE 200 — otherwise {{json.ar}} is empty in the next step
-        ContinuePayload payload = buildContinuePayload(ar);
+        // Bot waits for continue; send data.ar + data.status for {{json.ar}} / {{json.status}}
+        ContinuePayload payload = buildContinuePayload(ar, status);
         postContinue(returnUrl, request.token(), payload);
         return new AutoArResult(ar, status, arFieldId);
     }
@@ -75,7 +91,6 @@ public class AutoArService {
         return digits.substring(digits.length() - 4);
     }
 
-    /** Prefer data.phone; fall back to nested value/phone shapes from amo. */
     static String resolvePhone(JsonNode data) {
         String phone = text(data, "phone");
         if (phone != null && !phone.isBlank()) {
@@ -113,10 +128,14 @@ public class AutoArService {
         }
     }
 
-    /** Only {@code data.ar} — Salesbot writes the contact field from {{json.ar}}. */
-    private ContinuePayload buildContinuePayload(String ar) {
+    /**
+     * Continue payload per widgets-api: keys under {@code data} become {@code {{json.key}}}.
+     * Do not put set_custom_fields into execute_handlers — only show/goto are supported there.
+     */
+    private ContinuePayload buildContinuePayload(String ar, String status) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("ar", ar);
+        data.put("status", status);
         return new ContinuePayload(data);
     }
 
@@ -130,7 +149,11 @@ public class AutoArService {
                 spec = spec.header("Authorization", "Bearer " + token);
             }
             spec.body(payload).retrieve().toBodilessEntity();
-            log.info("autoar: continue ok ar={}", payload.data().get("ar"));
+            log.info(
+                    "autoar: continue ok ar={} status={}",
+                    payload.data().get("ar"),
+                    payload.data().get("status")
+            );
         } catch (Exception ex) {
             log.error("autoar: continue failed url={}: {}", returnUrl, ex.getMessage());
         }
