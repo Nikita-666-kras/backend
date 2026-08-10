@@ -2,23 +2,26 @@ package com.blog.platform.integrations.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
+import java.net.http.HttpClient;
 import java.time.Duration;
 
 @Configuration
 public class AppConfig {
 
     /**
-     * Keep amo Salesbot widget_request under ~2s (ack) + continue call.
-     * @see <a href="https://www.amocrm.ru/developers/content/digital_pipeline/salesbot">Salesbot docs</a>
+     * JDK client supports PATCH (HttpURLConnection / SimpleClientHttpRequestFactory does not).
+     * Timeouts keep Salesbot continue snappy and amo API calls reliable.
      */
     @Bean
     RestClient.Builder restClientBuilder() {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(Duration.ofMillis(800));
-        factory.setReadTimeout(Duration.ofMillis(1500));
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(5))
+                .build();
+        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(httpClient);
+        factory.setReadTimeout(Duration.ofSeconds(10));
         return RestClient.builder().requestFactory(factory);
     }
 }

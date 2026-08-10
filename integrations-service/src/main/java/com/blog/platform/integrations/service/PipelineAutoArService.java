@@ -57,8 +57,21 @@ public class PipelineAutoArService {
             return;
         }
 
-        for (Long leadId : leadIds) {
-            processLead(leadId);
+        // Cap burst size — Digital Pipeline can fan out; amo returns 429 if we hammer API.
+        int limit = Math.min(leadIds.size(), 10);
+        if (leadIds.size() > limit) {
+            log.warn("pipeline-autoar: got {} leads, processing first {}", leadIds.size(), limit);
+        }
+        for (int i = 0; i < limit; i++) {
+            if (i > 0) {
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+            processLead(leadIds.get(i));
         }
     }
 
@@ -89,15 +102,18 @@ public class PipelineAutoArService {
         }
 
         String leadName = buildLeadName(leadId, contactId, ar, snapshot.name());
-        boolean patchOk = amoCrmApiClient.patchLeadNameAndAr(leadId, leadName, properties.arFieldId(), ar);
+        // Name and AR separately: wrong field id must not block rename.
+        boolean nameOk = amoCrmApiClient.patchLeadName(leadId, leadName);
+        boolean arOk = amoCrmApiClient.patchLeadArField(leadId, properties.arFieldId(), ar);
 
         log.info(
-                "pipeline-autoar: lead_id={} contact_id={} ar={} ar_field_id={} lead_patch={} name={}",
+                "pipeline-autoar: lead_id={} contact_id={} ar={} ar_field_id={} name_patch={} ar_patch={} name={}",
                 leadId,
                 contactId,
                 ar,
                 properties.arFieldId(),
-                patchOk,
+                nameOk,
+                arOk,
                 leadName
         );
     }
