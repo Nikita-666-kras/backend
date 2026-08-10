@@ -1,0 +1,17 @@
+[
+  {
+    "question": [
+      {
+        "handler": "action",
+        "params": {
+          "name": "set_custom_fields",
+          "params": {
+            "type": "lead",
+            "value": "Ар {{lead.cf.1902731}} {{contact.name}} {{company.name}} {{contact.cf.1853457}} {{lead.cf.1853353}}",
+            "custom_field": "{{lead.name}}"
+          }
+        }
+      }
+    ]
+  }
+]

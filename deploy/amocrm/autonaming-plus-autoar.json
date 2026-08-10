@@ -48,6 +48,17 @@
               }
             },
             {
+              "handler": "action",
+              "params": {
+                "name": "set_custom_fields",
+                "params": {
+                  "type": "lead",
+                  "value": "Ар {{json.ar}} {{contact.name}} {{company.name}} {{contact.cf.1853457}} {{lead.cf.1853353}}",
+                  "custom_field": "{{lead.name}}"
+                }
+              }
+            },
+            {
               "handler": "exits",
               "params": {
                 "value": "success"

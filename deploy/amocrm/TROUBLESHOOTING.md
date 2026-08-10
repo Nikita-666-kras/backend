@@ -22,7 +22,7 @@ sudo journalctl -u nginx --since "10 min ago" | grep amocrm
 
 ## Симптом B: в логе есть contact_id и continue ok, поле АР пустое
 
-Второй шаг бота: значение должно быть `{{json.ar}}`, поле `1902113`.  
+Второй шаг бота: значение должно быть `{{json.ar}}`, поле **1902731** (сделка, type 2).  
 Если пусто — попробуй `{{json.data.ar}}`.
 
 ## Симптом C: continue failed на amocrm.ru

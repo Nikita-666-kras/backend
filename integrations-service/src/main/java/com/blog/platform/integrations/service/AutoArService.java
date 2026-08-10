@@ -38,7 +38,7 @@ public class AutoArService {
 
     public AutoArService(
             RestClient.Builder restClientBuilder,
-            @Value("${amocrm.ar-field-id:1902113}") long defaultArFieldId
+            @Value("${amocrm.ar-field-id:1902731}") long defaultArFieldId
     ) {
         this.restClientBuilder = restClientBuilder;
         this.defaultArFieldId = defaultArFieldId;

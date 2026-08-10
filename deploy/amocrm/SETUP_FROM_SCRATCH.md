@@ -2,7 +2,7 @@
 
 Полные рекомендации по доке: [BEST_PRACTICES.md](BEST_PRACTICES.md) · ревью: [CODE_REVIEW.md](CODE_REVIEW.md) · чеклист: [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md)
 
-Цель: при **переходе сделки на этап** Salesbot считает 4 последние цифры телефона и пишет в поле **АР** (`1902113`).
+Цель: при **переходе сделки на этап** Salesbot считает 4 последние цифры телефона и пишет в поле **АР** на сделке (`1902731`).
 
 ```text
 Перенос сделки на этап
@@ -43,7 +43,7 @@ curl -s -X POST https://api.atris.site/amocrm/autoar \
 1. `widget_request` + `goto` на шаг 1 (паттерн из доки виджета).
 2. Шаг 1: `conditions` по `{{json.status}}` = `success` → `set_custom_fields`.
 3. Телефон: `{{contact.cf.1844509}}` — замените ID при необходимости (`CFV[id]` в HTML).
-4. АР: `custom_fields_id` **1902113**, value `{{json.ar}}`.
+4. АР: `custom_fields_id` **1902731**, `type` **2** (сделка), value `{{json.ar}}`.
 
 Показать на сервере:
 

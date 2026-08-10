@@ -66,13 +66,13 @@
 Шаг 0: widget_request → ваш сервер
         goto → шаг 1
 Шаг 1: если {{json.status}} = success
-          → set_custom_fields (контакт, {{json.ar}})
+          → set_custom_fields (сделка, {{json.ar}}, type 2)
 ```
 
 Файл: [`autoar.json`](autoar.json).
 
 `set_custom_fields`:
-- `type: 1` = контакт, `type: 2` = сделка ([дока](https://www.amocrm.ru/developers/content/digital_pipeline/salesbot))
+- `type: 2` = сделка (поле АР **1902731**), `type: 1` = контакт ([дока](https://www.amocrm.ru/developers/content/digital_pipeline/salesbot))
 - `custom_fields_id` = int id поля
 - `value` = строка или маркер (`{{json.ar}}`)
 

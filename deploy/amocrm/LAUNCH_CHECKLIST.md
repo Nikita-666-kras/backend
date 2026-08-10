@@ -41,7 +41,7 @@ curl -s -X POST https://api.atris.site/amocrm/autoar \
 Опционально в `.env`:
 
 ```env
-AMOCRM_AR_FIELD_ID=1902113
+AMOCRM_AR_FIELD_ID=1902731
 # AMOCRM_WEBHOOK_SECRET=...
 ```
 
@@ -55,7 +55,7 @@ AMOCRM_AR_FIELD_ID=1902113
 2. Режим **кода / JSON**.
 3. Вставить содержимое [autoar.json](autoar.json) целиком.
 4. Проверить ID телефона: `{{contact.cf.1844509}}` → свой `CFV[id]` если другой.
-5. Поле АР: `1902113`, value `{{json.ar}}`.
+5. Поле АР: `1902731` (сделка), value `{{json.ar}}`.
 6. **Сохранить** бота.
 
 ### 2.2 Digital Pipeline (критично)
@@ -94,7 +94,7 @@ autoar: contact_id=<число> phone_len>0 ar=XXXX return_url=present token=pre
 autoar: continue ok ar=XXXX
 ```
 
-Карточка контакта → поле АР = **4 цифры**.
+Карточка сделки → поле АР = **4 цифры**.
 
 ---
 
@@ -127,7 +127,7 @@ autoar: continue ok ar=XXXX
 |------|--------|
 | Official | https://www.amocrm.ru/developers/content/digital_pipeline/salesbot |
 | Access | Public HTTPS POST, no OAuth for widget_request |
-| Permissions | Salesbot on pipeline; contact custom field 1902113 |
+| Permissions | Salesbot on pipeline; lead custom field 1902731 |
 | Handler | `https://api.atris.site/amocrm/autoar` |
 | Code | `integrations-service`, gateway public profile |
 | Skill | `amocrm-integrations` + `references/atris-autoar.md` |

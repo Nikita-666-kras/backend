@@ -1,0 +1,21 @@
+[
+  {
+    "handler": "widget_request",
+    "params": {
+      "url": "https://api.atris.site/amocrm/autoar",
+      "data": {
+        "lead_id": "{{lead.id}}",
+        "contact_id": "{{contact.id}}",
+        "phone": "{{contact.cf.1844509}}",
+        "ar_field_id": "1902731"
+      }
+    }
+  },
+  {
+    "handler": "goto",
+    "params": {
+      "type": "question",
+      "step": 1
+    }
+  }
+]

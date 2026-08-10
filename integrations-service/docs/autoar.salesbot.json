@@ -9,7 +9,7 @@
             "lead_id": "{{lead.id}}",
             "contact_id": "{{contact.id}}",
             "phone": "{{contact.cf.1844509}}",
-            "ar_field_id": "1902113"
+            "ar_field_id": "1902731"
           }
         }
       },
@@ -41,13 +41,25 @@
               "params": {
                 "name": "set_custom_fields",
                 "params": {
-                  "type": 1,
-                  "custom_fields_id": 1902113,
+                  "type": 2,
+                  "custom_fields_id": 1902731,
                   "value": "{{json.ar}}"
                 }
               }
+            },
+            {
+              "handler": "exits",
+              "params": {
+                "value": "success"
+              }
             }
           ]
+        }
+      },
+      {
+        "handler": "exits",
+        "params": {
+          "value": "fail"
         }
       }
     ]

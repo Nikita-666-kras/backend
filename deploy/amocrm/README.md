@@ -11,7 +11,7 @@
 
 1. Сервер считает АР = 4 последние цифры телефона.  
 2. `POST` на `return_url` (корень JSON от amo): `{ "data": { "ar": "0440" } }`.  
-3. Второй блок Salesbot пишет поле контакта из `{{json.ar}}`.
+3. Второй блок Salesbot пишет поле **сделки** из `{{json.ar}}`.
 
 Сервер **не** обновляет контакт через amo API.
 
@@ -40,7 +40,7 @@ curl -s -X POST https://api.atris.site/amocrm/autoar \
 ## 2. Env (опционально)
 
 ```env
-AMOCRM_AR_FIELD_ID=1902113
+AMOCRM_AR_FIELD_ID=1902731
 # AMOCRM_WEBHOOK_SECRET=...   # тогда URL: .../autoar?secret=...
 ```
 
@@ -53,7 +53,7 @@ AMOCRM_AR_FIELD_ID=1902113
 Загрузите / вставьте [`autoar.json`](autoar.json):
 
 1. Шаг `widget_request` → наш URL + `contact_id`, `phone`.
-2. Шаг `set_custom_fields` → значение `{{json.ar}}`, поле `1902113`.
+2. Шаг `set_custom_fields` → значение `{{json.ar}}`, поле `1902731` (type 2 = сделка).
 
 Проверьте ID телефона: `{{contact.cf.1844509}}` — замените, если в аккаунте другой.
 

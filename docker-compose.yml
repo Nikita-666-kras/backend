@@ -194,8 +194,12 @@ services:
       context: .
       dockerfile: integrations-service/Dockerfile
     environment:
-      AMOCRM_AR_FIELD_ID: ${AMOCRM_AR_FIELD_ID:-1902113}
+      AMOCRM_AR_FIELD_ID: ${AMOCRM_AR_FIELD_ID:-1902731}
+      AMOCRM_PHONE_FIELD_ID: ${AMOCRM_PHONE_FIELD_ID:-1844509}
       AMOCRM_WEBHOOK_SECRET: ${AMOCRM_WEBHOOK_SECRET:-}
+      AMOCRM_BASE_URL: ${AMOCRM_BASE_URL:-}
+      AMOCRM_ACCESS_TOKEN: ${AMOCRM_ACCESS_TOKEN:-}
+      AMOCRM_PIPELINE_ENABLED: ${AMOCRM_PIPELINE_ENABLED:-false}
     networks:
       - blog-net
     expose:
