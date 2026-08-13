@@ -37,8 +37,8 @@ public class PublicReadOnlyFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        // Salesbot / CRM webhooks (server-to-server POST)
-        if (isAmocrmWebhook(path, method)) {
+        // Salesbot / CRM webhooks and public order intake (server-to-server or browser POST)
+        if (isPublicWrite(path, method)) {
             return chain.filter(exchange);
         }
 
@@ -50,9 +50,11 @@ public class PublicReadOnlyFilter implements GlobalFilter, Ordered {
         return exchange.getResponse().setComplete();
     }
 
-    private boolean isAmocrmWebhook(String path, HttpMethod method) {
-        return path.startsWith("/amocrm")
-                && (HttpMethod.POST.equals(method) || HttpMethod.OPTIONS.equals(method));
+    private boolean isPublicWrite(String path, HttpMethod method) {
+        if (!HttpMethod.POST.equals(method) && !HttpMethod.OPTIONS.equals(method)) {
+            return false;
+        }
+        return path.startsWith("/amocrm") || path.startsWith("/public/orders");
     }
 
     private boolean isBlockedAdminSurface(String path) {

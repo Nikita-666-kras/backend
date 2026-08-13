@@ -18,6 +18,16 @@ amocrm:
   webhook-secret: ${AMOCRM_WEBHOOK_SECRET:}
   pipeline-enabled: ${AMOCRM_PIPELINE_ENABLED:false}
 
+orders:
+  enabled: ${ORDERS_ENABLED:true}
+  secret: ${ORDERS_SECRET:}
+  pipeline-id: ${AMOCRM_ORDERS_PIPELINE_ID:0}
+  status-id: ${AMOCRM_ORDERS_STATUS_ID:0}
+  utm-campaign-field-id: ${AMOCRM_UTM_CAMPAIGN_FIELD_ID:1844521}
+  utm-referrer-field-id: ${AMOCRM_UTM_REFERRER_FIELD_ID:1844527}
+  tag-parts: ${ORDERS_TAG_PARTS:запчасти}
+  tag-site: ${ORDERS_TAG_SITE:tilda}
+
 management:
   endpoints:
     web:

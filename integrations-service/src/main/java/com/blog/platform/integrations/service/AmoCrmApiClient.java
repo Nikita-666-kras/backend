@@ -98,7 +98,7 @@ public class AmoCrmApiClient {
         return findCustomFieldValue(root.path("custom_fields_values"), fieldId);
     }
 
-    boolean patchContactArField(long contactId, long arFieldId, String ar) {
+    public boolean patchContactArField(long contactId, long arFieldId, String ar) {
         Map<String, Object> body = Map.of(
                 "custom_fields_values", List.of(Map.of(
                         "field_id", arFieldId,
@@ -130,6 +130,163 @@ public class AmoCrmApiClient {
 
     boolean patchLeadName(long leadId, String name) {
         return patch("/api/v4/leads/" + leadId, Map.of("name", name));
+    }
+
+    public Optional<Long> findOrCreateContact(String name, String phoneDigits) {
+        Optional<Long> existing = findContactIdByPhoneQuery(phoneDigits);
+        if (existing.isPresent()) {
+            return existing;
+        }
+        return createContact(name, phoneDigits);
+    }
+
+    public Optional<Long> createLead(
+            String name,
+            Long pipelineId,
+            Long statusId,
+            List<CustomFieldValue> customFields,
+            List<String> tags
+    ) {
+        Map<String, Object> lead = new LinkedHashMap<>();
+        lead.put("name", name);
+        if (pipelineId != null && pipelineId > 0) {
+            lead.put("pipeline_id", pipelineId);
+        }
+        if (statusId != null && statusId > 0) {
+            lead.put("status_id", statusId);
+        }
+        if (customFields != null && !customFields.isEmpty()) {
+            lead.put("custom_fields_values", customFields.stream().map(this::toFieldMap).toList());
+        }
+        if (tags != null && !tags.isEmpty()) {
+            lead.put("_embedded", Map.of(
+                    "tags", tags.stream().map(tag -> Map.of("name", tag)).toList()
+            ));
+        }
+        JsonNode response = post("/api/v4/leads", List.of(lead));
+        return extractEmbeddedId(response, "leads");
+    }
+
+    public boolean linkContactToLead(long leadId, long contactId) {
+        List<Map<String, Object>> body = List.of(Map.of(
+                "to_entity_id", contactId,
+                "to_entity_type", "contacts",
+                "metadata", Map.of("is_main", true)
+        ));
+        JsonNode response = post("/api/v4/leads/" + leadId + "/link", body);
+        return response != null;
+    }
+
+    public boolean addLeadNote(long leadId, String text) {
+        Map<String, Object> note = Map.of(
+                "entity_id", leadId,
+                "note_type", "common",
+                "params", Map.of("text", text)
+        );
+        JsonNode response = post("/api/v4/leads/notes", List.of(note));
+        return response != null;
+    }
+
+    public record CustomFieldValue(long fieldId, String value) {
+    }
+
+    private Optional<Long> findContactIdByPhoneQuery(String phoneDigits) {
+        if (phoneDigits == null || phoneDigits.isBlank()) {
+            return Optional.empty();
+        }
+        String tail = phoneDigits.length() > 10
+                ? phoneDigits.substring(phoneDigits.length() - 10)
+                : phoneDigits;
+        JsonNode root = get("/api/v4/contacts?query=" + tail + "&limit=5");
+        if (root == null) {
+            return Optional.empty();
+        }
+        JsonNode contacts = root.path("_embedded").path("contacts");
+        if (!contacts.isArray() || contacts.isEmpty()) {
+            return Optional.empty();
+        }
+        for (JsonNode contact : contacts) {
+            Optional<String> phone = extractPhone(contact);
+            if (phone.isPresent() && phonesMatch(phoneDigits, phone.get())) {
+                return Optional.of(contact.path("id").asLong());
+            }
+        }
+        return Optional.of(contacts.get(0).path("id").asLong());
+    }
+
+    private Optional<Long> createContact(String name, String phoneDigits) {
+        Map<String, Object> contact = new LinkedHashMap<>();
+        contact.put("name", name == null || name.isBlank() ? "Клиент" : name);
+        contact.put("custom_fields_values", List.of(Map.of(
+                "field_id", properties.phoneFieldId(),
+                "values", List.of(Map.of("value", formatPhoneForAmo(phoneDigits)))
+        )));
+        JsonNode response = post("/api/v4/contacts", List.of(contact));
+        return extractEmbeddedId(response, "contacts");
+    }
+
+    private Map<String, Object> toFieldMap(CustomFieldValue field) {
+        return Map.of(
+                "field_id", field.fieldId(),
+                "values", List.of(Map.of("value", field.value()))
+        );
+    }
+
+    private Optional<Long> extractEmbeddedId(JsonNode response, String entity) {
+        if (response == null) {
+            return Optional.empty();
+        }
+        JsonNode items = response.path("_embedded").path(entity);
+        if (!items.isArray() || items.isEmpty()) {
+            return Optional.empty();
+        }
+        long id = items.get(0).path("id").asLong(0);
+        return id > 0 ? Optional.of(id) : Optional.empty();
+    }
+
+    private static boolean phonesMatch(String leftDigits, String rightRaw) {
+        String right = rightRaw.replaceAll("\\D", "");
+        if (leftDigits.equals(right)) {
+            return true;
+        }
+        if (leftDigits.length() >= 10 && right.length() >= 10) {
+            return leftDigits.endsWith(right.substring(right.length() - 10))
+                    || right.endsWith(leftDigits.substring(leftDigits.length() - 10));
+        }
+        return false;
+    }
+
+    private static String formatPhoneForAmo(String digits) {
+        if (digits == null || digits.isBlank()) {
+            return "";
+        }
+        if (digits.startsWith("7") && digits.length() == 11) {
+            return "+" + digits;
+        }
+        if (digits.startsWith("8") && digits.length() == 11) {
+            return "+7" + digits.substring(1);
+        }
+        return digits.startsWith("+") ? digits : "+" + digits;
+    }
+
+    private JsonNode post(String path, Object body) {
+        if (!properties.apiConfigured()) {
+            log.error("amo api: not configured (AMOCRM_BASE_URL / AMOCRM_ACCESS_TOKEN)");
+            return null;
+        }
+        try {
+            return restClient.post()
+                    .uri(properties.normalizedBaseUrl() + path)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + properties.accessToken())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .body(JsonNode.class);
+        } catch (Exception ex) {
+            log.error("amo api POST {} failed: {}", path, ex.getMessage());
+            return null;
+        }
     }
 
     private JsonNode get(String path) {

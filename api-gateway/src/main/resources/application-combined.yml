@@ -43,3 +43,7 @@ spring:
           uri: ${INTEGRATIONS_SERVICE_URL:http://integrations-service:9009}
           predicates:
             - Path=/amocrm,/amocrm/**
+        - id: integrations-orders
+          uri: ${INTEGRATIONS_SERVICE_URL:http://integrations-service:9009}
+          predicates:
+            - Path=/public/orders,/public/orders/**

@@ -6,7 +6,7 @@
 - `parts-service` — каталог запчастей / комплектов / дронов
 - `sso-service` — login / refresh / roles
 - `admin-service` — BFF для админки
-- `integrations-service` — внешние webhook (amoCRM Salesbot autoar)
+- `integrations-service` — **хаб внешних интеграций** (amoCRM, заказы; см. `deploy/integrations/ARCHITECTURE.md`)
 - `api-gateway` — **admin-gateway** (JWT + CRUD): `/auth`, `/admin`, `/manager`, preview `/media`
 - `public-gateway` — **read-only API** (GET) + **POST `/amocrm/**`**: `/posts`, `/parts`, `/kits`, `/drones`, `/media/{uuid}`
 - `admin-ui` / `manager-ui` / `public-ui`
@@ -24,7 +24,8 @@ Manager UI (:8090) ───────┼──► api-gateway :8080   (profil
 Public UI / Tilda / amo ──┴──► public-gateway :8081 (profile=public)
                                  ├── GET /posts/** /media/{uuid} → post-service
                                  ├── GET /parts|/kits|/drones/** → parts-service
-                                 └── POST /amocrm/** → integrations-service
+                                 ├── POST /public/orders → integrations-service (корзина → CRM)
+                                 └── POST /amocrm/** → integrations-service (Salesbot / Pipeline)
                                       (status forced PUBLISHED on catalog)
 ```
 
