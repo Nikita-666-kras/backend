@@ -82,6 +82,7 @@ AMOCRM_PHONE_FIELD_ID=1844509
 ORDERS_ENABLED=true
 
 # MAX (опционально): личка менеджерам по user_id
+# TLS: platform-api2.max.ru подписан Минцифры — клиент грузит CA из classpath /certs
 # MAX_BOT_TOKEN=...
 # MAX_ORDERS_USER_IDS=290387676
 

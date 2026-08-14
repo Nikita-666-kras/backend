@@ -3,11 +3,14 @@ package com.blog.platform.integrations.channel.max;
 import com.blog.platform.integrations.channel.OrderNotifier;
 import com.blog.platform.integrations.config.MaxProperties;
 import com.blog.platform.integrations.domain.OrderContext;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.Map;
 
@@ -21,9 +24,18 @@ public class MaxOrderNotifier implements OrderNotifier {
     private final MaxProperties properties;
     private final RestClient restClient;
 
-    public MaxOrderNotifier(MaxProperties properties, RestClient.Builder restClientBuilder) {
+    public MaxOrderNotifier(MaxProperties properties, @Qualifier("maxRestClient") RestClient restClient) {
         this.properties = properties;
-        this.restClient = restClientBuilder.build();
+        this.restClient = restClient;
+    }
+
+    @PostConstruct
+    void logStatus() {
+        if (enabled()) {
+            log.info("max: enabled recipients={}", properties.userIds());
+        } else {
+            log.info("max: disabled (MAX_BOT_TOKEN or MAX_ORDERS_USER_IDS missing)");
+        }
     }
 
     @Override
@@ -61,6 +73,9 @@ public class MaxOrderNotifier implements OrderNotifier {
                     .retrieve()
                     .toBodilessEntity();
             log.info("max: order {} sent to user_id={}", orderId, userId);
+        } catch (RestClientResponseException ex) {
+            log.error("max: notify failed orderId={} user_id={} status={} body={}",
+                    orderId, userId, ex.getStatusCode().value(), ex.getResponseBodyAsString());
         } catch (Exception ex) {
             log.error("max: notify failed orderId={} user_id={}: {}", orderId, userId, ex.getMessage());
         }

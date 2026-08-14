@@ -20,4 +20,10 @@ class MaxPropertiesTest {
         assertTrue(new MaxProperties("", "290387676").userIds().contains(290387676L));
         assertTrue(!new MaxProperties("", "290387676").configured());
     }
+
+    @Test
+    void botToken_stripsBearerAndQuotes() {
+        assertEquals("abc", new MaxProperties("Bearer abc", "1").botToken());
+        assertEquals("abc", new MaxProperties("\"abc\"", "1").botToken());
+    }
 }
