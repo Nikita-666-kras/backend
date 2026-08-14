@@ -28,6 +28,10 @@ orders:
   tag-parts: ${ORDERS_TAG_PARTS:запчасти}
   tag-site: ${ORDERS_TAG_SITE:tilda}
 
+max:
+  bot-token: ${MAX_BOT_TOKEN:}
+  orders-user-ids: ${MAX_ORDERS_USER_IDS:}
+
 management:
   endpoints:
     web:

@@ -18,7 +18,7 @@
 |----------|-------------|------------|
 | `POST /amocrm/autoar` | amoCRM → сервер → amoCRM continue | Salesbot AutoAR |
 | `POST /amocrm/pipeline-autoar` | Digital Pipeline → сервер → amo API | Plan B AutoAR |
-| `POST /public/orders` | Сайт → сервер → amoCRM | Заказ из корзины |
+| `POST /public/orders` | Сайт → сервер → amoCRM (+ MAX, если настроен) | Заказ из корзины |
 
 ## Архитектура внутри
 
@@ -32,9 +32,11 @@ domain/                 общие модели событий
   OrderContext
 
 channel/                исходящие интеграции
-  OrderNotifier         интерфейс (будущие каналы: Telegram, email)
+  OrderNotifier         интерфейс (MAX, позже Telegram/email)
   amocrm/
     AmoCrmOrderChannel  обязательный канал для заказов
+  max/
+    MaxOrderNotifier    личные сообщения менеджерам (user_id)
 
 service/                оркестрация + amo webhook-логика
   OrderOrchestrator     validate → CRM → notifiers
@@ -50,11 +52,11 @@ POST /public/orders
   → OrderOrchestrator
       1. validate (phone, items, consentPd)
       2. AmoCrmOrderChannel.push()     ← обязательно, иначе 502
-      3. OrderNotifier × N             ← пока пусто; позже Telegram/email
-  → 201 { orderId, leadId, contactId }
+      3. OrderNotifier × N             ← MAX, если MAX_BOT_TOKEN задан
+  → 200 { orderId, leadId, contactId }
 ```
 
-Сейчас после CRM дополнительные каналы не включены. Заказ принимается, если сделка в amoCRM создана.
+Если MAX не настроен или упал — заказ в amoCRM всё равно создаётся.
 
 ## Gateway
 
@@ -78,6 +80,10 @@ AMOCRM_PHONE_FIELD_ID=1844509
 
 # Заказы
 ORDERS_ENABLED=true
+
+# MAX (опционально): личка менеджерам по user_id
+# MAX_BOT_TOKEN=...
+# MAX_ORDERS_USER_IDS=290387676
 
 # CORS для Tilda
 PUBLIC_CORS_ALLOWED_ORIGINS=https://atris.su,https://www.atris.su

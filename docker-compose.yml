@@ -208,6 +208,8 @@ services:
       AMOCRM_UTM_REFERRER_FIELD_ID: ${AMOCRM_UTM_REFERRER_FIELD_ID:-1844527}
       ORDERS_TAG_PARTS: ${ORDERS_TAG_PARTS:-запчасти}
       ORDERS_TAG_SITE: ${ORDERS_TAG_SITE:-tilda}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
+      MAX_ORDERS_USER_IDS: ${MAX_ORDERS_USER_IDS:-}
     networks:
       - blog-net
     expose:
