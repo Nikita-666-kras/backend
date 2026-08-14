@@ -117,7 +117,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 || isPublicPublishedPosts(path, method)
                 || isPublicCatalog(path, method)
                 || isPublicMediaFile(path, method)
-                || isPublicAmocrmWebhook(path, method)) {
+                || isPublicAmocrmWebhook(path, method)
+                || isPublicOrderIntake(path, method)) {
             ServerWebExchange next = exchange.mutate().request(requestBuilder.build()).build();
             if (isPublicPublishedPosts(path, method)) {
                 next = forcePublishedStatus(next, "/posts");
@@ -132,6 +133,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private boolean isPublicAmocrmWebhook(String path, HttpMethod method) {
         return path.startsWith("/amocrm")
+                && (HttpMethod.POST.equals(method) || HttpMethod.OPTIONS.equals(method));
+    }
+
+    private boolean isPublicOrderIntake(String path, HttpMethod method) {
+        return path.startsWith("/public/orders")
                 && (HttpMethod.POST.equals(method) || HttpMethod.OPTIONS.equals(method));
     }
 
