@@ -31,7 +31,7 @@ Always `{ "data": { ... } }` on success.
 }
 ```
 
-HTTP **201 Created** on success.
+HTTP **200 OK** on success.
 
 ### Error responses
 
@@ -361,7 +361,7 @@ Frontend does **not** need amoCRM field IDs.
 ## 9. Testing checklist
 
 - [ ] Empty cart → error before fetch
-- [ ] Valid order → 201, cart cleared
+- [ ] Valid order → 200, cart cleared
 - [ ] Deal appears in amoCRM with note
 - [ ] Tags `tilda` + `запчасти` on deal (for Salesbot UTM bots)
 - [ ] Mobile checkout works

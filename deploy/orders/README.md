@@ -55,7 +55,7 @@ curl -s -X POST http://127.0.0.1:8081/public/orders \
   }'
 ```
 
-Expected: `201` + `{"data":{"orderId":"ord_...","leadId":...,"contactId":...,"status":"accepted"}}`
+Expected: `200` + `{"data":{"orderId":"ord_...","leadId":...,"contactId":...,"status":"accepted"}}`
 
 Logs: `docker compose logs --tail=20 integrations-service | grep orders`
 

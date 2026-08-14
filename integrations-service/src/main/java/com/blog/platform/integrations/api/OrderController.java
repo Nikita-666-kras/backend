@@ -31,7 +31,7 @@ public class OrderController {
     ) {
         assertOrderSecret(httpRequest);
         CreateOrderResponse result = orderOrchestrator.process(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(result));
+        return ResponseEntity.ok(ApiResponse.of(result));
     }
 
     private void assertOrderSecret(HttpServletRequest request) {
